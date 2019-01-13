@@ -40,7 +40,7 @@
  */
 uint8_t
 ringbuff_init(ringbuff_t* buff, void* buffdata, size_t size) {
-    if (buff == NULL || size == 0 || buffdata == NULL) {/* Check buffer structure */
+    if (buff == NULL || size == 0 || buffdata == NULL) {
         return 0;
     }
     memset(buff, 0, sizeof(*buff));             /* Set buffer values to all zeros */
@@ -244,30 +244,30 @@ ringbuff_get_full(ringbuff_t* buff) {
  */
 void
 ringbuff_reset(ringbuff_t* buff) {
-    if (buff == NULL) {                         /* Check buffer structure */
+    if (buff == NULL) {
         return;
     }
-    buff->in = 0;                               /* Reset values */
+    buff->in = 0;
     buff->out = 0;
 }
 
 /**
  * \brief           Get linear address for buffer for fast read
  * \param[in]       buff: Pointer to buffer
- * \return          Pointer to start of linear address
+ * \return          Linear buffer start address
  */
 void *
 ringbuff_get_linear_block_address(ringbuff_t* buff) {
     if (buff == NULL || buff->buff == NULL) {
         return NULL;
     }
-    return &buff->buff[buff->out];              /* Return read address */
+    return &buff->buff[buff->out];
 }
 
 /**
  * \brief           Get length of linear block address before it overflows
  * \param[in]       buff: Pointer to buffer
- * \return          Length of linear address
+ * \return          Linear buffer size in units of bytes
  */
 size_t
 ringbuff_get_linear_block_length(ringbuff_t* buff) {
