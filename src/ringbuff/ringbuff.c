@@ -259,7 +259,7 @@ ringbuff_reset(ringbuff_t* buff) {
 void *
 ringbuff_get_linear_block_address(ringbuff_t* buff) {
     if (buff == NULL || buff->buff == NULL) {
-        return NULL
+        return NULL;
     }
     return &buff->buff[buff->out];              /* Return read address */
 }
@@ -272,7 +272,7 @@ ringbuff_get_linear_block_address(ringbuff_t* buff) {
 size_t
 ringbuff_get_linear_block_length(ringbuff_t* buff) {
     size_t len;
-    
+
     if (buff->in > buff->out) {
         len = buff->in - buff->out;
     } else if (buff->out > buff->in) {
