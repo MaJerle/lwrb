@@ -1,4 +1,4 @@
-/**	
+/**
  * \file            ringbuff.h
  * \brief           Ring buffer manager
  */
@@ -42,7 +42,7 @@ extern "C" {
 
 /**
  * \defgroup        RINGBUFF Ring buffer
- * \brief           Generic ring buffer manager
+ * \brief           Generic FIFO ring buffer manager
  * \{
  */
 
@@ -50,10 +50,11 @@ extern "C" {
  * \brief           Buffer structure
  */
 typedef struct {
-    uint8_t* buff;
-    size_t size;
-    size_t in;
-    size_t out;
+    uint8_t* buff;                              /*!< Pointer to buffer data.
+                                                    Buffer is considered initialized when `buff != NULL` */
+    size_t size;                                /*!< Size of buffer data. Size of actual buffer is `1` byte less than written here */
+    size_t r;                                   /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    size_t w;                                   /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
 } ringbuff_t;
 
 uint8_t     ringbuff_init(ringbuff_t* buff, void* buffdata, size_t size);
