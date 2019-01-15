@@ -62,17 +62,18 @@ uint8_t* data;
 /* Get length of linear memory at read pointer */
 /* Function returns 3 as we can read 3 bytes from buffer in sequence */
 if ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
-	/* Get pointer to first element in linear block at read address */
-	/* Function returns &buff_data[5] */
-	data = ringbuff_get_linear_block_address(&buff);
+    /* Get pointer to first element in linear block at read address */
+    /* Function returns &buff_data[5] */
+    data = ringbuff_get_linear_block_address(&buff);
 
-	/* Send data via DMA and wait to finish (for sake of example) */
-	send_data(data, len);
+    /* Send data via DMA and wait to finish (for sake of example) */
+    send_data(data, len);
 
-	/* Now skip sent bytes from buffer */
-	ringbuff_skip(&buff, len);
+    /* Now skip sent bytes from buffer */
+    ringbuff_skip(&buff, len);
 
-	/* At this point, we are at image part B */
+    /* Now R points to top of buffer, R = 0 */
+    /* At this point, we are at image part B */
 }
 
 /* IMAGE PART B */
@@ -80,22 +81,49 @@ if ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
 /* Get length of linear memory at read pointer */
 /* Function returns 4 as we can read 4 bytes from buffer in sequence */
 if ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
-	/* Get pointer to first element in linear block at read address */
-	/* Function returns &buff_data[0] */
-	data = ringbuff_get_linear_block_address(&buff);
+    /* Get pointer to first element in linear block at read address */
+    /* Function returns &buff_data[0] */
+    data = ringbuff_get_linear_block_address(&buff);
 
-	/* Send data via DMA and wait to finish (for sake of example) */
-	send_data(data, len);
+    /* Send data via DMA and wait to finish (for sake of example) */
+    send_data(data, len);
 
-	/* Now skip sent bytes from buffer */
-	ringbuff_skip(&buff, len);
+    /* Now skip sent bytes from buffer */
+    ringbuff_skip(&buff, len);
 
-	/* At this point, we are at image part C */
+    /* Now R points to 4, that is R = W and buffer is empty */
+    /* At this point, we are at image part C */
 }
 
 /* IMAGE PART C */
 
-/* Buffer is considered empty */
+/* Buffer is considered empty as R = W */
+```
+
+Code may be rewritten to something like this:
+
+```c
+/* Initialization part skipped */
+
+
+/* Get length of linear memory at read pointer */
+while ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
+    /* Get pointer to first element in linear block at read address */
+    data = ringbuff_get_linear_block_address(&buff);
+
+    /* If max length needs to be considered */
+    /* simply decrease it and use smaller len on skip function */
+    if (len > max_len) {
+        len = max_len;
+    }
+
+    /* Send data via DMA and wait to finish (for sake of example) */
+    send_data(data, len);
+
+    /* Now skip sent bytes from buffer */
+    ringbuff_skip(&buff, len);
+}
+
 ```
 
 Refer to DMA example below for more real-life use case.
