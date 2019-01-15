@@ -69,7 +69,7 @@ if ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
     /* Send data via DMA and wait to finish (for sake of example) */
     send_data(data, len);
 
-    /* Now skip sent bytes from buffer */
+    /* Now skip sent bytes from buffer = move read pointer */
     ringbuff_skip(&buff, len);
 
     /* Now R points to top of buffer, R = 0 */
@@ -88,7 +88,7 @@ if ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
     /* Send data via DMA and wait to finish (for sake of example) */
     send_data(data, len);
 
-    /* Now skip sent bytes from buffer */
+    /* Now skip sent bytes from buffer = move read pointer */
     ringbuff_skip(&buff, len);
 
     /* Now R points to 4, that is R = W and buffer is empty */
@@ -105,7 +105,6 @@ Code may be rewritten to something like this:
 ```c
 /* Initialization part skipped */
 
-
 /* Get length of linear memory at read pointer */
 while ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
     /* Get pointer to first element in linear block at read address */
@@ -120,7 +119,7 @@ while ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
     /* Send data via DMA and wait to finish (for sake of example) */
     send_data(data, len);
 
-    /* Now skip sent bytes from buffer */
+    /* Now skip sent bytes from buffer = move read pointer */
     ringbuff_skip(&buff, len);
 }
 

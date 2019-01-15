@@ -337,7 +337,7 @@ ringbuff_skip(ringbuff_t* buff, size_t len) {
     }
     buff->r += len;                             /* Advance buffer */
     if (buff->r >= buff->size) {                /* Subtract possible overflow */
-        buff->r -= buff->size;                  /* Do subtract */
+        buff->r -= buff->size;
     }
     return len;
 }
