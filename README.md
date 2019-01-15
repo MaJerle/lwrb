@@ -19,7 +19,7 @@ Library provides generic FIFO ring buffer implementation.
 ![Ring buffer use cases](https://raw.githubusercontent.com/MaJerle/ringbuff/master/docs/buff_empty.svg?sanitize=true)
 
 Image shows different corner cases. As for the reference, `R` stands for ***R**ead pointer* and `W` stands for ***W**rite pointer*. Pointer are being used when *read* or *write* operations are used respectively. Numbers `0 - 7` represent `S = 8` byte long data array. **S** represents buffer size.
-`R` and `W` pointers always point to *next read/write* operation. When `W == R`, buffer is considered empty. When `W == R - 1`, buffer is considered empty. Please note that `W == R - 1` is valid only if `W` and `R` overflows at buffer size.
+`R` and `W` pointers always point to *next read/write* operation. When `W == R`, buffer is considered empty. When `W == R - 1`, buffer is considered empty. Please note that `W == R - 1` is valid only if `W` and `R` overflow at buffer size.
 
 - ***a***: Buffer is empty as `W == R` (`0 - 0`)
 - ***b***: Buffer holds `W - R` (`4 - 0`) bytes as `W > R`
@@ -31,6 +31,74 @@ Image shows different corner cases. As for the reference, `R` stands for ***R**e
 
 > Consider `W` and `R` pointers to overflow at buffer size (`S`). If `S = 4`, `W/R` values are: `0, 1, 2, 3, 0, 1, 2, 3, ...`. Example: `3 + 2 = 1`. Example: `1 - 2 = 3`.
 > If `S = 5`, `W/R` values can be: `0, 1, 2, 3, 4, 0, 1, 2, 3, 4, ...`. Example: `1 - 2 = 4`
+
+### Linear block and data skipping
+
+Instead of using read function and copying data from working buffer to application buffer, application may instead use original working buffer and only read the data. This feature is very useful when implementing Direct Memory Access (DMA) feature on microcontroller or any other platform as it allows data transfer with zero-copy between memories.
+
+![Ring buffer use cases](https://raw.githubusercontent.com/MaJerle/ringbuff/master/docs/buff_lin_skip.svg?sanitize=true)
+
+Image is used together with bottom example.
+
+```c
+/* Declare buffer variables */
+ringbuff_t buff;
+uint8_t buff_data[8];
+
+/* Initialize buffer, use buff_data as data array */
+ringbuff_init(&buff, buff_data, sizeof(buff_data));
+
+/* Use write, read operations, process data */
+/* ... */
+
+size_t len;
+uint8_t* data;
+
+/* IMAGE PART A */
+
+/* At this stage, we have buffer as on image above */
+/* R = 5, W = 4, buffer is full at this point */
+
+/* Get length of linear memory at read pointer */
+/* Function returns 3 as we can read 3 bytes from buffer in sequence */
+if ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
+	/* Get pointer to first element in linear block at read address */
+	/* Function returns &buff_data[5] */
+	data = ringbuff_get_linear_block_address(&buff);
+
+	/* Send data via DMA and wait to finish (for sake of example) */
+	send_data(data, len);
+
+	/* Now skip sent bytes from buffer */
+	ringbuff_skip(&buff, len);
+
+	/* At this point, we are at image part B */
+}
+
+/* IMAGE PART B */
+
+/* Get length of linear memory at read pointer */
+/* Function returns 4 as we can read 4 bytes from buffer in sequence */
+if ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
+	/* Get pointer to first element in linear block at read address */
+	/* Function returns &buff_data[0] */
+	data = ringbuff_get_linear_block_address(&buff);
+
+	/* Send data via DMA and wait to finish (for sake of example) */
+	send_data(data, len);
+
+	/* Now skip sent bytes from buffer */
+	ringbuff_skip(&buff, len);
+
+	/* At this point, we are at image part C */
+}
+
+/* IMAGE PART C */
+
+/* Buffer is considered empty */
+```
+
+Refer to DMA example below for more real-life use case.
 
 ## Examples
 
