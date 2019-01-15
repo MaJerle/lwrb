@@ -16,7 +16,23 @@ Library provides generic FIFO ring buffer implementation.
 
 ## How it works
 
-![Ring buffer use cases](https://raw.githubusercontent.com/MaJerle/ringbuff/master/docs/buff_empty.svg?sanitize=true)
+<p align="center">
+	![Ring buffer use cases](https://raw.githubusercontent.com/MaJerle/ringbuff/master/docs/buff_empty.svg?sanitize=true)
+</p>
+
+Image shows different corner cases. As for the reference, `R` stands for ***R**ead pointer* and `W` stands for ***W**rite pointer*. Pointer are being used when *read* or *write* operations are used respectively. Numbers `0 - 7` represent `S = 8` byte long data array. **S** represents buffer size.
+`R` and `W` pointers always point to *next read/write* operation. When `W == R`, buffer is considered empty. When `W == R - 1`, buffer is considered empty. Please note that `W == R - 1` is valid only if `W` and `R` overflows at buffer size.
+
+- *a*: Buffer is empty as `W == R` (`0 - 0`)
+- *b*: Buffer holds `W - R` (`4 - 0`) bytes as `W > R`
+- *c*: Buffer is full as `W == R - 1` (`7 = 0 - 1`, remember, numbers can hold `S` different values, from `0` to `S - 1`). Buffer has `W - R` bytes ready for read as `W > R`
+* *d*: Buffer hold `S - (R - W)` (`8 - (5 - 3)`) bytes as `R > W`
+* *e*: Buffer is full as `W == R - 1` (`4 = 5 - 1`) and holds `S - (R - W)` (`8 - (5 - 4)`) bytes
+
+> Effective number of bytes to read/write from/to buffer is always `1` less than buffer size. In case of example, maximal number of bytes buffer can hold is `8 - 1 = 7`.
+
+> Consider `W` and `R` pointers to overflow at buffer size (`S`). If `S = 4`, `W/R` values are: `0, 1, 2, 3, 0, 1, 2, 3, ...`. Example: `3 + 2 = 1`. Example: `1 - 2 = 3`.
+> If `S = 5`, `W/R` values can be: `0, 1, 2, 3, 4, 0, 1, 2, 3, 4, ...`. Example: `1 - 2 = 4`
 
 ## Examples
 
