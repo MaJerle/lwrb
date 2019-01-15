@@ -14,6 +14,10 @@ Library provides generic FIFO ring buffer implementation.
 - Suitable for DMA transfers
 - Supports data peek and data skip
 
+## How it works
+
+![Ring buffer use cases](https://raw.githubusercontent.com/MaJerle/ringbuff/master/docs/buff_empty.svg?sanitize=true)
+
 ## Examples
 
 Few examples to show how to use the library
