@@ -32,10 +32,13 @@
  */
 #include "ringbuff/ringbuff.h"
 
+#define BUF_MEMSET                      memset
+#define BUF_MEMCPY                      memcpy
+
 /**
  * \brief           Initialize buffer
  * \param[in]       buff: Pointer to buffer structure
- * \param[in]       size: Size of buffer. This parameter must match length of memory used on memory param
+ * \param[in]       size: Size of buffer in units of bytes. This parameter must match length of memory used on memory param
  * \return          `1` on success, `0` otherwise
  */
 uint8_t
@@ -44,7 +47,7 @@ ringbuff_init(ringbuff_t* buff, void* buffdata, size_t size) {
         return 0;
     }
 
-    memset(buff, 0, sizeof(*buff));             /* Set buffer values to all zeros */
+    BUF_MEMSET(buff, 0, sizeof(*buff));
 
     buff->size = size;                          /* Set default values */
     buff->buff = buffdata;                      /* Save buffer working array */
@@ -85,13 +88,13 @@ ringbuff_write(ringbuff_t* buff, const void* data, size_t count) {
     if (tocopy > count) {
         tocopy = count;
     }
-    memcpy(&buff->buff[buff->w], d, tocopy);
+    BUF_MEMCPY(&buff->buff[buff->w], d, tocopy);
     buff->w += tocopy;
     count -= tocopy;
 
     /* Write data to overflow part of buffer */
     if (count > 0) {
-        memcpy(buff->buff, (void *)&d[tocopy], count);
+        BUF_MEMCPY(buff->buff, (void *)&d[tocopy], count);
         buff->w = count;
     }
     if (buff->w >= buff->size) {                /* Check input overflow */
@@ -134,13 +137,13 @@ ringbuff_read(ringbuff_t* buff, void* data, size_t count) {
     if (tocopy > count) {
         tocopy = count;
     }
-    memcpy(d, &buff->buff[buff->r], tocopy);
+    BUF_MEMCPY(d, &buff->buff[buff->r], tocopy);
     buff->r += tocopy;
     count -= tocopy;
 
     /* Read data from overflow part of buffer */
     if (count > 0) {
-        memcpy(&d[tocopy], buff->buff, count);
+        BUF_MEMCPY(&d[tocopy], buff->buff, count);
         buff->r = count;
     }
     if (buff->r >= buff->size) {                /* Check output overflow */
@@ -197,12 +200,12 @@ ringbuff_peek(ringbuff_t* buff, size_t skip_count, void* data, size_t count) {
     if (tocopy > count) {
         tocopy = count;
     }
-    memcpy(d, &buff->buff[r], tocopy);
+    BUF_MEMCPY(d, &buff->buff[r], tocopy);
     count -= tocopy;
 
     /* Read data from overflow part of buffer */
-    if (count > 0) {                            /* Check if anything to read */
-        memcpy(&d[tocopy], buff->buff, count);  /* Copy content */
+    if (count > 0) {
+        BUF_MEMCPY(&d[tocopy], buff->buff, count);
     }
     return tocopy + count;                      /* Return number of elements stored in memory */
 }
