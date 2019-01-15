@@ -16,9 +16,7 @@ Library provides generic FIFO ring buffer implementation.
 
 ## How it works
 
-<p align="center">
 ![Ring buffer use cases](https://raw.githubusercontent.com/MaJerle/ringbuff/master/docs/buff_empty.svg?sanitize=true)
-</p>
 
 Image shows different corner cases. As for the reference, `R` stands for ***R**ead pointer* and `W` stands for ***W**rite pointer*. Pointer are being used when *read* or *write* operations are used respectively. Numbers `0 - 7` represent `S = 8` byte long data array. **S** represents buffer size.
 `R` and `W` pointers always point to *next read/write* operation. When `W == R`, buffer is considered empty. When `W == R - 1`, buffer is considered empty. Please note that `W == R - 1` is valid only if `W` and `R` overflows at buffer size.
