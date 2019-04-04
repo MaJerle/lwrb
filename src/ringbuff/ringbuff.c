@@ -37,7 +37,7 @@
 
 /**
  * \brief           Initialize buffer
- * \param[in]       buff: Pointer to buffer structure
+ * \param[in]       buff: Buffer handle
  * \param[in]       size: Size of buffer in units of bytes. This parameter must match length of memory used on memory param
  * \return          `1` on success, `0` otherwise
  */
@@ -56,7 +56,7 @@ ringbuff_init(ringbuff_t* buff, void* buffdata, size_t size) {
 
 /**
  * \brief           Write data to buffer
- * \param[in]       buff: Pointer to buffer structure
+ * \param[in]       buff: Buffer handle
  * \param[in]       data: Pointer to data to copy memory from
  * \param[in]       count: Number of bytes we want to write
  * \return          Number of bytes actually written to buffer
@@ -105,7 +105,7 @@ ringbuff_write(ringbuff_t* buff, const void* data, size_t count) {
 
 /**
  * \brief           Read data from buffer
- * \param[in]       buff: Pointer to buffer structure
+ * \param[in]       buff: Buffer handle
  * \param[out]      data: Pointer to data to copy memory to
  * \param[in]       count: Number of bytes we want to read
  * \return          Number of bytes actually read and saved to data variable
@@ -154,7 +154,7 @@ ringbuff_read(ringbuff_t* buff, void* data, size_t count) {
 
 /**
  * \brief           Read from buffer but do not change read pointer
- * \param[in]       buff: Pointer to buffer structure
+ * \param[in]       buff: Buffer handle
  * \param[in]       skip_count: Number of bytes to skip before reading data
  * \param[out]      data: Pointer to data to save read memory
  * \param[in]       count: Number of bytes to peek
@@ -212,7 +212,7 @@ ringbuff_peek(ringbuff_t* buff, size_t skip_count, void* data, size_t count) {
 
 /**
  * \brief           Get number of bytes in buffer available to write
- * \param[in]       buff: Pointer to buffer structure
+ * \param[in]       buff: Buffer handle
  * \return          Number of free bytes in memory
  */
 size_t
@@ -240,7 +240,7 @@ ringbuff_get_free(ringbuff_t* buff) {
 
 /**
  * \brief           Get number of bytes in buffer available to read
- * \param[in]       buff: Pointer to buffer structure
+ * \param[in]       buff: Buffer handle
  * \return          Number of bytes ready to be read
  */
 size_t
@@ -266,7 +266,7 @@ ringbuff_get_full(ringbuff_t* buff) {
 
 /**
  * \brief           Resets and clears buffer
- * \param[in]       buff: Pointer to buffer structure
+ * \param[in]       buff: Buffer handle
  */
 void
 ringbuff_reset(ringbuff_t* buff) {
@@ -279,11 +279,11 @@ ringbuff_reset(ringbuff_t* buff) {
 
 /**
  * \brief           Get linear address for buffer for fast read
- * \param[in]       buff: Pointer to buffer
+ * \param[in]       buff: Buffer handle
  * \return          Linear buffer start address
  */
 void *
-ringbuff_get_linear_block_address(ringbuff_t* buff) {
+ringbuff_get_linear_block_read_address(ringbuff_t* buff) {
     if (buff == NULL || buff->buff == NULL) {
         return NULL;
     }
@@ -291,12 +291,12 @@ ringbuff_get_linear_block_address(ringbuff_t* buff) {
 }
 
 /**
- * \brief           Get length of linear block address before it overflows
- * \param[in]       buff: Pointer to buffer
- * \return          Linear buffer size in units of bytes
+ * \brief           Get length of linear block address before it overflows for read operation
+ * \param[in]       buff: Buffer handle
+ * \return          Linear buffer size in units of bytes for read operation
  */
 size_t
-ringbuff_get_linear_block_length(ringbuff_t* buff) {
+ringbuff_get_linear_block_read_length(ringbuff_t* buff) {
     size_t w, r, len;
 
     if (buff == NULL) {
@@ -317,9 +317,9 @@ ringbuff_get_linear_block_length(ringbuff_t* buff) {
 }
 
 /**
- * \brief           Skip (ignore) buffer data.
+ * \brief           Skip (ignore, advance read pointer) buffer data.
  * \note            Useful at the end of streaming transfer such as DMA
- * \param[in]       buff: Pointer to buffer structure
+ * \param[in]       buff: Buffer handle
  * \param[in]       len: Number of bytes to skip
  * \return          Number of bytes skipped
  */
@@ -335,9 +335,80 @@ ringbuff_skip(ringbuff_t* buff, size_t len) {
     if (len > full) {
         len = full;
     }
-    buff->r += len;                             /* Advance buffer */
+    buff->r += len;                             /* Advance read pointer */
     if (buff->r >= buff->size) {                /* Subtract possible overflow */
         buff->r -= buff->size;
+    }
+    return len;
+}
+
+/**
+ * \brief           Get linear address for buffer for fast read
+ * \param[in]       buff: Buffer handle
+ * \return          Linear buffer start address
+ */
+void *
+ringbuff_get_linear_block_write_address(ringbuff_t* buff) {
+    if (buff == NULL || buff->buff == NULL) {
+        return NULL;
+    }
+    return &buff->buff[buff->w];
+}
+
+/**
+ * \brief           Get length of linear block address before it overflows for write operation
+ * \param[in]       buff: Buffer handle
+ * \return          Linear buffer size in units of bytes for write operation
+ */
+size_t
+ringbuff_get_linear_block_write_length(ringbuff_t* buff) {
+    size_t w, r, len;
+
+    if (buff == NULL) {
+        return 0;
+    }
+
+    /* Operate on temporary values in case they change in between */
+    w = buff->w;
+    r = buff->r;
+    if (w >= r) {
+        len = buff->size - w;
+        /*
+         * When read pointer == 0,
+         * maximal length is one less as if too many bytes 
+         * are written, it buffer would be considered empty again (r == w)
+         */
+        if (r == 0) {
+            len--;
+        }
+    } else {
+        len = r - w - 1;
+    }
+    return len;
+}
+
+/**
+ * \brief           Advance write pointer in the buffer
+ * \note            Useful when hardware is writing to buffer and app needs to increase number of bytes written
+ * \param[in]       buff: Buffer handle
+ * \param[in]       len: Number of bytes to advance
+ * \return          Number of bytes advanced for write operation
+ */
+size_t
+ringbuff_advance(ringbuff_t* buff, size_t len) {
+    size_t free;
+
+    if (buff == NULL || len == 0) {
+        return 0;
+    }
+
+    free = ringbuff_get_free(buff);             /* Get buffer free length */
+    if (len > free) {
+        len = free;
+    }
+    buff->w += len;                             /* Advance write pointer */
+    if (buff->w >= buff->size) {                /* Subtract possible overflow */
+        buff->w -= buff->size;
     }
     return len;
 }

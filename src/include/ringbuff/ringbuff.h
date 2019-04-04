@@ -67,9 +67,13 @@ size_t      ringbuff_peek(ringbuff_t* buff, size_t skip_count, void* data, size_
 size_t      ringbuff_get_free(ringbuff_t* buff);
 size_t      ringbuff_get_full(ringbuff_t* buff);
 
-void *      ringbuff_get_linear_block_address(ringbuff_t* buff);
-size_t      ringbuff_get_linear_block_length(ringbuff_t* buff);
+void *      ringbuff_get_linear_block_read_address(ringbuff_t* buff);
+size_t      ringbuff_get_linear_block_read_length(ringbuff_t* buff);
 size_t      ringbuff_skip(ringbuff_t* buff, size_t len);
+
+void *      ringbuff_get_linear_block_write_address(ringbuff_t* buff);
+size_t      ringbuff_get_linear_block_write_length(ringbuff_t* buff);
+size_t      ringbuff_advance(ringbuff_t* buff, size_t len);
 
 /**
  * \}
