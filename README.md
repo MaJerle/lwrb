@@ -63,10 +63,10 @@ uint8_t* data;
 
 /* Get length of linear memory at read pointer */
 /* Function returns 3 as we can read 3 bytes from buffer in sequence */
-if ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
+if ((len = ringbuff_get_linear_block_read_length(&buff)) > 0) {
     /* Get pointer to first element in linear block at read address */
     /* Function returns &buff_data[5] */
-    data = ringbuff_get_linear_block_address(&buff);
+    data = ringbuff_get_linear_block_read_address(&buff);
 
     /* Send data via DMA and wait to finish (for sake of example) */
     send_data(data, len);
@@ -82,10 +82,10 @@ if ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
 
 /* Get length of linear memory at read pointer */
 /* Function returns 4 as we can read 4 bytes from buffer in sequence */
-if ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
+if ((len = ringbuff_get_linear_block_read_length(&buff)) > 0) {
     /* Get pointer to first element in linear block at read address */
     /* Function returns &buff_data[0] */
-    data = ringbuff_get_linear_block_address(&buff);
+    data = ringbuff_get_linear_block_read_address(&buff);
 
     /* Send data via DMA and wait to finish (for sake of example) */
     send_data(data, len);
@@ -108,9 +108,9 @@ Code may be rewritten to something like this:
 /* Initialization part skipped */
 
 /* Get length of linear memory at read pointer */
-while ((len = ringbuff_get_linear_block_length(&buff)) > 0) {
+while ((len = ringbuff_get_linear_block_read_length(&buff)) > 0) {
     /* Get pointer to first element in linear block at read address */
-    data = ringbuff_get_linear_block_address(&buff);
+    data = ringbuff_get_linear_block_read_address(&buff);
 
     /* If max length needs to be considered */
     /* simply decrease it and use smaller len on skip function */
@@ -197,10 +197,10 @@ send_data(void) {
     }
 
     /* Get maximal length of buffer to read data as linear memory */
-    len = ringbuff_get_linear_block_length(&buff);
+    len = ringbuff_get_linear_block_read_length(&buff);
     if (len) {
         /* Get pointer to read memory */
-        uint8_t* data = ringbuff_get_linear_block_address(&buff);
+        uint8_t* data = ringbuff_get_linear_block_read_address(&buff);
 
         /* Start DMA transfer */
         start_dma_transfer(data, len);
