@@ -35,10 +35,16 @@
 #define BUF_MEMSET                      memset
 #define BUF_MEMCPY                      memcpy
 
+#define BUF_IS_VALID(b)                 ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
+#define BUF_MIN(x, y)                   ((x) < (y) ? (x) : (y))
+#define BUF_MAX(x, y)                   ((x) > (y) ? (x) : (y))
+
 /**
- * \brief           Initialize buffer
+ * \brief           Initialize buffer handle to default values with size and buffer data array
  * \param[in]       buff: Buffer handle
- * \param[in]       size: Size of buffer in units of bytes. This parameter must match length of memory used on memory param
+ * \param[in]       buffdata: Pointer to memory to use as buffer data
+ * \param[in]       size: Size of `buffdata` in units of bytes
+ *                  Maximum number of bytes buffer can hold is `size - 1`
  * \return          `1` on success, `0` otherwise
  */
 uint8_t
@@ -47,26 +53,30 @@ ringbuff_init(ringbuff_t* buff, void* buffdata, size_t size) {
         return 0;
     }
 
-    BUF_MEMSET(buff, 0, sizeof(*buff));
+    BUF_MEMSET(buff, 0x00, sizeof(*buff));
 
-    buff->size = size;                          /* Set default values */
-    buff->buff = buffdata;                      /* Save buffer working array */
-    return 1;                                   /* Initialized OK */
+    buff->size = size;
+    buff->buff = buffdata;
+
+    return 1;
 }
 
 /**
  * \brief           Write data to buffer
+ *                  Copies data from `data` array to buffer and marks buffer as full for maximum `count` number of bytes
  * \param[in]       buff: Buffer handle
- * \param[in]       data: Pointer to data to copy memory from
- * \param[in]       count: Number of bytes we want to write
- * \return          Number of bytes actually written to buffer
+ * \param[in]       data: Pointer to data to write into buffer
+ * \param[in]       count: Number of bytes to write
+ * \return          Number of bytes written to buffer.
+ *                  When value is less than `count`, there was no enough memory available
+ *                  to copy full data array
  */
 size_t
 ringbuff_write(ringbuff_t* buff, const void* data, size_t count) {
     size_t tocopy, free;
     const uint8_t* d = data;
 
-    if (buff == NULL || buff->buff == NULL || count == 0) {
+    if (!BUF_IS_VALID(buff) || count == 0) {
         return 0;
     }
 
@@ -74,48 +84,45 @@ ringbuff_write(ringbuff_t* buff, const void* data, size_t count) {
         buff->w = 0;                            /* On normal use, this should never happen */
     }
 
-    /* Calculate maximum number of bytes we can write */
+    /* Calculate maximum number of bytes available to write */
     free = ringbuff_get_free(buff);
-    if (free < count) {
-        if (free == 0) {
-            return 0;
-        }
-        count = free;
+    count = BUF_MIN(free, count);
+    if (!count) {
+        return 0;
     }
 
-    /* Write data to linear part of buffer */
-    tocopy = buff->size - buff->w;              /* Calculate number of elements we can put at the end of buffer */
-    if (tocopy > count) {
-        tocopy = count;
-    }
+    /* Step 1: Write data to linear part of buffer */
+    tocopy = BUF_MIN(buff->size - buff->w, count);
     BUF_MEMCPY(&buff->buff[buff->w], d, tocopy);
     buff->w += tocopy;
     count -= tocopy;
 
-    /* Write data to overflow part of buffer */
+    /* Step 2: Write data to beginning of buffer (overflow part) */
     if (count > 0) {
         BUF_MEMCPY(buff->buff, (void *)&d[tocopy], count);
         buff->w = count;
     }
+
     if (buff->w >= buff->size) {                /* Check input overflow */
         buff->w = 0;
     }
-    return tocopy + count;                      /* Return number of elements stored in memory */
+    return tocopy + count;                      /* Number of elements written */
 }
 
 /**
  * \brief           Read data from buffer
+ *                  Copies data from buffer to `data` array and marks buffer as free for maximum `count` number of bytes
  * \param[in]       buff: Buffer handle
- * \param[out]      data: Pointer to data to copy memory to
- * \param[in]       count: Number of bytes we want to read
- * \return          Number of bytes actually read and saved to data variable
+ * \param[out]      data: Pointer to output memory to copy buffer data to
+ * \param[in]       count: Number of bytes to read
+ * \return          Number of bytes read and copied to data array
  */
 size_t
 ringbuff_read(ringbuff_t* buff, void* data, size_t count) {
     size_t tocopy, full;
     uint8_t *d = data;
 
-    if (buff == NULL || buff->buff == NULL || count == 0) {
+    if (!BUF_IS_VALID(buff) || count == 0) {
         return 0;
     }
 
@@ -123,49 +130,45 @@ ringbuff_read(ringbuff_t* buff, void* data, size_t count) {
         buff->r = 0;                            /* On normal use, this should never happen */
     }
 
-    /* Calculate maximum number of bytes we can read */
+    /* Calculate maximum number of bytes available to read */
     full = ringbuff_get_full(buff);
-    if (full < count) {
-        if (full == 0) {
-            return 0;
-        }
-        count = full;
+    count = BUF_MIN(full, count);
+    if (!count) {
+        return 0;
     }
 
-    /* Read data from linear part of buffer */
-    tocopy = buff->size - buff->r;
-    if (tocopy > count) {
-        tocopy = count;
-    }
+    /* Step 1: Read data from linear part of buffer */
+    tocopy = BUF_MIN(buff->size - buff->r, count);
     BUF_MEMCPY(d, &buff->buff[buff->r], tocopy);
     buff->r += tocopy;
     count -= tocopy;
 
-    /* Read data from overflow part of buffer */
+    /* Step 2: Read data from beginning of buffer (overflow part) */
     if (count > 0) {
         BUF_MEMCPY(&d[tocopy], buff->buff, count);
         buff->r = count;
     }
+
     if (buff->r >= buff->size) {                /* Check output overflow */
         buff->r = 0;
     }
-    return tocopy + count;                      /* Return number of elements stored in memory */
+    return tocopy + count;                      /* Number of elements read */
 }
 
 /**
- * \brief           Read from buffer but do not change read pointer
+ * \brief           Read from buffer without changing read pointer (peek only)
  * \param[in]       buff: Buffer handle
  * \param[in]       skip_count: Number of bytes to skip before reading data
- * \param[out]      data: Pointer to data to save read memory
+ * \param[out]      data: Pointer to output memory to copy buffer data to
  * \param[in]       count: Number of bytes to peek
- * \return          Number of bytes written to data array
+ * \return          Number of bytes peeked and written to output array
  */
 size_t
 ringbuff_peek(ringbuff_t* buff, size_t skip_count, void* data, size_t count) {
     size_t full, tocopy, r;
     uint8_t *d = data;
 
-    if (buff == NULL || buff->buff == NULL || count == 0) {
+    if (!BUF_IS_VALID(buff) || count == 0) {
         return 0;
     }
 
@@ -174,7 +177,7 @@ ringbuff_peek(ringbuff_t* buff, size_t skip_count, void* data, size_t count) {
     }
     r = buff->r;
 
-    /* Calculate maximum number of bytes we can read */
+    /* Calculate maximum number of bytes available to read */
     full = ringbuff_get_full(buff);
 
     /* Skip beginning of buffer */
@@ -187,27 +190,22 @@ ringbuff_peek(ringbuff_t* buff, size_t skip_count, void* data, size_t count) {
         r -= buff->size;
     }
 
-    /* Check if we can read something after skip */
-    if (full < count) {
-        if (full == 0) {
-            return 0;
-        }
-        count = full;
+    /* Check maximum number of bytes available to read after skip */
+    count = BUF_MIN(full, count);
+    if (!count) {
+        return 0;
     }
 
-    /* Read data from linear part of buffer */
-    tocopy = buff->size - r;
-    if (tocopy > count) {
-        tocopy = count;
-    }
+    /* Step 1: Read data from linear part of buffer */
+    tocopy = BUF_MIN(buff->size - r, count);
     BUF_MEMCPY(d, &buff->buff[r], tocopy);
     count -= tocopy;
 
-    /* Read data from overflow part of buffer */
+    /* Step 2: Read data from beginning of buffer (overflow part) */
     if (count > 0) {
         BUF_MEMCPY(&d[tocopy], buff->buff, count);
     }
-    return tocopy + count;                      /* Return number of elements stored in memory */
+    return tocopy + count;                      /* Number of elements read */
 }
 
 /**
@@ -219,11 +217,11 @@ size_t
 ringbuff_get_free(ringbuff_t* buff) {
     size_t size, w, r;
 
-    if (buff == NULL || buff->buff == NULL) {
+    if (!BUF_IS_VALID(buff)) {
         return 0;
     }
 
-    /* Operate on temporary values in case they change in between */
+    /* Use temporary values in case they are changed during operations */
     w = buff->w;
     r = buff->r;
     if (w == r) {
@@ -247,11 +245,11 @@ size_t
 ringbuff_get_full(ringbuff_t* buff) {
     size_t w, r, size;
 
-    if (buff == NULL || buff->buff == NULL) {
+    if (!BUF_IS_VALID(buff)) {
         return 0;
     }
 
-    /* Operate on temporary values in case they change in between */
+    /* Use temporary values in case they are changed during operations */
     w = buff->w;
     r = buff->r;
     if (w == r) {
@@ -265,16 +263,15 @@ ringbuff_get_full(ringbuff_t* buff) {
 }
 
 /**
- * \brief           Resets and clears buffer
+ * \brief           Resets buffer to default values. Buffer size is not modified
  * \param[in]       buff: Buffer handle
  */
 void
 ringbuff_reset(ringbuff_t* buff) {
-    if (buff == NULL) {
-        return;
+    if (BUF_IS_VALID(buff)) {
+        buff->w = 0;
+        buff->r = 0;
     }
-    buff->w = 0;
-    buff->r = 0;
 }
 
 /**
@@ -284,7 +281,7 @@ ringbuff_reset(ringbuff_t* buff) {
  */
 void *
 ringbuff_get_linear_block_read_address(ringbuff_t* buff) {
-    if (buff == NULL || buff->buff == NULL) {
+    if (!BUF_IS_VALID(buff)) {
         return NULL;
     }
     return &buff->buff[buff->r];
@@ -299,11 +296,11 @@ size_t
 ringbuff_get_linear_block_read_length(ringbuff_t* buff) {
     size_t w, r, len;
 
-    if (buff == NULL) {
+    if (!BUF_IS_VALID(buff)) {
         return 0;
     }
 
-    /* Operate on temporary values in case they change in between */
+    /* Use temporary values in case they are changed during operations */
     w = buff->w;
     r = buff->r;
     if (w > r) {
@@ -317,25 +314,23 @@ ringbuff_get_linear_block_read_length(ringbuff_t* buff) {
 }
 
 /**
- * \brief           Skip (ignore, advance read pointer) buffer data.
+ * \brief           Skip (ignore; advance read pointer) buffer data
+ *                  Marks data as read in the buffer and increases free memory up to `len` bytes
  * \note            Useful at the end of streaming transfer such as DMA
  * \param[in]       buff: Buffer handle
- * \param[in]       len: Number of bytes to skip
+ * \param[in]       len: Number of bytes to skip and mark as read
  * \return          Number of bytes skipped
  */
 size_t
 ringbuff_skip(ringbuff_t* buff, size_t len) {
     size_t full;
 
-    if (buff == NULL || len == 0) {
+    if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
     }
 
     full = ringbuff_get_full(buff);             /* Get buffer used length */
-    if (len > full) {
-        len = full;
-    }
-    buff->r += len;                             /* Advance read pointer */
+    buff->r += BUF_MIN(len, full);              /* Advance read pointer */
     if (buff->r >= buff->size) {                /* Subtract possible overflow */
         buff->r -= buff->size;
     }
@@ -349,7 +344,7 @@ ringbuff_skip(ringbuff_t* buff, size_t len) {
  */
 void *
 ringbuff_get_linear_block_write_address(ringbuff_t* buff) {
-    if (buff == NULL || buff->buff == NULL) {
+    if (!BUF_IS_VALID(buff)) {
         return NULL;
     }
     return &buff->buff[buff->w];
@@ -364,11 +359,11 @@ size_t
 ringbuff_get_linear_block_write_length(ringbuff_t* buff) {
     size_t w, r, len;
 
-    if (buff == NULL) {
+    if (!BUF_IS_VALID(buff)) {
         return 0;
     }
 
-    /* Operate on temporary values in case they change in between */
+    /* Use temporary values in case they are changed during operations */
     w = buff->w;
     r = buff->r;
     if (w >= r) {
@@ -376,9 +371,14 @@ ringbuff_get_linear_block_write_length(ringbuff_t* buff) {
         /*
          * When read pointer == 0,
          * maximal length is one less as if too many bytes 
-         * are written, it buffer would be considered empty again (r == w)
+         * are written, buffer would be considered empty again (r == w)
          */
         if (r == 0) {
+            /*
+             * Cannot overflow:
+             * - If r != 0, statement does not get called
+             * - buff->size cannot be 0 and if r == 0, len is > 0
+             */
             len--;
         }
     } else {
@@ -388,8 +388,10 @@ ringbuff_get_linear_block_write_length(ringbuff_t* buff) {
 }
 
 /**
- * \brief           Advance write pointer in the buffer
- * \note            Useful when hardware is writing to buffer and app needs to increase number of bytes written
+ * \brief           Advance write pointer in the buffer.
+ *                  Similar to `ringbuff_skip` but modified write pointer instead of read
+ * \note            Useful when hardware is writing to buffer and application needs to increase number
+ *                  of bytes written to buffer by hardware
  * \param[in]       buff: Buffer handle
  * \param[in]       len: Number of bytes to advance
  * \return          Number of bytes advanced for write operation
@@ -398,15 +400,12 @@ size_t
 ringbuff_advance(ringbuff_t* buff, size_t len) {
     size_t free;
 
-    if (buff == NULL || len == 0) {
+    if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
     }
 
     free = ringbuff_get_free(buff);             /* Get buffer free length */
-    if (len > free) {
-        len = free;
-    }
-    buff->w += len;                             /* Advance write pointer */
+    buff->w += BUF_MIN(len, free);              /* Advance write pointer */
     if (buff->w >= buff->size) {                /* Subtract possible overflow */
         buff->w -= buff->size;
     }
