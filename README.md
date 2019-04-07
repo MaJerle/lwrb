@@ -16,7 +16,7 @@ Library provides generic FIFO ring buffer implementation.
 
 ## How it works
 
-![Ring buffer use cases](https://raw.githubusercontent.com/MaJerle/ringbuff/master/docs/buff_empty.svg?sanitize=true)
+![Ring buffer use cases](https://raw.githubusercontent.com/MaJerle/ringbuff_res/master/docs/src/buff_cases.svg?sanitize=true)
 
 Image shows different corner cases. As for the reference, `R` stands for ***R**ead pointer* and `W` stands for ***W**rite pointer*. Pointer are being used when *read* or *write* operations are used respectively. Numbers `0 - 7` represent `S = 8` byte long data array. **S** represents buffer size.
 `R` and `W` pointers always point to *next read/write* operation. When `W == R`, buffer is considered empty. When `W == R - 1`, buffer is considered empty. Please note that `W == R - 1` is valid only if `W` and `R` overflow at buffer size `S`.
@@ -42,7 +42,7 @@ Image shows different corner cases. As for the reference, `R` stands for ***R**e
 Instead of using read function and copying data from working buffer to application buffer, it is possible to use original working buffer and process/read data directly from memory.
 This feature is very useful when implementing Direct Memory Access (DMA) feature on microcontroller or any other platform as it allows data transfer with zero-copy between memories.
 
-![Ring buffer use cases](https://raw.githubusercontent.com/MaJerle/ringbuff_res/master/docs/src/buff_lin_read_skip.svg?sanitize=true)
+![Linear read and data skipping](https://raw.githubusercontent.com/MaJerle/ringbuff_res/master/docs/src/buff_lin_read_skip.svg?sanitize=true)
 
 Following code is explaining image above.
 
@@ -51,14 +51,14 @@ Following code is explaining image above.
 ringbuff_t buff;
 uint8_t buff_data[8];
 
+size_t len;
+uint8_t* data;
+
 /* Initialize buffer, use buff_data as data array */
 ringbuff_init(&buff, buff_data, sizeof(buff_data));
 
 /* Use write, read operations, process data */
 /* ... */
-
-size_t len;
-uint8_t* data;
 
 /* IMAGE PART A */
 
@@ -67,7 +67,7 @@ uint8_t* data;
 
 /* Get length of linear memory at read pointer */
 /* Function returns 3 as we can read 3 bytes from buffer in sequence */
-/* When function returns 0, there is no memory available in the buffer */
+/* When function returns 0, there is no memory available in the buffer for read anymore */
 if ((len = ringbuff_get_linear_block_read_length(&buff)) > 0) {
     /* Get pointer to first element in linear block at read address */
     /* Function returns &buff_data[5] */
@@ -87,7 +87,7 @@ if ((len = ringbuff_get_linear_block_read_length(&buff)) > 0) {
 
 /* Get length of linear memory at read pointer */
 /* Function returns 4 as we can read 4 bytes from buffer in sequence */
-/* When function returns 0, there is no memory available in the buffer */
+/* When function returns 0, there is no memory available in the buffer for read anymore */
 if ((len = ringbuff_get_linear_block_read_length(&buff)) > 0) {
     /* Get pointer to first element in linear block at read address */
     /* Function returns &buff_data[0] */
@@ -109,13 +109,13 @@ if ((len = ringbuff_get_linear_block_read_length(&buff)) > 0) {
 /* Buffer is considered empty as R == W */
 ```
 
-Code may be rewritten to something like this:
+Code may be rewritten to something like:
 
 ```c
 /* Initialization part skipped */
 
 /* Get length of linear memory at read pointer */
-/* When function returns 0, there is no memory available in the buffer */
+/* When function returns 0, there is no memory available in the buffer for read anymore */
 while ((len = ringbuff_get_linear_block_read_length(&buff)) > 0) {
     /* Get pointer to first element in linear block at read address */
     data = ringbuff_get_linear_block_read_address(&buff);
@@ -143,7 +143,7 @@ Similar to read block, it is possible to get linear block and its length to dire
 This feature is very useful when hardware writes to memory on a microcontroller (DMA) without interrupting CPU for each received byte.
 Once transfer is completed, application must manually increase write pointer to consider buffer is containing data.
 
-![Ring buffer use cases](https://raw.githubusercontent.com/MaJerle/ringbuff_res/master/docs/src/buff_lin_write_advance.svg?sanitize=true)
+![Linear write and pointer advancing](https://raw.githubusercontent.com/MaJerle/ringbuff_res/master/docs/src/buff_lin_write_advance.svg?sanitize=true)
 
 Following code is explaining image above. Buffer write will continue where buffer read ended in previous image.
 
@@ -152,14 +152,14 @@ Following code is explaining image above. Buffer write will continue where buffe
 ringbuff_t buff;
 uint8_t buff_data[8];
 
+size_t len;
+uint8_t* data;
+
 /* Initialize buffer, use buff_data as data array */
 ringbuff_init(&buff, buff_data, sizeof(buff_data));
 
 /* Use write, read operations, process data */
 /* ... */
-
-size_t len;
-uint8_t* data;
 
 /* IMAGE PART A */
 
@@ -168,7 +168,7 @@ uint8_t* data;
 
 /* Get length of linear memory at write pointer */
 /* Function returns 4 as we can write 4 bytes to buffer in sequence */
-/* When function returns 0, there is no memory available in the buffer */
+/* When function returns 0, there is no memory available in the buffer for write anymore */
 if ((len = ringbuff_get_linear_block_write_length(&buff)) > 0) {
     /* Get pointer to first element in linear block at write address */
     /* Function returns &buff_data[4] */
@@ -192,7 +192,7 @@ if ((len = ringbuff_get_linear_block_write_length(&buff)) > 0) {
 
 /* Get length of linear memory at write pointer */
 /* Function returns 3 as we can write 3 bytes to buffer in sequence */
-/* When function returns 0, there is no memory available in the buffer */
+/* When function returns 0, there is no memory available in the buffer for write anymore */
 if ((len = ringbuff_get_linear_block_read_length(&buff)) > 0) {
     /* Get pointer to first element in linear block at write address */
     /* Function returns &buff_data[0] */
