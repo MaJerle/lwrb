@@ -217,6 +217,65 @@ if ((len = ringbuff_get_linear_block_read_length(&buff)) > 0) {
 /* Buffer is considered full as R == W + 1 */
 ```
 
+## Tips
+
+### Tip 1: Buffer size shall be `1` byte higher than anticipated data size
+
+When application needs buffer for same data block `N` times, it is advised to set buffer size to `1` byte more than `N * block_size` is.
+This is due to `R` and `W` pointers alignment, see explanation above.
+
+```c
+/* Create structure and use buffer to hold at least 3 instances of structure data */
+typedef struct {
+    int a;
+    int b;
+} my_data_t;
+
+/* Create buffer now */
+ringbuff_t buff_1;
+ringbuff_t buff_2;
+
+/* Create data for buffer. Use sizeof structure, multiplied by 3 (for 3 instances) */
+/* Add + 1 at the end to make buffer `1` byte bigger */
+uint8_t buff_data_1[sizeof(my_data_t) + 3 + 1];
+/* Use second buffer without + 1 at the end */
+uint8_t buff_data_2[sizeof(my_data_t) + 3];
+
+/* Create single my_data_t structure instance */
+my_data_t d;
+
+/* Write result values */
+size_t len_1;
+size_t len_2;
+
+/* Initialize buffer */
+ringbuff_init(&buff_1, buff_data_1, sizeof(buff_data_1));
+ringbuff_init(&buff_2, buff_data_2, sizeof(buff_data_2));
+
+/* Now uses buffer to write data */
+for (size_t i = 0; i < 3; i++) {
+    /* Prepare dummy data */
+    d.a = i;
+    d.b = i;
+    d.c = i * 5;
+
+    /* Write data to buffer */
+    /* Compare size of requested write vs actual write result */
+    len_1 = ringbuff_write(&buff_1, &d, sizeof(d));
+    len_2 = ringbuff_write(&buff_2, &d, sizeof(d));
+    printf("Write buffer 1: %d/%d bytes; buffer 2: %d/%d\r\n",
+        (int)len_1, (int)sizeof(d),
+        (int)len_2, (int)sizeof(d));
+}
+```
+When executed on my machine, result is (may be different on yours, based on integer size):
+```
+Write buffer 1: 8/8; buffer 2: 8/8
+Write buffer 1: 8/8; buffer 2: 8/8
+Write buffer 1: 8/8; buffer 2: 7/8
+```
+Second buffer without `+ 1` in buffer data size could only write `7` bytes third time as buffer is now full
+
 ## Examples
 
 Few examples to show how to use the library
