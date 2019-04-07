@@ -256,8 +256,7 @@ ringbuff_init(&buff_2, buff_data_2, sizeof(buff_data_2));
 for (size_t i = 0; i < 3; i++) {
     /* Prepare dummy data */
     d.a = i;
-    d.b = i;
-    d.c = i * 5;
+    d.b = i * 2;
 
     /* Write data to buffer */
     /* Compare size of requested write vs actual write result */
