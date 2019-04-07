@@ -202,7 +202,7 @@ if ((len = ringbuff_get_linear_block_read_length(&buff)) > 0) {
     /* Any other hardware may directly write to data array */
     /* Data array has len bytes length */
     /* Or use memcpy(data, my_array, len); */
-    send_data(data, len);
+    receive_data(data, len);
 
     /* Now advance buffer for written bytes to buffer = move write pointer */
     /* Write pointer is moved for len bytes */
