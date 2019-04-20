@@ -46,6 +46,14 @@ extern "C" {
  * \{
  */
 
+/* --- Buffer unique part starts --- */
+/* Prefix for all buffer functions and typedefs */
+/**
+ * \brief           Buffer function/typedef prefix string
+ */
+#define BUF_PREF(x)                     ring ## x
+/* --- Buffer unique part ends --- */
+
 /**
  * \brief           Buffer structure
  */
@@ -55,29 +63,32 @@ typedef struct {
     size_t size;                                /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
     size_t r;                                   /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
     size_t w;                                   /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
-} ringbuff_t;
+} BUF_PREF(buff_t);
 
-uint8_t     ringbuff_init(ringbuff_t* buff, void* buffdata, size_t size);
-void        ringbuff_reset(ringbuff_t* buff);
+uint8_t     BUF_PREF(buff_init)(BUF_PREF(buff_t)* buff, void* buffdata, size_t size);
+void        BUF_PREF(buff_free)(BUF_PREF(buff_t)* buff);
+void        BUF_PREF(buff_reset)(BUF_PREF(buff_t)* buff);
 
 /* Read/Write functions */
-size_t      ringbuff_write(ringbuff_t* buff, const void* data, size_t count);
-size_t      ringbuff_read(ringbuff_t* buff, void* data, size_t count);
-size_t      ringbuff_peek(ringbuff_t* buff, size_t skip_count, void* data, size_t count);
+size_t      BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t count);
+size_t      BUF_PREF(buff_read)(BUF_PREF(buff_t)* buff, void* data, size_t count);
+size_t      BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_t count);
 
 /* Buffer size information */
-size_t      ringbuff_get_free(ringbuff_t* buff);
-size_t      ringbuff_get_full(ringbuff_t* buff);
+size_t      BUF_PREF(buff_get_free)(BUF_PREF(buff_t)* buff);
+size_t      BUF_PREF(buff_get_full)(BUF_PREF(buff_t)* buff);
 
 /* Read data block management */
-void *      ringbuff_get_linear_block_read_address(ringbuff_t* buff);
-size_t      ringbuff_get_linear_block_read_length(ringbuff_t* buff);
-size_t      ringbuff_skip(ringbuff_t* buff, size_t len);
+void *      BUF_PREF(buff_get_linear_block_read_address)(BUF_PREF(buff_t)* buff);
+size_t      BUF_PREF(buff_get_linear_block_read_length)(BUF_PREF(buff_t)* buff);
+size_t      BUF_PREF(buff_skip)(BUF_PREF(buff_t)* buff, size_t len);
 
 /* Write data block management */
-void *      ringbuff_get_linear_block_write_address(ringbuff_t* buff);
-size_t      ringbuff_get_linear_block_write_length(ringbuff_t* buff);
-size_t      ringbuff_advance(ringbuff_t* buff, size_t len);
+void *      BUF_PREF(buff_get_linear_block_write_address)(BUF_PREF(buff_t)* buff);
+size_t      BUF_PREF(buff_get_linear_block_write_length)(BUF_PREF(buff_t)* buff);
+size_t      BUF_PREF(buff_advance)(BUF_PREF(buff_t)* buff, size_t len);
+
+#undef BUF_PREF         /* Prefix not needed anymore */
 
 /**
  * \}

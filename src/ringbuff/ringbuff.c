@@ -32,9 +32,14 @@
  */
 #include "ringbuff/ringbuff.h"
 
+/* --- Buffer unique part starts --- */
+/* Prefix for all buffer functions and typedefs */
+#define BUF_PREF(x)                     ring ## x
+/* --- Buffer unique part ends --- */
+
+/* Memory set and copy functions */
 #define BUF_MEMSET                      memset
 #define BUF_MEMCPY                      memcpy
-
 #define BUF_IS_VALID(b)                 ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
 #define BUF_MIN(x, y)                   ((x) < (y) ? (x) : (y))
 #define BUF_MAX(x, y)                   ((x) > (y) ? (x) : (y))
@@ -48,7 +53,7 @@
  * \return          `1` on success, `0` otherwise
  */
 uint8_t
-ringbuff_init(ringbuff_t* buff, void* buffdata, size_t size) {
+BUF_PREF(buff_init)(BUF_PREF(buff_t)* buff, void* buffdata, size_t size) {
     if (buff == NULL || size == 0 || buffdata == NULL) {
         return 0;
     }
@@ -62,6 +67,19 @@ ringbuff_init(ringbuff_t* buff, void* buffdata, size_t size) {
 }
 
 /**
+ * \brief           Free buffer memory
+ * \note            Since implementation does not use dynamic allocation,
+ *                  it just sets buffer handle to `NULL`
+ * \param[in]       buff: Buffer handle
+ */
+void
+BUF_PREF(buff_free)(BUF_PREF(buff_t)* buff) {
+    if (BUF_IS_VALID(buff)) {
+        buff->buff = NULL;
+    }
+}
+
+/**
  * \brief           Write data to buffer
  *                  Copies data from `data` array to buffer and marks buffer as full for maximum `count` number of bytes
  * \param[in]       buff: Buffer handle
@@ -72,7 +90,7 @@ ringbuff_init(ringbuff_t* buff, void* buffdata, size_t size) {
  *                  to copy full data array
  */
 size_t
-ringbuff_write(ringbuff_t* buff, const void* data, size_t count) {
+BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t count) {
     size_t tocopy, free;
     const uint8_t* d = data;
 
@@ -85,7 +103,7 @@ ringbuff_write(ringbuff_t* buff, const void* data, size_t count) {
     }
 
     /* Calculate maximum number of bytes available to write */
-    free = ringbuff_get_free(buff);
+    free = BUF_PREF(buff_get_free)(buff);
     count = BUF_MIN(free, count);
     if (!count) {
         return 0;
@@ -118,7 +136,7 @@ ringbuff_write(ringbuff_t* buff, const void* data, size_t count) {
  * \return          Number of bytes read and copied to data array
  */
 size_t
-ringbuff_read(ringbuff_t* buff, void* data, size_t count) {
+BUF_PREF(buff_read)(BUF_PREF(buff_t)* buff, void* data, size_t count) {
     size_t tocopy, full;
     uint8_t *d = data;
 
@@ -131,7 +149,7 @@ ringbuff_read(ringbuff_t* buff, void* data, size_t count) {
     }
 
     /* Calculate maximum number of bytes available to read */
-    full = ringbuff_get_full(buff);
+    full = BUF_PREF(buff_get_full)(buff);
     count = BUF_MIN(full, count);
     if (!count) {
         return 0;
@@ -164,7 +182,7 @@ ringbuff_read(ringbuff_t* buff, void* data, size_t count) {
  * \return          Number of bytes peeked and written to output array
  */
 size_t
-ringbuff_peek(ringbuff_t* buff, size_t skip_count, void* data, size_t count) {
+BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_t count) {
     size_t full, tocopy, r;
     uint8_t *d = data;
 
@@ -178,7 +196,7 @@ ringbuff_peek(ringbuff_t* buff, size_t skip_count, void* data, size_t count) {
     r = buff->r;
 
     /* Calculate maximum number of bytes available to read */
-    full = ringbuff_get_full(buff);
+    full = BUF_PREF(buff_get_full)(buff);
 
     /* Skip beginning of buffer */
     if (skip_count >= full) {
@@ -214,7 +232,7 @@ ringbuff_peek(ringbuff_t* buff, size_t skip_count, void* data, size_t count) {
  * \return          Number of free bytes in memory
  */
 size_t
-ringbuff_get_free(ringbuff_t* buff) {
+BUF_PREF(buff_get_free)(BUF_PREF(buff_t)* buff) {
     size_t size, w, r;
 
     if (!BUF_IS_VALID(buff)) {
@@ -242,7 +260,7 @@ ringbuff_get_free(ringbuff_t* buff) {
  * \return          Number of bytes ready to be read
  */
 size_t
-ringbuff_get_full(ringbuff_t* buff) {
+BUF_PREF(buff_get_full)(BUF_PREF(buff_t)* buff) {
     size_t w, r, size;
 
     if (!BUF_IS_VALID(buff)) {
@@ -267,7 +285,7 @@ ringbuff_get_full(ringbuff_t* buff) {
  * \param[in]       buff: Buffer handle
  */
 void
-ringbuff_reset(ringbuff_t* buff) {
+BUF_PREF(buff_reset)(BUF_PREF(buff_t)* buff) {
     if (BUF_IS_VALID(buff)) {
         buff->w = 0;
         buff->r = 0;
@@ -280,7 +298,7 @@ ringbuff_reset(ringbuff_t* buff) {
  * \return          Linear buffer start address
  */
 void *
-ringbuff_get_linear_block_read_address(ringbuff_t* buff) {
+BUF_PREF(buff_get_linear_block_read_address)(BUF_PREF(buff_t)* buff) {
     if (!BUF_IS_VALID(buff)) {
         return NULL;
     }
@@ -293,7 +311,7 @@ ringbuff_get_linear_block_read_address(ringbuff_t* buff) {
  * \return          Linear buffer size in units of bytes for read operation
  */
 size_t
-ringbuff_get_linear_block_read_length(ringbuff_t* buff) {
+BUF_PREF(buff_get_linear_block_read_length)(BUF_PREF(buff_t)* buff) {
     size_t w, r, len;
 
     if (!BUF_IS_VALID(buff)) {
@@ -322,14 +340,14 @@ ringbuff_get_linear_block_read_length(ringbuff_t* buff) {
  * \return          Number of bytes skipped
  */
 size_t
-ringbuff_skip(ringbuff_t* buff, size_t len) {
+BUF_PREF(buff_skip)(BUF_PREF(buff_t)* buff, size_t len) {
     size_t full;
 
     if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
     }
 
-    full = ringbuff_get_full(buff);             /* Get buffer used length */
+    full = BUF_PREF(buff_get_full)(buff);       /* Get buffer used length */
     buff->r += BUF_MIN(len, full);              /* Advance read pointer */
     if (buff->r >= buff->size) {                /* Subtract possible overflow */
         buff->r -= buff->size;
@@ -343,7 +361,7 @@ ringbuff_skip(ringbuff_t* buff, size_t len) {
  * \return          Linear buffer start address
  */
 void *
-ringbuff_get_linear_block_write_address(ringbuff_t* buff) {
+BUF_PREF(buff_get_linear_block_write_address)(BUF_PREF(buff_t)* buff) {
     if (!BUF_IS_VALID(buff)) {
         return NULL;
     }
@@ -356,7 +374,7 @@ ringbuff_get_linear_block_write_address(ringbuff_t* buff) {
  * \return          Linear buffer size in units of bytes for write operation
  */
 size_t
-ringbuff_get_linear_block_write_length(ringbuff_t* buff) {
+BUF_PREF(buff_get_linear_block_write_length)(BUF_PREF(buff_t)* buff) {
     size_t w, r, len;
 
     if (!BUF_IS_VALID(buff)) {
@@ -389,7 +407,7 @@ ringbuff_get_linear_block_write_length(ringbuff_t* buff) {
 
 /**
  * \brief           Advance write pointer in the buffer.
- *                  Similar to `ringbuff_skip` but modified write pointer instead of read
+ *                  Similar to skip function but modifies write pointer instead of read
  * \note            Useful when hardware is writing to buffer and application needs to increase number
  *                  of bytes written to buffer by hardware
  * \param[in]       buff: Buffer handle
@@ -397,14 +415,14 @@ ringbuff_get_linear_block_write_length(ringbuff_t* buff) {
  * \return          Number of bytes advanced for write operation
  */
 size_t
-ringbuff_advance(ringbuff_t* buff, size_t len) {
+BUF_PREF(buff_advance)(BUF_PREF(buff_t)* buff, size_t len) {
     size_t free;
 
     if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
     }
 
-    free = ringbuff_get_free(buff);             /* Get buffer free length */
+    free = BUF_PREF(buff_get_free)(buff);       /* Get buffer free length */
     buff->w += BUF_MIN(len, free);              /* Advance write pointer */
     if (buff->w >= buff->size) {                /* Subtract possible overflow */
         buff->w -= buff->size;
