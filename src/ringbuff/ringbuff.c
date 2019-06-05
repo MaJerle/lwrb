@@ -40,7 +40,7 @@
 /* Memory set and copy functions */
 #define BUF_MEMSET                      memset
 #define BUF_MEMCPY                      memcpy
-#define BUF_IS_VALID(b)                 (NULL != (b) && NULL != (b)->buff && (b)->size)
+#define BUF_IS_VALID(b)                 ((b) != NULL && (b)->buff != NULL && (b)->size)
 #define BUF_MIN(x, y)                   ((x) < (y) ? (x) : (y))
 #define BUF_MAX(x, y)                   ((x) > (y) ? (x) : (y))
 
@@ -54,7 +54,7 @@
  */
 uint8_t
 BUF_PREF(buff_init)(BUF_PREF(buff_t)* buff, void* buffdata, size_t size) {
-    if (NULL == buff || !size || NULL == buffdata) {
+    if (buff == NULL || !size || buffdata == NULL) {
         return 0;
     }
 
@@ -394,8 +394,8 @@ BUF_PREF(buff_get_linear_block_write_length)(BUF_PREF(buff_t)* buff) {
         if (!r) {
             /*
              * Cannot overflow:
-             * - If r != 0, statement does not get called
-             * - buff->size cannot be 0 and if r == 0, len is > 0
+             * - If r is not 0, statement does not get called
+             * - buff->size cannot be 0 and if r == 0, len is greater 0
              */
             len--;
         }

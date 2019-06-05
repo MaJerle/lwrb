@@ -63,7 +63,7 @@ extern "C" {
  */
 typedef struct {
     uint8_t* buff;                              /*!< Pointer to buffer data.
-                                                    Buffer is considered initialized when `NULL != buff` and `0 < size` */
+                                                    Buffer is considered initialized when `buff != NULL` and `size` */
     size_t size;                                /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
     size_t r;                                   /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
     size_t w;                                   /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
