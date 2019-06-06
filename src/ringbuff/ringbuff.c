@@ -54,7 +54,7 @@
  */
 uint8_t
 BUF_PREF(buff_init)(BUF_PREF(buff_t)* buff, void* buffdata, size_t size) {
-    if (buff == NULL || !size || buffdata == NULL) {
+    if (buff == NULL || size == 0 || buffdata == NULL) {
         return 0;
     }
 
@@ -94,7 +94,7 @@ BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t count) {
     size_t tocopy, free;
     const uint8_t* d = data;
 
-    if (!BUF_IS_VALID(buff) || !count) {
+    if (!BUF_IS_VALID(buff) || count == 0) {
         return 0;
     }
 
@@ -105,7 +105,7 @@ BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t count) {
     /* Calculate maximum number of bytes available to write */
     free = BUF_PREF(buff_get_free)(buff);
     count = BUF_MIN(free, count);
-    if (!count) {
+    if (count == 0) {
         return 0;
     }
 
@@ -116,7 +116,7 @@ BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t count) {
     count -= tocopy;
 
     /* Step 2: Write data to beginning of buffer (overflow part) */
-    if (count) {
+    if (count > 0) {
         BUF_MEMCPY(buff->buff, (void *)&d[tocopy], count);
         buff->w = count;
     }
@@ -140,7 +140,7 @@ BUF_PREF(buff_read)(BUF_PREF(buff_t)* buff, void* data, size_t count) {
     size_t tocopy, full;
     uint8_t *d = data;
 
-    if (!BUF_IS_VALID(buff) || !count) {
+    if (!BUF_IS_VALID(buff) || count == 0) {
         return 0;
     }
 
@@ -151,7 +151,7 @@ BUF_PREF(buff_read)(BUF_PREF(buff_t)* buff, void* data, size_t count) {
     /* Calculate maximum number of bytes available to read */
     full = BUF_PREF(buff_get_full)(buff);
     count = BUF_MIN(full, count);
-    if (!count) {
+    if (count == 0) {
         return 0;
     }
 
@@ -162,7 +162,7 @@ BUF_PREF(buff_read)(BUF_PREF(buff_t)* buff, void* data, size_t count) {
     count -= tocopy;
 
     /* Step 2: Read data from beginning of buffer (overflow part) */
-    if (count) {
+    if (count > 0) {
         BUF_MEMCPY(&d[tocopy], buff->buff, count);
         buff->r = count;
     }
@@ -186,7 +186,7 @@ BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_
     size_t full, tocopy, r;
     uint8_t *d = data;
 
-    if (!BUF_IS_VALID(buff) || !count) {
+    if (!BUF_IS_VALID(buff) || count == 0) {
         return 0;
     }
 
@@ -210,7 +210,7 @@ BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_
 
     /* Check maximum number of bytes available to read after skip */
     count = BUF_MIN(full, count);
-    if (!count) {
+    if (count == 0) {
         return 0;
     }
 
@@ -220,7 +220,7 @@ BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_
     count -= tocopy;
 
     /* Step 2: Read data from beginning of buffer (overflow part) */
-    if (count) {
+    if (count > 0) {
         BUF_MEMCPY(&d[tocopy], buff->buff, count);
     }
     return tocopy + count;                      /* Number of elements read */
@@ -343,7 +343,7 @@ size_t
 BUF_PREF(buff_skip)(BUF_PREF(buff_t)* buff, size_t len) {
     size_t full;
 
-    if (!BUF_IS_VALID(buff) || !len) {
+    if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
     }
 
@@ -387,15 +387,15 @@ BUF_PREF(buff_get_linear_block_write_length)(BUF_PREF(buff_t)* buff) {
     if (w >= r) {
         len = buff->size - w;
         /*
-         * When read pointer == 0,
+         * When read pointer is 0,
          * maximal length is one less as if too many bytes 
          * are written, buffer would be considered empty again (r == w)
          */
-        if (!r) {
+        if (r == 0) {
             /*
              * Cannot overflow:
              * - If r is not 0, statement does not get called
-             * - buff->size cannot be 0 and if r == 0, len is greater 0
+             * - buff->size cannot be 0 and if r is 0, len is greater 0
              */
             len--;
         }
@@ -418,7 +418,7 @@ size_t
 BUF_PREF(buff_advance)(BUF_PREF(buff_t)* buff, size_t len) {
     size_t free;
 
-    if (!BUF_IS_VALID(buff) || !len) {
+    if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
     }
 
