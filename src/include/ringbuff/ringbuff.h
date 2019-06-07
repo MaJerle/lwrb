@@ -74,9 +74,9 @@ void        BUF_PREF(buff_free)(BUF_PREF(buff_t)* buff);
 void        BUF_PREF(buff_reset)(BUF_PREF(buff_t)* buff);
 
 /* Read/Write functions */
-size_t      BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t count);
-size_t      BUF_PREF(buff_read)(BUF_PREF(buff_t)* buff, void* data, size_t count);
-size_t      BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_t count);
+size_t      BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t btw);
+size_t      BUF_PREF(buff_read)(BUF_PREF(buff_t)* buff, void* data, size_t btr);
+size_t      BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_t btp);
 
 /* Buffer size information */
 size_t      BUF_PREF(buff_get_free)(BUF_PREF(buff_t)* buff);
