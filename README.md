@@ -14,10 +14,6 @@ Library provides generic FIFO ring buffer implementation.
 - Suitable for DMA transfers from and to memory with zero-copy between buffer and application memory
 - Supports data peek, skip for read and advance for write
 
-# Examples and resources
-
-For examples, please check second repository, available at https://github.com/MaJerle/ringbuff_res
-
 # Documentation
 
 Full API documentation with description and examples is available and is regulary updated with the source changes
