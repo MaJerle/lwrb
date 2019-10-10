@@ -29,7 +29,7 @@
  * This file is part of ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
- * Version:         $_version_$
+ * Version:         v1.1
  */
 #ifndef RINGBUFF_HDR_H
 #define RINGBUFF_HDR_H
