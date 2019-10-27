@@ -388,7 +388,7 @@ BUF_PREF(buff_get_linear_block_write_length)(BUF_PREF(buff_t)* buff) {
              * - If r is not 0, statement does not get called
              * - buff->size cannot be 0 and if r is 0, len is greater 0
              */
-            len--;
+            --len;
         }
     } else {
         len = r - w - 1;
