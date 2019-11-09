@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2019 Tilen Majerle
+ * Copyright (c) 2019 Tilen MAJERLE
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,7 +29,7 @@
  * This file is part of ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
- * Version:         v1.1
+ * Version:         v1.1.0
  */
 #include "ringbuff/ringbuff.h"
 
@@ -388,7 +388,7 @@ BUF_PREF(buff_get_linear_block_write_length)(BUF_PREF(buff_t)* buff) {
              * - If r is not 0, statement does not get called
              * - buff->size cannot be 0 and if r is 0, len is greater 0
              */
-            len--;
+            --len;
         }
     } else {
         len = r - w - 1;

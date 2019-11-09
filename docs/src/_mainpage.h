@@ -19,8 +19,8 @@
  *
  * \section         sect_resources Download & Resources
  *
- *  - <a class="download_url" href="https://github.com/MaJerle/ringbuff/releases">Download library from Github releases</a>
- *  - <a href="https://github.com/MaJerle/ringbuff_res">Resources and examples repository</a>
+ *  - <a class="download_url" href="https://github.com/MaJerle/ringbuff/releases">Download library at Github releases</a>
+ *  - <a href="https://github.com/MaJerle/ringbuff">Resources and examples repository</a>
  *  - Read \ref page_appnote before you start development
  *  - <a href="https://github.com/MaJerle/ringbuff">Official development repository on Github</a>
  *

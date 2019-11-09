@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2019 Tilen Majerle
+ * Copyright (c) 2019 Tilen MAJERLE
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,7 +29,7 @@
  * This file is part of ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
- * Version:         v1.1
+ * Version:         v1.1.0
  */
 #ifndef RINGBUFF_HDR_H
 #define RINGBUFF_HDR_H
