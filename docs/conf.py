@@ -13,13 +13,13 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-import sphinx_rtd_theme
+from sphinx.builders.html import StandaloneHTMLBuilder
 
 # -- Project information -----------------------------------------------------
 
 project = 'Ringbuffer'
 copyright = '2019, Tilen Majerle'
-author = 'Tilen Majerle'
+author = 'Tilen MAJERLE'
 
 # The full version, including alpha/beta/rc tags
 release = '1.1.0'
@@ -31,8 +31,16 @@ release = '1.1.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-#	'breathe'
-	"sphinx_rtd_theme"
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.viewcode',
+
+	'breathe',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -43,6 +51,7 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+highlight_language = 'c'
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -50,6 +59,24 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+html_theme_options = {
+    'canonical_url': '',
+    'analytics_id': '',  #  Provided by Google in your dashboard
+    'display_version': True,
+    'prev_next_buttons_location': 'bottom',
+    'style_external_links': False,
+    
+    'logo_only': False,
+
+    # Toc options
+    'collapse_navigation': True,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
+}
+html_logo = 'images/logo.svg'
+github_url = 'https://github.com/MaJerle/ringbuff'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -57,3 +84,14 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 master_doc = 'index'
+
+#
+# Breathe configuration
+#
+#
+#
+breathe_projects = {
+	"ringbuff": "d:\\_WORK\\docs_generated\\ringbuff\\xml\\"
+}
+breathe_default_project = "ringbuff"
+breathe_default_members = ('members', 'undoc-members')
