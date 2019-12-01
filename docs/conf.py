@@ -14,7 +14,6 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 from sphinx.builders.html import StandaloneHTMLBuilder
-import breathe
 
 # -- Project information -----------------------------------------------------
 
@@ -24,7 +23,6 @@ author = 'Tilen MAJERLE'
 
 # The full version, including alpha/beta/rc tags
 release = '1.1.0'
-
 
 # -- General configuration ---------------------------------------------------
 
