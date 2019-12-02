@@ -1,4 +1,0 @@
-API documentation
-=================
-
-.. doxygengroup:: RINGBUFF
