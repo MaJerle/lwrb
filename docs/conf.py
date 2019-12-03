@@ -14,7 +14,12 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 from sphinx.builders.html import StandaloneHTMLBuilder
+import subprocess, os
 
+# Run doxygen first
+read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
+if read_the_docs_build:
+    subprocess.call('doxygen doxy_ringbuff.doxy', shell=True)
 # -- Project information -----------------------------------------------------
 
 project = 'Ringbuffer'
@@ -90,7 +95,7 @@ master_doc = 'index'
 #
 #
 breathe_projects = {
-	"ringbuff": "d:\\_WORK\\docs_generated\\ringbuff\\xml\\"
+	"ringbuff": "xml\\"
 }
 breathe_default_project = "ringbuff"
 breathe_default_members = ('members', 'undoc-members')
