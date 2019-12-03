@@ -1,6 +1,8 @@
 Get started
 ===========
 
+.. _download_library:
+
 Download library
 ^^^^^^^^^^^^^^^^
 

@@ -6,7 +6,7 @@ Ringbuffer documentation!
 
 .. class::center
 
-:ref:`Download library` · `Github <https://github.com/MaJerle/ringbuff>`_
+:ref:`download_library` · `Github <https://github.com/MaJerle/ringbuff>`_
 
 Features
 ^^^^^^^^
@@ -26,6 +26,21 @@ Requirements
 ^^^^^^^^^^^^
 
 - C compiler
+- Less than ``1kB`` of memory
+
+Contribute
+^^^^^^^^^^
+
+We always welcome new contributors. To be as efficient as possible, we recommend:
+
+#. Fork Github repository
+#. Respect `C style & coding rules <https://github.com/MaJerle/c_code_style>`_ used by the library
+#. Make a pull request to ``develop`` branch with new features or bug fixes
+
+Alternatively you may:
+
+#. Report a bug
+#. Ask for a feature request
 
 Example code
 ^^^^^^^^^^^^
