@@ -27,7 +27,7 @@ copyright = '2019, Tilen Majerle'
 author = 'Tilen MAJERLE'
 
 # The full version, including alpha/beta/rc tags
-release = '1.1.0'
+release = '1.2.0'
 
 # -- General configuration ---------------------------------------------------
 
@@ -95,7 +95,7 @@ master_doc = 'index'
 #
 #
 breathe_projects = {
-	"ringbuff": "xml/xml/"
+	"ringbuff": "_build/xml/"
 }
 breathe_default_project = "ringbuff"
 breathe_default_members = ('members', 'undoc-members')
