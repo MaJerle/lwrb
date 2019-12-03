@@ -6,11 +6,11 @@ Application buffer size
 
 Buffer size shall always be ``1`` byte bigger than anticipated data size.
 
-When application uses buffer for some data block `N` times, it is advised to set buffer size to `1` byte more than `N * block_size` is.
-This is due to `R` and `W` pointers alignment.
+When application uses buffer for some data block ``N`` times, it is advised to set buffer size to ``1`` byte more than ``N * block_size`` is.
+This is due to ``R`` and ``W`` pointers alignment.
 
 .. note:: 
-    For more information, check :ref:`How it works`.
+    For more information, check :ref:`how_it_works`.
 
 .. code-block:: c
 
@@ -55,7 +55,7 @@ This is due to `R` and `W` pointers alignment.
             (int)len_2, (int)sizeof(d));
     }
 
-When the code is executed, it procudes following output::
+When the code is executed, it produces following output::
 
     Write: buffer 1: 8/8; buffer 2: 8/8
     Write: buffer 1: 8/8; buffer 2: 8/8
