@@ -22,6 +22,8 @@
 *.uvoptx
 *.__i
 *.i
+*.txt
+!requirements.txt
 RTE/
 
 # IAR Settings  

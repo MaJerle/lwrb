@@ -55,6 +55,11 @@ Minimalistic example code to read and write data to buffer
         printf("Successfully read %d bytes\r\n", (int)len);
     }
 
+License
+^^^^^^^
+
+.. literalinclude:: license.txt
+
 Table of contents
 ^^^^^^^^^^^^^^^^^
 
