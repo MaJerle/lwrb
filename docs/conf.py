@@ -95,7 +95,7 @@ master_doc = 'index'
 #
 #
 breathe_projects = {
-	"ringbuff": "xml\\"
+	"ringbuff": "xml/xml/"
 }
 breathe_default_project = "ringbuff"
 breathe_default_members = ('members', 'undoc-members')
