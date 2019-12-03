@@ -1,9 +1,11 @@
+.. _how_it_works:
+
 How it works
 ============
 
 This section shows different buffer corner cases and provides basic understanding how data are managed internally.
 
-.. figure:: ../images/buff_cases.svg
+.. figure:: ../static/images/buff_cases.svg
     :align: center
     :alt: Different buffer corner cases
     
@@ -37,7 +39,7 @@ Let's start with reference of abbreviations in picture:
     Example 2, subtract ``2`` numbers: ``2 - 3 = (2 - 3 + S) % S = (2 - 3 + 4) % 4 = (-1 + 4) % 4 = 3``
 
 
-.. figure:: ../images/buff_cases.svg
+.. figure:: ../static/images/buff_cases.svg
     :align: center
     :alt: Different buffer corner cases
     

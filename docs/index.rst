@@ -1,7 +1,7 @@
 Ringbuffer documentation!
 =========================
 
-.. image:: images/logo.svg
+.. image:: static/images/logo.svg
 	:align: center
 
 .. class::center
@@ -38,7 +38,7 @@ Minimalistic example code to read and write data to buffer
     ringbuff_t buff;                            /* Declare ring buffer structure */
     uint8_t buff_data[8];                       /* Declare raw buffer data array */
 
-    /* Application variables
+    /* Application variables */
     uint8_t data[2];                            /* Application working data */
     size_t len;
 

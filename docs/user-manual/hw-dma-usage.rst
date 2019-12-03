@@ -23,7 +23,7 @@ Zero-copy data from memory
 This describes how to pass ringbuffer output memory address as pointer to DMA (or any other processing function).
 After all the data are successfully processed, application can skip processed data and free ringbuff for new data being written to it.
 
-.. figure:: ../images/buff_lin_read_skip.svg
+.. figure:: ../static/images/buff_lin_read_skip.svg
     :align: center
     :alt: Data transfer from memory to hardware IP
 
@@ -130,7 +130,7 @@ Similar to reading data from buffer with zero-copy overhead, it is possible to w
 Only difference is that application now needs pointer to write memory address and length of maximal number of bytes to directly copy in buffer.
 After processing is successful, buffer advance operation is necessary to manually increase write pointer and to increase number of bytes in buffer.
 
-.. figure:: ../images/buff_lin_write_advance.svg
+.. figure:: ../static/images/buff_lin_write_advance.svg
     :align: center
     :alt: Data transfer from memory to hardware IP
 
