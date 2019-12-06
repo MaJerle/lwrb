@@ -35,6 +35,8 @@ Code example:
 
 .. code-block:: c
 
+    #include "ringbuff/ringbuff.h"
+
     /* Declare buffer variables */
     ringbuff_t buff;
     uint8_t buff_data[8];

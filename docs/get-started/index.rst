@@ -52,6 +52,8 @@ Run below example to test and verify library
 
 .. code-block:: c
 
+    #include "ringbuff/ringbuff.h"
+
     /* Buffer variables */
     ringbuff_t buff;                            /* Declare ring buffer structure */
     uint8_t buff_data[8];                       /* Declare raw buffer data array */

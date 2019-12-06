@@ -14,6 +14,8 @@ This is due to ``R`` and ``W`` pointers alignment.
 
 .. code-block:: c
 
+    #include "ringbuff/ringbuff.h"
+
     /* Number of data blocks to write */
     #define N          3
 
