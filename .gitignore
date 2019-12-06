@@ -16,12 +16,14 @@
 *.sct
 *.MajerleT
 *.tjuln
+*.tilen
 *.dbgconf
 *.uvguix
 *.uvoptx
 *.__i
 *.i
 *.txt
+!docs/*.txt
 RTE/
 
 # IAR Settings  
@@ -73,6 +75,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+_build/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
