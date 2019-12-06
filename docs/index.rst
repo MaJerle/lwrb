@@ -1,6 +1,8 @@
 Ringbuffer documentation!
 =========================
 
+Ring buffer is a generic *FIFO* (First In; First Out) buffer library optimized for embedded systems.
+
 .. image:: static/images/logo.svg
 	:align: center
 
@@ -11,22 +13,22 @@ Ringbuffer documentation!
 Features
 ^^^^^^^^
 
-- Written in ANSI C99, compatible with size_t for size data types
-- Platform independent, no architecture specific code
-- FIFO (First In First Out) buffer implementation
-- No dynamic memory allocation, data is static array
-- Uses optimized memory copy instead of loops to read/write data from/to memory
-- Thread safe when used as pipe with single write and single read entries
-- Interrupt safe when used as pipe with single write and single read entries
-- Suitable for DMA transfers from and to memory with zero-copy overhead between buffer and application memory
-- Supports data peek, skip for read and advance for write
-- User friendly MIT license
+* Written in ANSI C99, compatible with ``size_t`` for size data types
+* Platform independent, no architecture specific code
+* FIFO (First In First Out) buffer implementation
+* No dynamic memory allocation, data is static array
+* Uses optimized memory copy instead of loops to read/write data from/to memory
+* Thread safe when used as pipe with single write and single read entries
+* Interrupt safe when used as pipe with single write and single read entries
+* Suitable for DMA transfers from and to memory with zero-copy overhead between buffer and application memory
+* Supports data peek, skip for read and advance for write
+* User friendly MIT license
 
 Requirements
 ^^^^^^^^^^^^
 
-- C compiler
-- Less than ``1kB`` of memory
+* C compiler
+* Less than ``1kB`` of memory
 
 Contribute
 ^^^^^^^^^^
@@ -34,7 +36,7 @@ Contribute
 We always welcome new contributors. To be as efficient as possible, we recommend:
 
 #. Fork Github repository
-#. Respect `C style & coding rules <https://github.com/MaJerle/c_code_style>`_ used by the library
+#. Respect `C style & coding rules <https://github.com/MaJerle/c-code-style>`_ used by the library
 #. Make a pull request to ``develop`` branch with new features or bug fixes
 
 Alternatively you may:
