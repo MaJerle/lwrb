@@ -24,8 +24,12 @@ First-time clone
 
 * Download and install ``git`` if not already
 * Open console and navigate to path in the system to clone repository to. Use command ``cd your_path``
-* Run ``git clone --recurse-submodules https://github.com/MaJerle/ringbuff`` command to clone repository including submodules or
-* Run ``git clone --recurse-submodules --branch develop https://github.com/MaJerle/ringbuff`` to clone `development` branch
+* Clone repository with one of available ``3`` options
+
+  * Run ``git clone --recurse-submodules https://github.com/MaJerle/ringbuff`` command to clone entire repository, including submodules
+  * Run ``git clone --recurse-submodules --branch develop https://github.com/MaJerle/ringbuff`` to clone `development` branch, including submodules
+  * Run ``git clone --recurse-submodules --branch master https://github.com/MaJerle/ringbuff`` to clone `latest stable` branch, including submodules
+
 * Navigate to ``examples`` directory and run favourite example
 
 Update cloned to latest version
@@ -34,6 +38,10 @@ Update cloned to latest version
 * Open console and navigate to path in the system where your resources repository is. Use command ``cd your_path``
 * Run ``git pull origin master --recurse-submodules`` command to pull latest changes and to fetch latest changes from submodules
 * Run ``git submodule foreach git pull origin master`` to update & merge all submodules
+
+.. note::
+	This is preferred option to use when you want to evaluate library and run prepared examples.
+	Repository consists of multiple submodules which can be automatically downloaded when cloning and pulling changes from root repository.
 
 Add library to project
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -50,5 +58,5 @@ Minimal example code
 
 Run below example to test and verify library
 
-.. literalinclude:: ../examples/example_minimal.c
+.. literalinclude:: ../examples_src/example_minimal.c
     :language: c

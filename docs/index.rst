@@ -49,7 +49,7 @@ Example code
 
 Minimalistic example code to read and write data to buffer
 
-.. literalinclude:: examples/example_index.c
+.. literalinclude:: examples_src/example_index.c
     :language: c
 
 License

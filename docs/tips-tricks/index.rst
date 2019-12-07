@@ -14,12 +14,12 @@ This is due to ``R`` and ``W`` pointers alignment.
 .. note:: 
     For more information, check :ref:`how_it_works`.
 
-.. literalinclude:: ../examples/example_tt_buff_size.c
+.. literalinclude:: ../examples_src/example_tt_buff_size.c
     :language: c
 
 When the code is executed, it produces following output:
 
-.. literalinclude:: ../examples/example_tt_buff_size_log.c
+.. literalinclude:: ../examples_src/example_tt_buff_size_log.c
 
 
 .. toctree::

@@ -35,13 +35,13 @@ After all the data are successfully processed, application can skip processed da
 
 Code example:
 
-.. literalinclude:: ../examples/example_skip_1.c
+.. literalinclude:: ../examples_src/example_skip_1.c
     :language: c
 
 Part **A** on image clearly shows that not all data bytes are linked in single contiguous block of memory. 
 To send all bytes from ringbuff, it might be necessary to repeat procedure multiple times
 
-.. literalinclude:: ../examples/example_skip_2.c
+.. literalinclude:: ../examples_src/example_skip_2.c
     :language: c
 
 Zero-copy data to memory
@@ -63,7 +63,7 @@ After processing is successful, buffer advance operation is necessary to manuall
 
 Code example:
 
-.. literalinclude:: ../examples/example_advance_1.c
+.. literalinclude:: ../examples_src/example_advance_1.c
     :language: c
 
 Example for DMA transfer from memory
@@ -78,7 +78,7 @@ It is assumed that after DMA transfer completes, interrupt is generated (embedde
 
     Buffer skip operation is used to mark sent data as processed and to free memory for new writes to buffer
 
-.. literalinclude:: ../examples/example_dma_skip.c
+.. literalinclude:: ../examples_src/example_dma_skip.c
     :language: c
 
 .. toctree::
