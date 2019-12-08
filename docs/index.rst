@@ -34,7 +34,7 @@ Requirements
 Contribute
 ^^^^^^^^^^
 
-Fresh contributions are always welcome. Simple instructions to proceed::
+Fresh contributions are always welcome. Simple instructions to proceed:
 
 #. Fork Github repository
 #. Respect `C style & coding rules <https://github.com/MaJerle/c-code-style>`_ used by the library
