@@ -1,3 +1,32 @@
+/* Center aligned text */
 .center {
     text-align: center;
+}
+
+/* Paragraph with main links on index page */
+.index_links {
+	text-align: center;
+}
+
+/* Index links a */
+.index-links a {
+    display: inline-block;
+    border: 1px solid #0E4263;
+    padding: 3px 10px;
+    background: #2980B9;
+    border-radius: 4px;
+    color: #FFFFFF;
+}
+
+.index-links a:hover {
+    background: #0E4263;
+}
+
+/* Table header p w/0 margin */
+table thead th {
+	vertical-align: middle;
+}
+
+table thead th p {
+	margin: 0;
 }
