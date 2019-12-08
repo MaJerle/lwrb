@@ -2,24 +2,30 @@
 
 Library provides generic FIFO ring buffer implementation.
 
+<h3><a href="http://docs.majerle.eu/projects/ringbuff">Documentation</a></h3>
+
 ## Features
 
-- Written in ANSI C99, compatible with `size_t` for size data types
-- Platform independent, no architecture specific code
-- FIFO (First In First Out) buffer implementation
-- No dynamic allocation
-- Uses optimized memory copy instead of loops to read/write data from/to memory
-- Thread safe when used as pipe with single write and single read entries
-- Interrupt safe when used as pipe with single write and single read entries
-- Suitable for DMA transfers from and to memory with zero-copy between buffer and application memory
-- Supports data peek, skip for read and advance for write
+* Written in ANSI C99, compatible with ``size_t`` for size data types
+* Platform independent, no architecture specific code
+* FIFO (First In First Out) buffer implementation
+* No dynamic memory allocation, data is static array
+* Uses optimized memory copy instead of loops to read/write data from/to memory
+* Thread safe when used as pipe with single write and single read entries
+* Interrupt safe when used as pipe with single write and single read entries
+* Suitable for DMA transfers from and to memory with zero-copy overhead between buffer and application memory
+* Supports data peek, skip for read and advance for write
+* User friendly MIT license
 
-# Documentation
+## Contribute
 
-Full API documentation with description and examples is available and is regulary updated with the source changes
+We always welcome new contributors. To be as efficient as possible, we recommend:
 
-http://majerle.eu/documentation/ringbuff/html/index.html
+1. Fork Github repository
+2. Respect C style & coding rules used by the library
+3. Make a pull request to develop branch with new features or bug fixes
 
-# Contribution
+Alternatively you may:
 
-I invite you to give feature request or report a bug. Please use issues tracker.
+1. Report a bug
+2. Ask for a feature request
