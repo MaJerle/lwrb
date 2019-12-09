@@ -1,4 +1,4 @@
-.. _user_manual:
+.. _um:
 
 User manual
 ===========
