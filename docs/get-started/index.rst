@@ -14,7 +14,7 @@ Library is primarly hosted on `Github <https://github.com/MaJerle/ringbuff>`_.
 Download from releases
 **********************
 
-All releases are available on Github releases `releases area <https://github.com/MaJerle/ringbuff/releases>`_.
+All releases are available on Github `releases area <https://github.com/MaJerle/ringbuff/releases>`_.
 
 Clone from Github
 *****************
