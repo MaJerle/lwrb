@@ -56,7 +56,7 @@ Minimalistic example code to read and write data to buffer
 License
 ^^^^^^^
 
-.. literalinclude:: license.txt
+.. literalinclude:: ../LICENSE
 
 Table of contents
 ^^^^^^^^^^^^^^^^^
