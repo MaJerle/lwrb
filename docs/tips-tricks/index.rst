@@ -1,4 +1,4 @@
-.. _tips_tricks::
+.. _tips_tricks:
 
 Tips & tricks
 =============
