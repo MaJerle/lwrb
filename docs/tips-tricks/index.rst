@@ -16,10 +16,12 @@ This is due to ``R`` and ``W`` pointers alignment.
 
 .. literalinclude:: ../examples_src/example_tt_buff_size.c
     :language: c
+    :caption: Application buffer size assignment
 
 When the code is executed, it produces following output:
 
 .. literalinclude:: ../examples_src/example_tt_buff_size_log.c
+    :caption: Application buffer size assignment output
 
 
 .. toctree::

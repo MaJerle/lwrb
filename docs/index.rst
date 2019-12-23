@@ -52,6 +52,7 @@ Minimalistic example code to read and write data to buffer
 
 .. literalinclude:: examples_src/example_index.c
     :language: c
+    :caption: Example code
 
 License
 ^^^^^^^

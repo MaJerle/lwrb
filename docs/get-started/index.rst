@@ -60,3 +60,4 @@ Run below example to test and verify library
 
 .. literalinclude:: ../examples_src/example_minimal.c
     :language: c
+    :caption: Minimal example code
