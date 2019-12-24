@@ -9,7 +9,7 @@ Ring buffer is a generic *FIFO* (First In; First Out) buffer library optimized f
 .. rst-class:: center
 .. rst-class:: index_links
 
-	:ref:`download_library` · `Github <https://github.com/MaJerle/ringbuff>`_
+	:ref:`download_library` · `Open Github <https://github.com/MaJerle/ringbuff>`_
 
 Features
 ^^^^^^^^
