@@ -37,6 +37,7 @@ Code example:
 
 .. literalinclude:: ../examples_src/example_skip_1.c
     :language: c
+    :linenos:
     :caption: Skip buffer data after usage
 
 Part **A** on image clearly shows that not all data bytes are linked in single contiguous block of memory. 
@@ -44,6 +45,7 @@ To send all bytes from ringbuff, it might be necessary to repeat procedure multi
 
 .. literalinclude:: ../examples_src/example_skip_2.c
     :language: c
+    :linenos:
     :caption: Skip buffer data for non-contiguous block
 
 Zero-copy data to memory
@@ -67,6 +69,7 @@ Code example:
 
 .. literalinclude:: ../examples_src/example_advance_1.c
     :language: c
+    :linenos:
     :caption: Advance buffer pointer for manually written bytes
 
 Example for DMA transfer from memory
@@ -83,6 +86,7 @@ It is assumed that after DMA transfer completes, interrupt is generated (embedde
 
 .. literalinclude:: ../examples_src/example_dma_skip.c
     :language: c
+    :linenos:
     :caption: DMA usage with buffer
 
 .. toctree::

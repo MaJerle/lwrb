@@ -16,6 +16,7 @@ This is due to ``R`` and ``W`` pointers alignment.
 
 .. literalinclude:: ../examples_src/example_tt_buff_size.c
     :language: c
+    :linenos:
     :caption: Application buffer size assignment
 
 When the code is executed, it produces following output:
