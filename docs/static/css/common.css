@@ -4,11 +4,10 @@
 }
 
 /* Paragraph with main links on index page */
-.index_links {
+.index-links {
   text-align: center;
+  margin-top: 10px;
 }
-
-/* Index links a */
 .index-links a {
   display: inline-block;
   border: 1px solid #0E4263;
@@ -17,13 +16,11 @@
   border-radius: 4px;
   color: #FFFFFF;
 }
-
-.index-links a:hover {
+.index-links a:hover, .index-links a:active {
   background: #0E4263;
 }
 
-/* Table header p w/0 margin */
-table thead th {
+.index-links a table thead th {
   vertical-align: middle;
 }
 
