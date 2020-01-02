@@ -5,3 +5,4 @@ sphinx>=2.0.1
 sphinx_rtd_theme
 sphinx-tabs
 sphinxcontrib-svg2pdfconverter
+sphinx-sitemap

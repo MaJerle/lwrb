@@ -43,6 +43,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
+    'sphinx_sitemap',
 
 	'breathe',
 ]
@@ -81,6 +82,7 @@ html_theme_options = {
 }
 html_logo = 'static/images/logo.svg'
 github_url = 'https://github.com/MaJerle/ringbuff'
+html_baseurl = 'https://docs.majerle.eu/projects/ringbuff/'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
