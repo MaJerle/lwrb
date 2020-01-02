@@ -380,7 +380,6 @@ log_file.txt
 .metadata/
 .mxproject
 .settings/
-template/
 project.ioc
 mx.scratch
 *.tilen majerle
