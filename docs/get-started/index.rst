@@ -1,5 +1,7 @@
-Get started
-===========
+.. _getting_started:
+
+Getting started
+===============
 
 .. _download_library:
 
