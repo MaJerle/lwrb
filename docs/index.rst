@@ -5,7 +5,6 @@ Ring buffer is a generic *FIFO* (First In; First Out) buffer library optimized f
 
 .. image:: static/images/logo.svg
 	:align: center
-    :caption: Onewire-UART
 
 .. rst-class:: center
 .. rst-class:: index_links

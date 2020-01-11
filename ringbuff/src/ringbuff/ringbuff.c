@@ -95,7 +95,7 @@ BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t btw) {
     size_t tocopy, free;
     const uint8_t* d = data;
 
-    if (!BUF_IS_VALID(buff) || btw == 0) {
+    if (!BUF_IS_VALID(buff) || data == NULL || btw == 0) {
         return 0;
     }
 
@@ -137,7 +137,7 @@ BUF_PREF(buff_read)(BUF_PREF(buff_t)* buff, void* data, size_t btr) {
     size_t tocopy, full;
     uint8_t *d = data;
 
-    if (!BUF_IS_VALID(buff) || btr == 0) {
+    if (!BUF_IS_VALID(buff) || data == NULL || btr == 0) {
         return 0;
     }
 
@@ -180,7 +180,7 @@ BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_
     size_t full, tocopy, r;
     uint8_t *d = data;
 
-    if (!BUF_IS_VALID(buff) || btp == 0) {
+    if (!BUF_IS_VALID(buff) || data == NULL || btp == 0) {
         return 0;
     }
     
