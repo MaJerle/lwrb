@@ -2,7 +2,7 @@
 
 Library provides generic FIFO ring buffer implementation.
 
-<h3><a href="http://docs.majerle.eu/projects/ringbuff">Documentation</a></h3>
+<h3><a href="http://docs.majerle.eu/projects/ringbuff/">Documentation</a></h3>
 
 ## Features
 
