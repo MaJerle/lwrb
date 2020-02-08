@@ -23,7 +23,7 @@ subprocess.call('doxygen doxyfile.doxy', shell=True)
 # -- Project information -----------------------------------------------------
 
 project = 'Ringbuffer'
-copyright = '2019, Tilen MAJERLE'
+copyright = '2020, Tilen MAJERLE'
 author = 'Tilen MAJERLE'
 
 # The full version, including alpha/beta/rc tags
