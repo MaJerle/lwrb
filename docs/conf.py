@@ -42,7 +42,7 @@ try:
     if git_branch.index('develop') >= 0:
         version = "latest-develop"
 except Exception:
-    printf("Exception for index check")
+    print("Exception for index check")
 
 # For debugging purpose
 print("GIT BRANCH: " + git_branch)
