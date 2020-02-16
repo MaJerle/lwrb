@@ -24,6 +24,8 @@ When the code is executed, it produces following output:
 .. literalinclude:: ../examples_src/example_tt_buff_size_log.c
     :caption: Application buffer size assignment output
 
+.. tip::
+    Check `STM32 UART DMA TX RX Github <https://github.com/MaJerle/stm32-usart-uart-dma-rx-tx>`_ repository for use cases.
 
 .. toctree::
     :maxdepth: 2
