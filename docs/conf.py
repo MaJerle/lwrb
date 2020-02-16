@@ -55,7 +55,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx_sitemap',
 
-	'breathe',
+    'breathe',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
