@@ -89,5 +89,8 @@ It is assumed that after DMA transfer completes, interrupt is generated (embedde
     :linenos:
     :caption: DMA usage with buffer
 
+.. tip::
+    Check `STM32 UART DMA TX RX Github <https://github.com/MaJerle/stm32-usart-uart-dma-rx-tx>`_ repository for use cases.
+
 .. toctree::
     :maxdepth: 2
