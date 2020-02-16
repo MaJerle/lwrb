@@ -1,5 +1,7 @@
-Ringbuffer documentation!
-=========================
+Ringbuffer |version| documentation
+==================================
+
+Welcome to the documentation for version |version|.
 
 Ring buffer is a generic *FIFO* (First In; First Out) buffer library optimized for embedded systems.
 
