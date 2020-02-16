@@ -36,8 +36,17 @@ res = os.popen('git branch').read().strip()
 for line in res.split("\n"):
     if line[0] == '*':
         git_branch = line[1:].strip()
-if git_branch == 'develop' or git_branch == 'origin/develop':
-    version = "latest-develop"
+
+# Decision for display version
+try: 
+    if git_branch.index('develop') >= 0:
+        version = "latest-develop"
+except Exception:
+    printf("Exception for index check")
+
+# For debugging purpose
+print("GIT BRANCH: " + git_branch)
+print("VERSION: " + version)
 
 # -- General configuration ---------------------------------------------------
 
