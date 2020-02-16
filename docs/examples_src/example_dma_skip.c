@@ -26,13 +26,13 @@ main(void) {
 void
 send_data(void) {
     /* If len > 0, DMA transfer is on-going */
-    if (len) {
+    if (len > 0) {
         return;
     }
 
     /* Get maximal length of buffer to read data as linear memory */
     len = ringbuff_get_linear_block_read_length(&buff);
-    if (len) {
+    if (len > 0) {
         /* Get pointer to read memory */
         uint8_t* data = ringbuff_get_linear_block_read_address(&buff);
 
@@ -48,7 +48,7 @@ send_data(void) {
 void
 DMA_Interrupt_handler(void) {
     /* Transfer finished */
-    if (len) {
+    if (len > 0) {
         /* Now skip the data (move read pointer) as they were successfully transferred over DMA */
         ringbuff_skip(&buff, len);
 
