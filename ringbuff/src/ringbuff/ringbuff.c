@@ -114,7 +114,7 @@ BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t btw) {
 
     /* Step 2: Write data to beginning of buffer (overflow part) */
     if (btw > 0) {
-        BUF_MEMCPY(buff->buff, (void *)&d[tocopy], btw);
+        BUF_MEMCPY(buff->buff, &d[tocopy], btw);
         buff->w = btw;
     }
 
