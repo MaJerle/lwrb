@@ -339,7 +339,8 @@ BUF_PREF(buff_skip)(BUF_PREF(buff_t)* buff, size_t len) {
     }
 
     full = BUF_PREF(buff_get_full)(buff);       /* Get buffer used length */
-    buff->r += BUF_MIN(len, full);              /* Advance read pointer */
+    len = BUF_MIN(len, full);                   /* Calculate max skip */
+    buff->r += len;                             /* Advance read pointer */
     if (buff->r >= buff->size) {                /* Subtract possible overflow */
         buff->r -= buff->size;
     }
@@ -414,7 +415,8 @@ BUF_PREF(buff_advance)(BUF_PREF(buff_t)* buff, size_t len) {
     }
 
     free = BUF_PREF(buff_get_free)(buff);       /* Get buffer free length */
-    buff->w += BUF_MIN(len, free);              /* Advance write pointer */
+    len = BUF_MIN(len, free);                   /* Calculate max advance */
+    buff->w += len;                             /* Advance write pointer */
     if (buff->w >= buff->size) {                /* Subtract possible overflow */
         buff->w -= buff->size;
     }
