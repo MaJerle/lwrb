@@ -82,7 +82,7 @@ BUF_PREF(buff_free)(BUF_PREF(buff_t)* buff) {
 
 /**
  * \brief           Write data to buffer
- *                  Copies data from `data` array to buffer and marks buffer as full for maximum `count` number of bytes
+ *                  Copies data from `data` array to buffer and marks buffer as full for maximum `btw` number of bytes
  * \param[in]       buff: Buffer handle
  * \param[in]       data: Pointer to data to write into buffer
  * \param[in]       btw: Number of bytes to write
