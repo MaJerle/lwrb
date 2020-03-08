@@ -218,7 +218,7 @@ BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_
 }
 
 /**
- * \brief           Get number of bytes in buffer available to write
+ * \brief           Get available size in buffer for write operation
  * \param[in]       buff: Buffer handle
  * \return          Number of free bytes in memory
  */
@@ -246,7 +246,7 @@ BUF_PREF(buff_get_free)(BUF_PREF(buff_t)* buff) {
 }
 
 /**
- * \brief           Get number of bytes in buffer available to read
+ * \brief           Get number of bytes currently available in buffer
  * \param[in]       buff: Buffer handle
  * \return          Number of bytes ready to be read
  */
