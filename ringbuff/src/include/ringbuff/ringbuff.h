@@ -50,9 +50,9 @@ extern "C" {
 /* --- Buffer unique part starts --- */
 /**
  * \brief           Buffer function/typedef prefix string
- * 
+ *
  * It is used to change function names in zero time to easily re-use same library between applications.
- * Use `#define BUF_PREF(x)    my_prefix_ ## x` to change all function names to (for example) `my_prefix_buff_init` 
+ * Use `#define BUF_PREF(x)    my_prefix_ ## x` to change all function names to (for example) `my_prefix_buff_init`
  *
  * \note            Modification of this macro must be done in header and source file aswell
  */

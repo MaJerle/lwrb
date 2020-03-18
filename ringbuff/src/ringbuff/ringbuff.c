@@ -1,4 +1,4 @@
-/** 
+/**
  * \file            ringbuff.c
  * \brief           Ring buffer manager
  */
@@ -183,7 +183,7 @@ BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_
     if (!BUF_IS_VALID(buff) || data == NULL || btp == 0) {
         return 0;
     }
-    
+
     r = buff->r;
 
     /* Calculate maximum number of bytes available to read */
@@ -380,7 +380,7 @@ BUF_PREF(buff_get_linear_block_write_length)(BUF_PREF(buff_t)* buff) {
         len = buff->size - w;
         /*
          * When read pointer is 0,
-         * maximal length is one less as if too many bytes 
+         * maximal length is one less as if too many bytes
          * are written, buffer would be considered empty again (r == w)
          */
         if (r == 0) {
