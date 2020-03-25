@@ -34,12 +34,12 @@
 #ifndef RINGBUFF_HDR_H
 #define RINGBUFF_HDR_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <string.h>
 #include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /**
  * \defgroup        RINGBUFF Ring buffer
@@ -101,6 +101,6 @@ size_t      BUF_PREF(buff_advance)(BUF_PREF(buff_t)* buff, size_t len);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
 #endif /* RINGBUFF_HDR_H */

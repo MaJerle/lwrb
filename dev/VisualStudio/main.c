@@ -1,8 +1,8 @@
 // ringbuff_dev.cpp : Defines the entry point for the console application.
 //
 
-#include "stdio.h"
-#include "string.h"
+#include <stdio.h>
+#include <string.h>
 #include "ringbuff/ringbuff.h"
 
 /* Create data array and buffer */
@@ -17,7 +17,7 @@ int
 main() {
     void* ptr;
     size_t len;
-    
+
     /* Init buffer */
     ringbuff_init(&buff, ringbuff_data, sizeof(ringbuff_data));
 
