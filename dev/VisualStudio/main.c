@@ -15,7 +15,6 @@ uint8_t tmp[8];
 
 int
 main() {
-    void* ptr;
     size_t len;
 
     /* Init buffer */
@@ -41,8 +40,9 @@ main() {
     memset(ringbuff_get_linear_block_write_address(&buff), 'C', ringbuff_get_linear_block_write_length(&buff));
     ringbuff_advance(&buff, ringbuff_get_linear_block_write_length(&buff));
 
-    //for (size_t r = 0; r < sizeof(ringbuff_data); r++) {
-    //    for (size_t w = 0; w < sizeof(ringbuff_data); w++) {
+    //for (size_t r = 0; r < sizeof(ringbuff_data); ++r) {
+    //    void* ptr;
+    //    for (size_t w = 0; w < sizeof(ringbuff_data); ++w) {
     //        buff.r = r;
     //        buff.w = w;
     //        ptr = ringbuff_get_linear_block_write_address(&buff);
