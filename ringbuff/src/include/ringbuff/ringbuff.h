@@ -47,18 +47,6 @@ extern "C" {
  * \{
  */
 
-/* --- Buffer unique part starts --- */
-/**
- * \brief           Buffer function/typedef prefix string
- *
- * It is used to change function names in zero time to easily re-use same library between applications.
- * Use `#define BUF_PREF(x)    my_prefix_ ## x` to change all function names to (for example) `my_prefix_buff_init`
- *
- * \note            Modification of this macro must be done in header and source file aswell
- */
-#define BUF_PREF(x)                     ring ## x
-/* --- Buffer unique part ends --- */
-
 /**
  * \brief           Enable buffer structure pointer parameter as volatile
  * To use this feature, uncomment keyword below
@@ -72,12 +60,12 @@ typedef enum {
     RINGBUFF_EVT_READ,                          /*!< Read event */
     RINGBUFF_EVT_WRITE,                         /*!< Write event */
     RINGBUFF_EVT_RESET,                         /*!< Reset event */
-} BUF_PREF(buff_evt_t);
+} ringbuff_evt_t;
 
 /**
  * \brief           Buffer structure forward declaration
  */
-struct BUF_PREF(buff);
+struct ringbuff;
 
 /**
  * \brief           Event callback function type
@@ -85,45 +73,43 @@ struct BUF_PREF(buff);
  * \param[in]       evt: Event type
  * \param[in]       bp: Number of bytes written or read (when used), depends on event type
  */
-typedef void (*BUF_PREF(buff_evt_fn))(struct BUF_PREF(buff)* buff, BUF_PREF(buff_evt_t) evt, size_t bp);
+typedef void (*ringbuff_evt_fn)(struct ringbuff* buff, ringbuff_evt_t evt, size_t bp);
 
 /**
  * \brief           Buffer structure
  */
-typedef struct BUF_PREF(buff) {
+typedef struct ringbuff {
     uint8_t* buff;                              /*!< Pointer to buffer data.
                                                     Buffer is considered initialized when `buff != NULL` and `size > 0` */
     size_t size;                                /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
     size_t r;                                   /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
     size_t w;                                   /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
-    BUF_PREF(buff_evt_fn) evt_fn;               /*!< Pointer to event callback function */
-} BUF_PREF(buff_t);
+    ringbuff_evt_fn evt_fn;                     /*!< Pointer to event callback function */
+} ringbuff_t;
 
-uint8_t     BUF_PREF(buff_init)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, void* buffdata, size_t size);
-void        BUF_PREF(buff_free)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
-void        BUF_PREF(buff_reset)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
-void        BUF_PREF(buff_set_rw_evt_fn)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, BUF_PREF(buff_evt_fn) fn);
+uint8_t     ringbuff_init(RINGBUFF_VOLATILE ringbuff_t* buff, void* buffdata, size_t size);
+void        ringbuff_free(RINGBUFF_VOLATILE ringbuff_t* buff);
+void        ringbuff_reset(RINGBUFF_VOLATILE ringbuff_t* buff);
+void        ringbuff_set_rw_evt_fn(RINGBUFF_VOLATILE ringbuff_t* buff, ringbuff_evt_fn fn);
 
 /* Read/Write functions */
-size_t      BUF_PREF(buff_write)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, const void* data, size_t btw);
-size_t      BUF_PREF(buff_read)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, void* data, size_t btr);
-size_t      BUF_PREF(buff_peek)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_t btp);
+size_t      ringbuff_write(RINGBUFF_VOLATILE ringbuff_t* buff, const void* data, size_t btw);
+size_t      ringbuff_read(RINGBUFF_VOLATILE ringbuff_t* buff, void* data, size_t btr);
+size_t      ringbuff_peek(RINGBUFF_VOLATILE ringbuff_t* buff, size_t skip_count, void* data, size_t btp);
 
 /* Buffer size information */
-size_t      BUF_PREF(buff_get_free)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
-size_t      BUF_PREF(buff_get_full)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
+size_t      ringbuff_get_free(RINGBUFF_VOLATILE ringbuff_t* buff);
+size_t      ringbuff_get_full(RINGBUFF_VOLATILE ringbuff_t* buff);
 
 /* Read data block management */
-void *      BUF_PREF(buff_get_linear_block_read_address)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
-size_t      BUF_PREF(buff_get_linear_block_read_length)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
-size_t      BUF_PREF(buff_skip)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, size_t len);
+void *      ringbuff_get_linear_block_read_address(RINGBUFF_VOLATILE ringbuff_t* buff);
+size_t      ringbuff_get_linear_block_read_length(RINGBUFF_VOLATILE ringbuff_t* buff);
+size_t      ringbuff_skip(RINGBUFF_VOLATILE ringbuff_t* buff, size_t len);
 
 /* Write data block management */
-void *      BUF_PREF(buff_get_linear_block_write_address)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
-size_t      BUF_PREF(buff_get_linear_block_write_length)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
-size_t      BUF_PREF(buff_advance)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, size_t len);
-
-#undef BUF_PREF         /* Prefix not needed anymore */
+void *      ringbuff_get_linear_block_write_address(RINGBUFF_VOLATILE ringbuff_t* buff);
+size_t      ringbuff_get_linear_block_write_length(RINGBUFF_VOLATILE ringbuff_t* buff);
+size_t      ringbuff_advance(RINGBUFF_VOLATILE ringbuff_t* buff, size_t len);
 
 /**
  * \}
