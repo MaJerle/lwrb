@@ -60,7 +60,7 @@ typedef enum {
     RINGBUFF_EVT_READ,                          /*!< Read event */
     RINGBUFF_EVT_WRITE,                         /*!< Write event */
     RINGBUFF_EVT_RESET,                         /*!< Reset event */
-} ringbuff_evt_t;
+} ringbuff_evt_type_t;
 
 /**
  * \brief           Buffer structure forward declaration
@@ -73,7 +73,7 @@ struct ringbuff;
  * \param[in]       evt: Event type
  * \param[in]       bp: Number of bytes written or read (when used), depends on event type
  */
-typedef void (*ringbuff_evt_fn)(struct ringbuff* buff, ringbuff_evt_t evt, size_t bp);
+typedef void (*ringbuff_evt_fn)(struct ringbuff* buff, ringbuff_evt_type_t evt, size_t bp);
 
 /**
  * \brief           Buffer structure
@@ -90,7 +90,7 @@ typedef struct ringbuff {
 uint8_t     ringbuff_init(RINGBUFF_VOLATILE ringbuff_t* buff, void* buffdata, size_t size);
 void        ringbuff_free(RINGBUFF_VOLATILE ringbuff_t* buff);
 void        ringbuff_reset(RINGBUFF_VOLATILE ringbuff_t* buff);
-void        ringbuff_set_rw_evt_fn(RINGBUFF_VOLATILE ringbuff_t* buff, ringbuff_evt_fn fn);
+void        ringbuff_set_evt_fn(RINGBUFF_VOLATILE ringbuff_t* buff, ringbuff_evt_fn fn);
 
 /* Read/Write functions */
 size_t      ringbuff_write(RINGBUFF_VOLATILE ringbuff_t* buff, const void* data, size_t btw);

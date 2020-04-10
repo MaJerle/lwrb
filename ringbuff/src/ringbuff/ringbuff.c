@@ -39,6 +39,7 @@
 #define BUF_IS_VALID(b)                 ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
 #define BUF_MIN(x, y)                   ((x) < (y) ? (x) : (y))
 #define BUF_MAX(x, y)                   ((x) > (y) ? (x) : (y))
+#define BUF_SEND_EVT(b, type, bp)       if ((b)->evt_fn != NULL) { (b)->evt_fn((b), (type), (bp)); }
 
 /**
  * \brief           Initialize buffer handle to default values with size and buffer data array
@@ -129,6 +130,7 @@ ringbuff_write(RINGBUFF_VOLATILE ringbuff_t* buff, const void* data, size_t btw)
     if (buff->w >= buff->size) {
         buff->w = 0;
     }
+    BUF_SEND_EVT(buff, RINGBUFF_EVT_WRITE, tocopy + btw);
     return tocopy + btw;
 }
 
@@ -173,6 +175,7 @@ ringbuff_read(RINGBUFF_VOLATILE ringbuff_t* buff, void* data, size_t btr) {
     if (buff->r >= buff->size) {
         buff->r = 0;
     }
+    BUF_SEND_EVT(buff, RINGBUFF_EVT_READ, tocopy + btr);
     return tocopy + btr;
 }
 
@@ -289,6 +292,7 @@ ringbuff_reset(RINGBUFF_VOLATILE ringbuff_t* buff) {
     if (BUF_IS_VALID(buff)) {
         buff->w = 0;
         buff->r = 0;
+        BUF_SEND_EVT(buff, RINGBUFF_EVT_RESET, 0);
     }
 }
 
@@ -348,12 +352,13 @@ ringbuff_skip(RINGBUFF_VOLATILE ringbuff_t* buff, size_t len) {
         return 0;
     }
 
-    full = ringbuff_get_full(buff);       /* Get buffer used length */
+    full = ringbuff_get_full(buff);             /* Get buffer used length */
     len = BUF_MIN(len, full);                   /* Calculate max skip */
     buff->r += len;                             /* Advance read pointer */
     if (buff->r >= buff->size) {                /* Subtract possible overflow */
         buff->r -= buff->size;
     }
+    BUF_SEND_EVT(buff, RINGBUFF_EVT_READ, len);
     return len;
 }
 
@@ -425,11 +430,12 @@ ringbuff_advance(RINGBUFF_VOLATILE ringbuff_t* buff, size_t len) {
         return 0;
     }
 
-    free = ringbuff_get_free(buff);       /* Get buffer free length */
+    free = ringbuff_get_free(buff);             /* Get buffer free length */
     len = BUF_MIN(len, free);                   /* Calculate max advance */
     buff->w += len;                             /* Advance write pointer */
     if (buff->w >= buff->size) {                /* Subtract possible overflow */
         buff->w -= buff->size;
     }
+    BUF_SEND_EVT(buff, RINGBUFF_EVT_WRITE, len);
     return len;
 }
