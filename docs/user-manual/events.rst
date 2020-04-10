@@ -19,7 +19,7 @@ Some use cases:
         is considered as read or write operation. An exception is *reset* event that sets
         both internal pointers to `0`
 
-.. literalinclude:: examples_src/example_events.c
+.. literalinclude:: ../examples_src/example_events.c
     :language: c
     :linenos:
     :caption: Example code for events
