@@ -13,12 +13,29 @@ static void debug_buff(uint8_t cmp, size_t r_w, size_t r_r, size_t r_f, size_t r
 
 uint8_t tmp[8];
 
+void
+my_buff_evt_fn(ringbuff_t* buff, ringbuff_evt_type_t type, size_t len) {
+    switch (type) {
+        case RINGBUFF_EVT_RESET:
+            printf("[EVT] Buffer reset event!\r\n");
+            break;
+        case RINGBUFF_EVT_READ:
+            printf("[EVT] Buffer read event: %d byte(s)!\r\n", (int)len);
+            break;
+        case RINGBUFF_EVT_WRITE:
+            printf("[EVT] Buffer write event: %d byte(s)!\r\n", (int)len);
+            break;
+        default: break;
+    }
+}
+
 int
 main() {
     size_t len;
 
     /* Init buffer */
     ringbuff_init(&buff, ringbuff_data, sizeof(ringbuff_data));
+    ringbuff_set_evt_fn(&buff, my_buff_evt_fn);
 
     ringbuff_write(&buff, "abc", 3);
     ringbuff_write(&buff, "abc", 3);
@@ -39,6 +56,8 @@ main() {
     buff.w = 3;
     memset(ringbuff_get_linear_block_write_address(&buff), 'C', ringbuff_get_linear_block_write_length(&buff));
     ringbuff_advance(&buff, ringbuff_get_linear_block_write_length(&buff));
+
+    ringbuff_reset(&buff);
 
     //for (size_t r = 0; r < sizeof(ringbuff_data); ++r) {
     //    void* ptr;
