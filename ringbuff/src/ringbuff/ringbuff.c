@@ -50,7 +50,7 @@
  * \param[in]       buff: Buffer handle
  * \param[in]       buffdata: Pointer to memory to use as buffer data
  * \param[in]       size: Size of `buffdata` in units of bytes
- *                  Maximum number of bytes buffer can hold is `size - 1`
+ *                      Maximum number of bytes buffer can hold is `size - 1`
  * \return          `1` on success, `0` otherwise
  */
 uint8_t
@@ -81,26 +81,27 @@ BUF_PREF(buff_free)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff) {
 }
 
 /**
- * \brief           Set event function callback for read and write operations
+ * \brief           Set event function callback for different buffer operations
  * \param[in]       buff: Buffer handle
  * \param[in]       evt_fn: Callback function
  */
 void
-BUF_PREF(buff_set_rw_evt_fn)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, BUF_PREF(buff_rw_evt_fn) evt_fn) {
+BUF_PREF(buff_set_rw_evt_fn)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, BUF_PREF(buff_evt_fn) evt_fn) {
     if (BUF_IS_VALID(buff)) {
         buff->evt_fn = evt_fn;
     }
 }
 
 /**
- * \brief           Write data to buffer
- *                  Copies data from `data` array to buffer and marks buffer as full for maximum `btw` number of bytes
+ * \brief           Write data to buffer.
+ * Copies data from `data` array to buffer and marks buffer as full for maximum `btw` number of bytes
+ *
  * \param[in]       buff: Buffer handle
  * \param[in]       data: Pointer to data to write into buffer
  * \param[in]       btw: Number of bytes to write
  * \return          Number of bytes written to buffer.
- *                  When returned value is less than `btw`, there was no enough memory available
- *                  to copy full data array
+ *                      When returned value is less than `btw`, there was no enough memory available
+ *                      to copy full data array
  */
 size_t
 BUF_PREF(buff_write)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, const void* data, size_t btw) {
@@ -137,8 +138,9 @@ BUF_PREF(buff_write)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, const void* data,
 }
 
 /**
- * \brief           Read data from buffer
- *                  Copies data from buffer to `data` array and marks buffer as free for maximum `btr` number of bytes
+ * \brief           Read data from buffer.
+ * Copies data from buffer to `data` array and marks buffer as free for maximum `btr` number of bytes
+ *
  * \param[in]       buff: Buffer handle
  * \param[out]      data: Pointer to output memory to copy buffer data to
  * \param[in]       btr: Number of bytes to read
@@ -336,7 +338,8 @@ BUF_PREF(buff_get_linear_block_read_length)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* 
 
 /**
  * \brief           Skip (ignore; advance read pointer) buffer data
- *                  Marks data as read in the buffer and increases free memory for up to `len` bytes
+ * Marks data as read in the buffer and increases free memory for up to `len` bytes
+ *
  * \note            Useful at the end of streaming transfer such as DMA
  * \param[in]       buff: Buffer handle
  * \param[in]       len: Number of bytes to skip and mark as read
@@ -411,9 +414,10 @@ BUF_PREF(buff_get_linear_block_write_length)(RINGBUFF_VOLATILE BUF_PREF(buff_t)*
 
 /**
  * \brief           Advance write pointer in the buffer.
- *                  Similar to skip function but modifies write pointer instead of read
+ * Similar to skip function but modifies write pointer instead of read
+ *
  * \note            Useful when hardware is writing to buffer and application needs to increase number
- *                  of bytes written to buffer by hardware
+ *                      of bytes written to buffer by hardware
  * \param[in]       buff: Buffer handle
  * \param[in]       len: Number of bytes to advance
  * \return          Number of bytes advanced for write operation
