@@ -66,19 +66,42 @@ extern "C" {
 #define RINGBUFF_VOLATILE               /* volatile */
 
 /**
+ * \brief           Event type for buffer operations
+ */
+typedef enum {
+    RINGBUFF_EVT_READ,                  /*!< Read event */
+    RINGBUFF_EVT_WRITE,                 /*!< Write event */
+} BUF_PREF(buff_evt_t);
+
+/**
+ * \brief           Buffer structure forward declaration
+ */
+struct BUF_PREF(buff);
+
+/**
+ * \brief           Read and write event callback for buffer
+ * \param[in]       buff: Buffer handle for event
+ * \param[in]       evt: Event type
+ * \param[in]       bp: Number of bytes written or read, depends on event type
+ */
+typedef void (*BUF_PREF(buff_rw_evt_fn))(struct BUF_PREF(buff)* buff, BUF_PREF(buff_evt_t) evt, size_t bp);
+
+/**
  * \brief           Buffer structure
  */
-typedef struct {
+typedef struct BUF_PREF(buff) {
     uint8_t* buff;                              /*!< Pointer to buffer data.
                                                     Buffer is considered initialized when `buff != NULL` and `size > 0` */
     size_t size;                                /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
     size_t r;                                   /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
     size_t w;                                   /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    BUF_PREF(buff_rw_evt_fn) evt_fn;            /*!< Pointer to event callback function */
 } BUF_PREF(buff_t);
 
 uint8_t     BUF_PREF(buff_init)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, void* buffdata, size_t size);
 void        BUF_PREF(buff_free)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
 void        BUF_PREF(buff_reset)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
+void        BUF_PREF(buff_set_rw_evt_fn)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, BUF_PREF(buff_rw_evt_fn) fn);
 
 /* Read/Write functions */
 size_t      BUF_PREF(buff_write)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, const void* data, size_t btw);

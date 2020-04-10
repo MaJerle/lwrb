@@ -81,6 +81,18 @@ BUF_PREF(buff_free)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff) {
 }
 
 /**
+ * \brief           Set event function callback for read and write operations
+ * \param[in]       buff: Buffer handle
+ * \param[in]       evt_fn: Callback function
+ */
+void
+BUF_PREF(buff_set_rw_evt_fn)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, BUF_PREF(buff_rw_evt_fn) evt_fn) {
+    if (BUF_IS_VALID(buff)) {
+        buff->evt_fn = evt_fn;
+    }
+}
+
+/**
  * \brief           Write data to buffer
  *                  Copies data from `data` array to buffer and marks buffer as full for maximum `btw` number of bytes
  * \param[in]       buff: Buffer handle
