@@ -54,12 +54,12 @@
  * \return          `1` on success, `0` otherwise
  */
 uint8_t
-BUF_PREF(buff_init)(BUF_PREF(buff_t)* buff, void* buffdata, size_t size) {
+BUF_PREF(buff_init)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, void* buffdata, size_t size) {
     if (buff == NULL || buffdata == NULL || size == 0) {
         return 0;
     }
 
-    BUF_MEMSET(buff, 0x00, sizeof(*buff));
+    BUF_MEMSET((void *)buff, 0x00, sizeof(*buff));
 
     buff->size = size;
     buff->buff = buffdata;
@@ -74,7 +74,7 @@ BUF_PREF(buff_init)(BUF_PREF(buff_t)* buff, void* buffdata, size_t size) {
  * \param[in]       buff: Buffer handle
  */
 void
-BUF_PREF(buff_free)(BUF_PREF(buff_t)* buff) {
+BUF_PREF(buff_free)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff) {
     if (BUF_IS_VALID(buff)) {
         buff->buff = NULL;
     }
@@ -91,7 +91,7 @@ BUF_PREF(buff_free)(BUF_PREF(buff_t)* buff) {
  *                  to copy full data array
  */
 size_t
-BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t btw) {
+BUF_PREF(buff_write)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, const void* data, size_t btw) {
     size_t tocopy, free;
     const uint8_t* d = data;
 
@@ -133,7 +133,7 @@ BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t btw) {
  * \return          Number of bytes read and copied to data array
  */
 size_t
-BUF_PREF(buff_read)(BUF_PREF(buff_t)* buff, void* data, size_t btr) {
+BUF_PREF(buff_read)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, void* data, size_t btr) {
     size_t tocopy, full;
     uint8_t *d = data;
 
@@ -176,7 +176,7 @@ BUF_PREF(buff_read)(BUF_PREF(buff_t)* buff, void* data, size_t btr) {
  * \return          Number of bytes peeked and written to output array
  */
 size_t
-BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_t btp) {
+BUF_PREF(buff_peek)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_t btp) {
     size_t full, tocopy, r;
     uint8_t *d = data;
 
@@ -223,7 +223,7 @@ BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_
  * \return          Number of free bytes in memory
  */
 size_t
-BUF_PREF(buff_get_free)(BUF_PREF(buff_t)* buff) {
+BUF_PREF(buff_get_free)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff) {
     size_t size, w, r;
 
     if (!BUF_IS_VALID(buff)) {
@@ -251,7 +251,7 @@ BUF_PREF(buff_get_free)(BUF_PREF(buff_t)* buff) {
  * \return          Number of bytes ready to be read
  */
 size_t
-BUF_PREF(buff_get_full)(BUF_PREF(buff_t)* buff) {
+BUF_PREF(buff_get_full)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff) {
     size_t w, r, size;
 
     if (!BUF_IS_VALID(buff)) {
@@ -276,7 +276,7 @@ BUF_PREF(buff_get_full)(BUF_PREF(buff_t)* buff) {
  * \param[in]       buff: Buffer handle
  */
 void
-BUF_PREF(buff_reset)(BUF_PREF(buff_t)* buff) {
+BUF_PREF(buff_reset)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff) {
     if (BUF_IS_VALID(buff)) {
         buff->w = 0;
         buff->r = 0;
@@ -289,7 +289,7 @@ BUF_PREF(buff_reset)(BUF_PREF(buff_t)* buff) {
  * \return          Linear buffer start address
  */
 void *
-BUF_PREF(buff_get_linear_block_read_address)(BUF_PREF(buff_t)* buff) {
+BUF_PREF(buff_get_linear_block_read_address)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff) {
     if (!BUF_IS_VALID(buff)) {
         return NULL;
     }
@@ -302,7 +302,7 @@ BUF_PREF(buff_get_linear_block_read_address)(BUF_PREF(buff_t)* buff) {
  * \return          Linear buffer size in units of bytes for read operation
  */
 size_t
-BUF_PREF(buff_get_linear_block_read_length)(BUF_PREF(buff_t)* buff) {
+BUF_PREF(buff_get_linear_block_read_length)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff) {
     size_t w, r, len;
 
     if (!BUF_IS_VALID(buff)) {
@@ -331,7 +331,7 @@ BUF_PREF(buff_get_linear_block_read_length)(BUF_PREF(buff_t)* buff) {
  * \return          Number of bytes skipped
  */
 size_t
-BUF_PREF(buff_skip)(BUF_PREF(buff_t)* buff, size_t len) {
+BUF_PREF(buff_skip)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, size_t len) {
     size_t full;
 
     if (!BUF_IS_VALID(buff) || len == 0) {
@@ -353,7 +353,7 @@ BUF_PREF(buff_skip)(BUF_PREF(buff_t)* buff, size_t len) {
  * \return          Linear buffer start address
  */
 void *
-BUF_PREF(buff_get_linear_block_write_address)(BUF_PREF(buff_t)* buff) {
+BUF_PREF(buff_get_linear_block_write_address)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff) {
     if (!BUF_IS_VALID(buff)) {
         return NULL;
     }
@@ -366,7 +366,7 @@ BUF_PREF(buff_get_linear_block_write_address)(BUF_PREF(buff_t)* buff) {
  * \return          Linear buffer size in units of bytes for write operation
  */
 size_t
-BUF_PREF(buff_get_linear_block_write_length)(BUF_PREF(buff_t)* buff) {
+BUF_PREF(buff_get_linear_block_write_length)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff) {
     size_t w, r, len;
 
     if (!BUF_IS_VALID(buff)) {
@@ -407,7 +407,7 @@ BUF_PREF(buff_get_linear_block_write_length)(BUF_PREF(buff_t)* buff) {
  * \return          Number of bytes advanced for write operation
  */
 size_t
-BUF_PREF(buff_advance)(BUF_PREF(buff_t)* buff, size_t len) {
+BUF_PREF(buff_advance)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, size_t len) {
     size_t free;
 
     if (!BUF_IS_VALID(buff) || len == 0) {

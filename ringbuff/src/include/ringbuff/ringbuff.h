@@ -60,6 +60,12 @@ extern "C" {
 /* --- Buffer unique part ends --- */
 
 /**
+ * \brief           Enable buffer structure pointer parameter as volatile
+ * To use this feature, uncomment keyword below
+ */
+#define RINGBUFF_VOLATILE               /* volatile */
+
+/**
  * \brief           Buffer structure
  */
 typedef struct {
@@ -70,28 +76,28 @@ typedef struct {
     size_t w;                                   /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
 } BUF_PREF(buff_t);
 
-uint8_t     BUF_PREF(buff_init)(BUF_PREF(buff_t)* buff, void* buffdata, size_t size);
-void        BUF_PREF(buff_free)(BUF_PREF(buff_t)* buff);
-void        BUF_PREF(buff_reset)(BUF_PREF(buff_t)* buff);
+uint8_t     BUF_PREF(buff_init)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, void* buffdata, size_t size);
+void        BUF_PREF(buff_free)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
+void        BUF_PREF(buff_reset)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
 
 /* Read/Write functions */
-size_t      BUF_PREF(buff_write)(BUF_PREF(buff_t)* buff, const void* data, size_t btw);
-size_t      BUF_PREF(buff_read)(BUF_PREF(buff_t)* buff, void* data, size_t btr);
-size_t      BUF_PREF(buff_peek)(BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_t btp);
+size_t      BUF_PREF(buff_write)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, const void* data, size_t btw);
+size_t      BUF_PREF(buff_read)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, void* data, size_t btr);
+size_t      BUF_PREF(buff_peek)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, size_t skip_count, void* data, size_t btp);
 
 /* Buffer size information */
-size_t      BUF_PREF(buff_get_free)(BUF_PREF(buff_t)* buff);
-size_t      BUF_PREF(buff_get_full)(BUF_PREF(buff_t)* buff);
+size_t      BUF_PREF(buff_get_free)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
+size_t      BUF_PREF(buff_get_full)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
 
 /* Read data block management */
-void *      BUF_PREF(buff_get_linear_block_read_address)(BUF_PREF(buff_t)* buff);
-size_t      BUF_PREF(buff_get_linear_block_read_length)(BUF_PREF(buff_t)* buff);
-size_t      BUF_PREF(buff_skip)(BUF_PREF(buff_t)* buff, size_t len);
+void *      BUF_PREF(buff_get_linear_block_read_address)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
+size_t      BUF_PREF(buff_get_linear_block_read_length)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
+size_t      BUF_PREF(buff_skip)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, size_t len);
 
 /* Write data block management */
-void *      BUF_PREF(buff_get_linear_block_write_address)(BUF_PREF(buff_t)* buff);
-size_t      BUF_PREF(buff_get_linear_block_write_length)(BUF_PREF(buff_t)* buff);
-size_t      BUF_PREF(buff_advance)(BUF_PREF(buff_t)* buff, size_t len);
+void *      BUF_PREF(buff_get_linear_block_write_address)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
+size_t      BUF_PREF(buff_get_linear_block_write_length)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff);
+size_t      BUF_PREF(buff_advance)(RINGBUFF_VOLATILE BUF_PREF(buff_t)* buff, size_t len);
 
 #undef BUF_PREF         /* Prefix not needed anymore */
 
