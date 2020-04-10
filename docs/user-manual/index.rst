@@ -7,4 +7,5 @@ User manual
     :maxdepth: 2
 
     how-it-works
+    events
     hw-dma-usage
