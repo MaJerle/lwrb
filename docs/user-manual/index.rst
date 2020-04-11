@@ -1,4 +1,4 @@
-.. _user_manual:
+.. _um:
 
 User manual
 ===========
@@ -7,4 +7,5 @@ User manual
     :maxdepth: 2
 
     how-it-works
+    events
     hw-dma-usage

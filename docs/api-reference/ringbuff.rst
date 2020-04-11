@@ -1,8 +1,6 @@
-.. contents::
+.. _api_ringbuff:
 
 Ring buffer
 ===========
-
-.. contents::
 
 .. doxygengroup:: RINGBUFF
