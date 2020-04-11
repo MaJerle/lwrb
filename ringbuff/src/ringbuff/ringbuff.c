@@ -39,7 +39,7 @@
 #define BUF_IS_VALID(b)                 ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
 #define BUF_MIN(x, y)                   ((x) < (y) ? (x) : (y))
 #define BUF_MAX(x, y)                   ((x) > (y) ? (x) : (y))
-#define BUF_SEND_EVT(b, type, bp)       if ((b)->evt_fn != NULL) { (b)->evt_fn((b), (type), (bp)); }
+#define BUF_SEND_EVT(b, type, bp)       do { if ((b)->evt_fn != NULL) { (b)->evt_fn((b), (type), (bp)); } } while (0)
 
 /**
  * \brief           Initialize buffer handle to default values with size and buffer data array
@@ -127,6 +127,7 @@ ringbuff_write(RINGBUFF_VOLATILE ringbuff_t* buff, const void* data, size_t btw)
         buff->w = btw;
     }
 
+    /* Step 3: Check end of buffer */
     if (buff->w >= buff->size) {
         buff->w = 0;
     }
