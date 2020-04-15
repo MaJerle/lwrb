@@ -29,7 +29,7 @@
  * This file is part of ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
- * Version:         v1.3.0
+ * Version:         v1.3.1
  */
 #ifndef RINGBUFF_HDR_H
 #define RINGBUFF_HDR_H
@@ -51,7 +51,7 @@ extern "C" {
  * \brief           Enable buffer structure pointer parameter as volatile
  * To use this feature, uncomment keyword below
  */
-#define RINGBUFF_VOLATILE               /* volatile */
+#define RINGBUFF_VOLATILE                       /* volatile */
 
 /**
  * \brief           Event type for buffer operations
@@ -73,7 +73,7 @@ struct ringbuff;
  * \param[in]       evt: Event type
  * \param[in]       bp: Number of bytes written or read (when used), depends on event type
  */
-typedef void (*ringbuff_evt_fn)(struct ringbuff* buff, ringbuff_evt_type_t evt, size_t bp);
+typedef void (*ringbuff_evt_fn)(RINGBUFF_VOLATILE struct ringbuff* buff, ringbuff_evt_type_t evt, size_t bp);
 
 /**
  * \brief           Buffer structure
