@@ -88,6 +88,7 @@ typedef struct ringbuff {
 } ringbuff_t;
 
 uint8_t     ringbuff_init(RINGBUFF_VOLATILE ringbuff_t* buff, void* buffdata, size_t size);
+uint8_t     ringbuff_is_ready(RINGBUFF_VOLATILE ringbuff_t* buff);
 void        ringbuff_free(RINGBUFF_VOLATILE ringbuff_t* buff);
 void        ringbuff_reset(RINGBUFF_VOLATILE ringbuff_t* buff);
 void        ringbuff_set_evt_fn(RINGBUFF_VOLATILE ringbuff_t* buff, ringbuff_evt_fn fn);

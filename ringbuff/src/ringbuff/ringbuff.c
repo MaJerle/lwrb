@@ -64,6 +64,16 @@ ringbuff_init(RINGBUFF_VOLATILE ringbuff_t* buff, void* buffdata, size_t size) {
 }
 
 /**
+ * \brief           Check if ringbuff is initialized and ready to use
+ * \param[in]       buff: Buffer handle
+ * \return          `1` if ready, `0` otherwise
+ */
+uint8_t
+ringbuff_is_ready(RINGBUFF_VOLATILE ringbuff_t* buff) {
+    return BUF_IS_VALID(buff);
+}
+
+/**
  * \brief           Free buffer memory
  * \note            Since implementation does not use dynamic allocation,
  *                  it just sets buffer handle to `NULL`
