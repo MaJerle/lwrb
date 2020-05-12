@@ -37,7 +37,7 @@
 #define BUF_MEMSET                      memset
 #define BUF_MEMCPY                      memcpy
 
-#ifdef RINGBUFF_USE_MAGIC
+#if RINGBUFF_USE_MAGIC
 #define BUF_IS_VALID(b)                 ((b) != NULL && (b)->magic1 == 0xDEADBEEF && (b)->magic2 == ~0xDEADBEEF && (b)->buff != NULL && (b)->size > 0)
 #else
 #define BUF_IS_VALID(b)                 ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
@@ -65,7 +65,7 @@ ringbuff_init(RINGBUFF_VOLATILE ringbuff_t* buff, void* buffdata, size_t size) {
     buff->size = size;
     buff->buff = buffdata;
 
-#ifdef RINGBUFF_USE_MAGIC
+#if RINGBUFF_USE_MAGIC
     buff->magic1 = 0xDEADBEEF;
     buff->magic2 = ~0xDEADBEEF;
 #endif /* RINGBUFF_USE_MAGIC */

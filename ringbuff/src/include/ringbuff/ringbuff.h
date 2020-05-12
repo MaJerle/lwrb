@@ -85,7 +85,7 @@ typedef void (*ringbuff_evt_fn)(RINGBUFF_VOLATILE struct ringbuff* buff, ringbuf
  * \brief           Buffer structure
  */
 typedef struct ringbuff {
-#ifdef RINGBUFF_USE_MAGIC
+#if RINGBUFF_USE_MAGIC
     uint32_t magic1;                            /*!< Magic 1 word */
 #endif /* RINGBUFF_USE_MAGIC */
     uint8_t* buff;                              /*!< Pointer to buffer data.
@@ -94,7 +94,7 @@ typedef struct ringbuff {
     size_t r;                                   /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
     size_t w;                                   /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
     ringbuff_evt_fn evt_fn;                     /*!< Pointer to event callback function */
-#ifdef RINGBUFF_USE_MAGIC
+#if RINGBUFF_USE_MAGIC
     uint32_t magic2;                            /*!< Magic 2 word */
 #endif /* RINGBUFF_USE_MAGIC */
 } ringbuff_t;
