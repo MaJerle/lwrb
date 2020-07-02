@@ -115,12 +115,12 @@ size_t      ringbuff_get_free(RINGBUFF_VOLATILE ringbuff_t* buff);
 size_t      ringbuff_get_full(RINGBUFF_VOLATILE ringbuff_t* buff);
 
 /* Read data block management */
-void *      ringbuff_get_linear_block_read_address(RINGBUFF_VOLATILE ringbuff_t* buff);
+void*       ringbuff_get_linear_block_read_address(RINGBUFF_VOLATILE ringbuff_t* buff);
 size_t      ringbuff_get_linear_block_read_length(RINGBUFF_VOLATILE ringbuff_t* buff);
 size_t      ringbuff_skip(RINGBUFF_VOLATILE ringbuff_t* buff, size_t len);
 
 /* Write data block management */
-void *      ringbuff_get_linear_block_write_address(RINGBUFF_VOLATILE ringbuff_t* buff);
+void*       ringbuff_get_linear_block_write_address(RINGBUFF_VOLATILE ringbuff_t* buff);
 size_t      ringbuff_get_linear_block_write_length(RINGBUFF_VOLATILE ringbuff_t* buff);
 size_t      ringbuff_advance(RINGBUFF_VOLATILE ringbuff_t* buff, size_t len);
 
