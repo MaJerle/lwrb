@@ -1,9 +1,9 @@
-Ringbuffer |version| documentation
-==================================
+LwRB |version| documentation
+============================
 
 Welcome to the documentation for version |version|.
 
-Ring buffer is a generic *FIFO* (First In; First Out) buffer library optimized for embedded systems.
+LwRB is a generic *FIFO* (First In; First Out) buffer library optimized for embedded systems.
 
 .. image:: static/images/logo.svg
     :align: center
