@@ -1,6 +1,6 @@
 /**
- * \file            ringbuff.c
- * \brief           Ring buffer manager
+ * \file            lwrb.c
+ * \brief           Lightweight ring buffer
  */
 
 /*
@@ -26,7 +26,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  *
- * This file is part of ring buffer library.
+ * This file is part of LwRB - Lightweight ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
  * Version:         v1.3.1

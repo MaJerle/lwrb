@@ -1,6 +1,6 @@
 /**
- * \file            ringbuff.h
- * \brief           Ring buffer manager
+ * \file            lwrb.h
+ * \brief           LwRB - Lightweight ring buffer
  */
 
 /*
@@ -26,7 +26,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  *
- * This file is part of ring buffer library.
+ * This file is part of LwRB - Lightweight ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
  * Version:         v1.3.1
@@ -42,8 +42,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * \defgroup        RINGBUFF Ring buffer
- * \brief           Generic ring buffer manager
+ * \defgroup        RINGBUFF Lightweight ring buffer manager
+ * \brief           Lightweight ring buffer manager
  * \{
  */
 
