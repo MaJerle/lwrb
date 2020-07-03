@@ -8,15 +8,15 @@ Getting started
 Download library
 ^^^^^^^^^^^^^^^^
 
-Library is primarly hosted on `Github <https://github.com/MaJerle/ringbuff>`_.
+Library is primarly hosted on `Github <https://github.com/MaJerle/lwrb>`_.
 
-* Download latest release from `releases area <https://github.com/MaJerle/ringbuff/releases>`_ on Github
+* Download latest release from `releases area <https://github.com/MaJerle/lwrb/releases>`_ on Github
 * Clone `develop` branch for latest development
 
 Download from releases
 **********************
 
-All releases are available on Github `releases area <https://github.com/MaJerle/ringbuff/releases>`_.
+All releases are available on Github `releases area <https://github.com/MaJerle/lwrb/releases>`_.
 
 Clone from Github
 *****************
@@ -28,9 +28,9 @@ First-time clone
 * Open console and navigate to path in the system to clone repository to. Use command ``cd your_path``
 * Clone repository with one of available ``3`` options
 
-  * Run ``git clone --recurse-submodules https://github.com/MaJerle/ringbuff`` command to clone entire repository, including submodules
-  * Run ``git clone --recurse-submodules --branch develop https://github.com/MaJerle/ringbuff`` to clone `development` branch, including submodules
-  * Run ``git clone --recurse-submodules --branch master https://github.com/MaJerle/ringbuff`` to clone `latest stable` branch, including submodules
+  * Run ``git clone --recurse-submodules https://github.com/MaJerle/lwrb`` command to clone entire repository, including submodules
+  * Run ``git clone --recurse-submodules --branch develop https://github.com/MaJerle/lwrb`` to clone `development` branch, including submodules
+  * Run ``git clone --recurse-submodules --branch master https://github.com/MaJerle/lwrb`` to clone `latest stable` branch, including submodules
 
 * Navigate to ``examples`` directory and run favourite example
 
@@ -50,9 +50,9 @@ Add library to project
 
 At this point it is assumed that you have successfully download library, either cloned it or from releases page.
 
-* Copy ``ringbuff`` folder to your project
-* Add ``ringbuff/src/include`` folder to `include path` of your toolchain
-* Add source files from ``ringbuff/src/`` folder to toolchain build
+* Copy ``lwrb`` folder to your project
+* Add ``lwrb/src/include`` folder to `include path` of your toolchain
+* Add source files from ``lwrb/src/`` folder to toolchain build
 * Build the project
 
 Minimal example code

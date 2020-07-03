@@ -21,7 +21,7 @@
     <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\ringbuff\src\ringbuff\ringbuff.c">
+    <ClCompile Include="..\..\lwrb\src\lwrb\lwrb.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

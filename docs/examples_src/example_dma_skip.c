@@ -1,5 +1,5 @@
 /* Buffer */
-ringbuff_t buff;
+lwrb_t buff;
 uint8_t buff_data[8];
 
 /* Working data length */
@@ -11,10 +11,10 @@ void send_data(void);
 int
 main(void) {
     /* Initialize buffer */
-    ringbuff_init(&buff, buff_data, sizeof(buff_data));
+    lwrb_init(&buff, buff_data, sizeof(buff_data));
 
     /* Write 4 bytes of data */
-    ringbuff_write(&buff, "0123", 4);
+    lwrb_write(&buff, "0123", 4);
 
     /* Send data over DMA */
     send_data();
@@ -31,10 +31,10 @@ send_data(void) {
     }
 
     /* Get maximal length of buffer to read data as linear memory */
-    len = ringbuff_get_linear_block_read_length(&buff);
+    len = lwrb_get_linear_block_read_length(&buff);
     if (len > 0) {
         /* Get pointer to read memory */
-        uint8_t* data = ringbuff_get_linear_block_read_address(&buff);
+        uint8_t* data = lwrb_get_linear_block_read_address(&buff);
 
         /* Start DMA transfer */
         start_dma_transfer(data, len);
@@ -50,7 +50,7 @@ DMA_Interrupt_handler(void) {
     /* Transfer finished */
     if (len > 0) {
         /* Now skip the data (move read pointer) as they were successfully transferred over DMA */
-        ringbuff_skip(&buff, len);
+        lwrb_skip(&buff, len);
 
         /* Reset length = DMA is not active */
         len = 0;
