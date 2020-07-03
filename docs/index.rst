@@ -1,9 +1,9 @@
-Ringbuffer |version| documentation
-==================================
+LwRB |version| documentation
+============================
 
 Welcome to the documentation for version |version|.
 
-Ring buffer is a generic *FIFO* (First In; First Out) buffer library optimized for embedded systems.
+LwRB is a generic *FIFO* (First In; First Out) buffer library optimized for embedded systems.
 
 .. image:: static/images/logo.svg
     :align: center
@@ -11,7 +11,7 @@ Ring buffer is a generic *FIFO* (First In; First Out) buffer library optimized f
 .. rst-class:: center
 .. rst-class:: index_links
 
-	:ref:`download_library` · :ref:`getting_started` · `Open Github <https://github.com/MaJerle/ringbuff>`_
+	:ref:`download_library` · :ref:`getting_started` · `Open Github <https://github.com/MaJerle/lwrb>`_
 
 Features
 ^^^^^^^^

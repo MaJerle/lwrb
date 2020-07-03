@@ -22,7 +22,7 @@ import subprocess, os
 subprocess.call('doxygen doxyfile.doxy', shell=True)
 # -- Project information -----------------------------------------------------
 
-project = 'Ringbuffer'
+project = 'LwRB'
 copyright = '2020, Tilen MAJERLE'
 author = 'Tilen MAJERLE'
 
@@ -100,8 +100,8 @@ html_theme_options = {
     'titles_only': False
 }
 html_logo = 'static/images/logo.svg'
-github_url = 'https://github.com/MaJerle/ringbuff'
-html_baseurl = 'https://docs.majerle.eu/projects/ringbuff/'
+github_url = 'https://github.com/MaJerle/lwrb'
+html_baseurl = 'https://docs.majerle.eu/projects/lwrb/'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -123,7 +123,7 @@ master_doc = 'index'
 #
 #
 breathe_projects = {
-	"ringbuff": "_build/xml/"
+	"lwrb": "_build/xml/"
 }
-breathe_default_project = "ringbuff"
+breathe_default_project = "lwrb"
 breathe_default_members = ('members', 'undoc-members')
