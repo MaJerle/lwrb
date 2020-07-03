@@ -1,6 +1,6 @@
 /**
- * \file            ringbuff.c
- * \brief           Ring buffer manager
+ * \file            lwrb.c
+ * \brief           Lightweight ring buffer
  */
 
 /*
@@ -26,17 +26,22 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  *
- * This file is part of ring buffer library.
+ * This file is part of LwRB - Lightweight ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
- * Version:         v1.3.1
+ * Version:         v2.0.0
  */
-#include "ringbuff/ringbuff.h"
+#include "lwrb/lwrb.h"
 
 /* Memory set and copy functions */
 #define BUF_MEMSET                      memset
 #define BUF_MEMCPY                      memcpy
+
+#if LWRB_USE_MAGIC
+#define BUF_IS_VALID(b)                 ((b) != NULL && (b)->magic1 == 0xDEADBEEF && (b)->magic2 == ~0xDEADBEEF && (b)->buff != NULL && (b)->size > 0)
+#else
 #define BUF_IS_VALID(b)                 ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
+#endif /* LWRB_USE_MAGIC */
 #define BUF_MIN(x, y)                   ((x) < (y) ? (x) : (y))
 #define BUF_MAX(x, y)                   ((x) > (y) ? (x) : (y))
 #define BUF_SEND_EVT(b, type, bp)       do { if ((b)->evt_fn != NULL) { (b)->evt_fn((b), (type), (bp)); } } while (0)
@@ -50,17 +55,32 @@
  * \return          `1` on success, `0` otherwise
  */
 uint8_t
-ringbuff_init(RINGBUFF_VOLATILE ringbuff_t* buff, void* buffdata, size_t size) {
+lwrb_init(LWRB_VOLATILE lwrb_t* buff, void* buffdata, size_t size) {
     if (buff == NULL || buffdata == NULL || size == 0) {
         return 0;
     }
 
-    BUF_MEMSET((void *)buff, 0x00, sizeof(*buff));
+    BUF_MEMSET((void*)buff, 0x00, sizeof(*buff));
 
     buff->size = size;
     buff->buff = buffdata;
 
+#if LWRB_USE_MAGIC
+    buff->magic1 = 0xDEADBEEF;
+    buff->magic2 = ~0xDEADBEEF;
+#endif /* LWRB_USE_MAGIC */
+
     return 1;
+}
+
+/**
+ * \brief           Check if buff is initialized and ready to use
+ * \param[in]       buff: Buffer handle
+ * \return          `1` if ready, `0` otherwise
+ */
+uint8_t
+lwrb_is_ready(LWRB_VOLATILE lwrb_t* buff) {
+    return BUF_IS_VALID(buff);
 }
 
 /**
@@ -70,7 +90,7 @@ ringbuff_init(RINGBUFF_VOLATILE ringbuff_t* buff, void* buffdata, size_t size) {
  * \param[in]       buff: Buffer handle
  */
 void
-ringbuff_free(RINGBUFF_VOLATILE ringbuff_t* buff) {
+lwrb_free(LWRB_VOLATILE lwrb_t* buff) {
     if (BUF_IS_VALID(buff)) {
         buff->buff = NULL;
     }
@@ -82,7 +102,7 @@ ringbuff_free(RINGBUFF_VOLATILE ringbuff_t* buff) {
  * \param[in]       evt_fn: Callback function
  */
 void
-ringbuff_set_evt_fn(RINGBUFF_VOLATILE ringbuff_t* buff, ringbuff_evt_fn evt_fn) {
+lwrb_set_evt_fn(LWRB_VOLATILE lwrb_t* buff, lwrb_evt_fn evt_fn) {
     if (BUF_IS_VALID(buff)) {
         buff->evt_fn = evt_fn;
     }
@@ -100,7 +120,7 @@ ringbuff_set_evt_fn(RINGBUFF_VOLATILE ringbuff_t* buff, ringbuff_evt_fn evt_fn) 
  *                      to copy full data array
  */
 size_t
-ringbuff_write(RINGBUFF_VOLATILE ringbuff_t* buff, const void* data, size_t btw) {
+lwrb_write(LWRB_VOLATILE lwrb_t* buff, const void* data, size_t btw) {
     size_t tocopy, free;
     const uint8_t* d = data;
 
@@ -109,7 +129,7 @@ ringbuff_write(RINGBUFF_VOLATILE ringbuff_t* buff, const void* data, size_t btw)
     }
 
     /* Calculate maximum number of bytes available to write */
-    free = ringbuff_get_free(buff);
+    free = lwrb_get_free(buff);
     btw = BUF_MIN(free, btw);
     if (btw == 0) {
         return 0;
@@ -131,7 +151,7 @@ ringbuff_write(RINGBUFF_VOLATILE ringbuff_t* buff, const void* data, size_t btw)
     if (buff->w >= buff->size) {
         buff->w = 0;
     }
-    BUF_SEND_EVT(buff, RINGBUFF_EVT_WRITE, tocopy + btw);
+    BUF_SEND_EVT(buff, LWRB_EVT_WRITE, tocopy + btw);
     return tocopy + btw;
 }
 
@@ -145,16 +165,16 @@ ringbuff_write(RINGBUFF_VOLATILE ringbuff_t* buff, const void* data, size_t btw)
  * \return          Number of bytes read and copied to data array
  */
 size_t
-ringbuff_read(RINGBUFF_VOLATILE ringbuff_t* buff, void* data, size_t btr) {
+lwrb_read(LWRB_VOLATILE lwrb_t* buff, void* data, size_t btr) {
     size_t tocopy, full;
-    uint8_t *d = data;
+    uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btr == 0) {
         return 0;
     }
 
     /* Calculate maximum number of bytes available to read */
-    full = ringbuff_get_full(buff);
+    full = lwrb_get_full(buff);
     btr = BUF_MIN(full, btr);
     if (btr == 0) {
         return 0;
@@ -176,7 +196,7 @@ ringbuff_read(RINGBUFF_VOLATILE ringbuff_t* buff, void* data, size_t btr) {
     if (buff->r >= buff->size) {
         buff->r = 0;
     }
-    BUF_SEND_EVT(buff, RINGBUFF_EVT_READ, tocopy + btr);
+    BUF_SEND_EVT(buff, LWRB_EVT_READ, tocopy + btr);
     return tocopy + btr;
 }
 
@@ -189,9 +209,9 @@ ringbuff_read(RINGBUFF_VOLATILE ringbuff_t* buff, void* data, size_t btr) {
  * \return          Number of bytes peeked and written to output array
  */
 size_t
-ringbuff_peek(RINGBUFF_VOLATILE ringbuff_t* buff, size_t skip_count, void* data, size_t btp) {
+lwrb_peek(LWRB_VOLATILE lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
     size_t full, tocopy, r;
-    uint8_t *d = data;
+    uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btp == 0) {
         return 0;
@@ -200,7 +220,7 @@ ringbuff_peek(RINGBUFF_VOLATILE ringbuff_t* buff, size_t skip_count, void* data,
     r = buff->r;
 
     /* Calculate maximum number of bytes available to read */
-    full = ringbuff_get_full(buff);
+    full = lwrb_get_full(buff);
 
     /* Skip beginning of buffer */
     if (skip_count >= full) {
@@ -236,7 +256,7 @@ ringbuff_peek(RINGBUFF_VOLATILE ringbuff_t* buff, size_t skip_count, void* data,
  * \return          Number of free bytes in memory
  */
 size_t
-ringbuff_get_free(RINGBUFF_VOLATILE ringbuff_t* buff) {
+lwrb_get_free(LWRB_VOLATILE lwrb_t* buff) {
     size_t size, w, r;
 
     if (!BUF_IS_VALID(buff)) {
@@ -264,7 +284,7 @@ ringbuff_get_free(RINGBUFF_VOLATILE ringbuff_t* buff) {
  * \return          Number of bytes ready to be read
  */
 size_t
-ringbuff_get_full(RINGBUFF_VOLATILE ringbuff_t* buff) {
+lwrb_get_full(LWRB_VOLATILE lwrb_t* buff) {
     size_t w, r, size;
 
     if (!BUF_IS_VALID(buff)) {
@@ -289,11 +309,11 @@ ringbuff_get_full(RINGBUFF_VOLATILE ringbuff_t* buff) {
  * \param[in]       buff: Buffer handle
  */
 void
-ringbuff_reset(RINGBUFF_VOLATILE ringbuff_t* buff) {
+lwrb_reset(LWRB_VOLATILE lwrb_t* buff) {
     if (BUF_IS_VALID(buff)) {
         buff->w = 0;
         buff->r = 0;
-        BUF_SEND_EVT(buff, RINGBUFF_EVT_RESET, 0);
+        BUF_SEND_EVT(buff, LWRB_EVT_RESET, 0);
     }
 }
 
@@ -302,8 +322,8 @@ ringbuff_reset(RINGBUFF_VOLATILE ringbuff_t* buff) {
  * \param[in]       buff: Buffer handle
  * \return          Linear buffer start address
  */
-void *
-ringbuff_get_linear_block_read_address(RINGBUFF_VOLATILE ringbuff_t* buff) {
+void*
+lwrb_get_linear_block_read_address(LWRB_VOLATILE lwrb_t* buff) {
     if (!BUF_IS_VALID(buff)) {
         return NULL;
     }
@@ -316,7 +336,7 @@ ringbuff_get_linear_block_read_address(RINGBUFF_VOLATILE ringbuff_t* buff) {
  * \return          Linear buffer size in units of bytes for read operation
  */
 size_t
-ringbuff_get_linear_block_read_length(RINGBUFF_VOLATILE ringbuff_t* buff) {
+lwrb_get_linear_block_read_length(LWRB_VOLATILE lwrb_t* buff) {
     size_t w, r, len;
 
     if (!BUF_IS_VALID(buff)) {
@@ -346,20 +366,20 @@ ringbuff_get_linear_block_read_length(RINGBUFF_VOLATILE ringbuff_t* buff) {
  * \return          Number of bytes skipped
  */
 size_t
-ringbuff_skip(RINGBUFF_VOLATILE ringbuff_t* buff, size_t len) {
+lwrb_skip(LWRB_VOLATILE lwrb_t* buff, size_t len) {
     size_t full;
 
     if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
     }
 
-    full = ringbuff_get_full(buff);             /* Get buffer used length */
-    len = BUF_MIN(len, full);                   /* Calculate max skip */
-    buff->r += len;                             /* Advance read pointer */
-    if (buff->r >= buff->size) {                /* Subtract possible overflow */
+    full = lwrb_get_full(buff);
+    len = BUF_MIN(len, full);
+    buff->r += len;
+    if (buff->r >= buff->size) {
         buff->r -= buff->size;
     }
-    BUF_SEND_EVT(buff, RINGBUFF_EVT_READ, len);
+    BUF_SEND_EVT(buff, LWRB_EVT_READ, len);
     return len;
 }
 
@@ -368,8 +388,8 @@ ringbuff_skip(RINGBUFF_VOLATILE ringbuff_t* buff, size_t len) {
  * \param[in]       buff: Buffer handle
  * \return          Linear buffer start address
  */
-void *
-ringbuff_get_linear_block_write_address(RINGBUFF_VOLATILE ringbuff_t* buff) {
+void*
+lwrb_get_linear_block_write_address(LWRB_VOLATILE lwrb_t* buff) {
     if (!BUF_IS_VALID(buff)) {
         return NULL;
     }
@@ -382,7 +402,7 @@ ringbuff_get_linear_block_write_address(RINGBUFF_VOLATILE ringbuff_t* buff) {
  * \return          Linear buffer size in units of bytes for write operation
  */
 size_t
-ringbuff_get_linear_block_write_length(RINGBUFF_VOLATILE ringbuff_t* buff) {
+lwrb_get_linear_block_write_length(LWRB_VOLATILE lwrb_t* buff) {
     size_t w, r, len;
 
     if (!BUF_IS_VALID(buff)) {
@@ -424,19 +444,19 @@ ringbuff_get_linear_block_write_length(RINGBUFF_VOLATILE ringbuff_t* buff) {
  * \return          Number of bytes advanced for write operation
  */
 size_t
-ringbuff_advance(RINGBUFF_VOLATILE ringbuff_t* buff, size_t len) {
+lwrb_advance(LWRB_VOLATILE lwrb_t* buff, size_t len) {
     size_t free;
 
     if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
     }
 
-    free = ringbuff_get_free(buff);             /* Get buffer free length */
-    len = BUF_MIN(len, free);                   /* Calculate max advance */
-    buff->w += len;                             /* Advance write pointer */
-    if (buff->w >= buff->size) {                /* Subtract possible overflow */
+    free = lwrb_get_free(buff);
+    len = BUF_MIN(len, free);
+    buff->w += len;
+    if (buff->w >= buff->size) {
         buff->w -= buff->size;
     }
-    BUF_SEND_EVT(buff, RINGBUFF_EVT_WRITE, len);
+    BUF_SEND_EVT(buff, LWRB_EVT_WRITE, len);
     return len;
 }

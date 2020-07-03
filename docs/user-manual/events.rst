@@ -3,7 +3,7 @@
 Events
 ======
 
-When using ringbuffer in the application, it may be useful to get notification on different events,
+When using LwRB in the application, it may be useful to get notification on different events,
 such as info when something has been written or read to/from buffer.
 
 Library has support for events that get called each time there has been a modification
@@ -11,7 +11,7 @@ in the buffer data, that means on every read or write operation.
 
 Some use cases:
 
-* Notify application layer that ringbuffer operation has been executed and send debug message
+* Notify application layer that LwRB operation has been executed and send debug message
 * Unlock semaphore when sufficient amount of bytes have been written/read from/to buffer when application uses operating system
 * Write notification to message queue at operating system level to wakeup another task
 
