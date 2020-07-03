@@ -22,7 +22,7 @@ import subprocess, os
 subprocess.call('doxygen doxyfile.doxy', shell=True)
 # -- Project information -----------------------------------------------------
 
-project = 'Ringbuffer'
+project = 'LwRB'
 copyright = '2020, Tilen MAJERLE'
 author = 'Tilen MAJERLE'
 
