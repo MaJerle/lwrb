@@ -37,8 +37,11 @@
 #define BUF_MEMSET                      memset
 #define BUF_MEMCPY                      memcpy
 
+#define BUF_MAGIC1                      (0xDEADBEEF)
+#define BUF_MAGIC2                      (~0xDEADBEEF)
+
 #if LWRB_USE_MAGIC
-#define BUF_IS_VALID(b)                 ((b) != NULL && (b)->magic1 == 0xDEADBEEF && (b)->magic2 == ~0xDEADBEEF && (b)->buff != NULL && (b)->size > 0)
+#define BUF_IS_VALID(b)                 ((b) != NULL && (b)->magic1 == BUF_MAGIC1 && (b)->magic2 == ~BUF_MAGIC2 && (b)->buff != NULL && (b)->size > 0)
 #else
 #define BUF_IS_VALID(b)                 ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
 #endif /* LWRB_USE_MAGIC */
@@ -66,8 +69,8 @@ lwrb_init(LWRB_VOLATILE lwrb_t* buff, void* buffdata, size_t size) {
     buff->buff = buffdata;
 
 #if LWRB_USE_MAGIC
-    buff->magic1 = 0xDEADBEEF;
-    buff->magic2 = ~0xDEADBEEF;
+    buff->magic1 = BUF_MAGIC1;
+    buff->magic2 = BUF_MAGIC2;
 #endif /* LWRB_USE_MAGIC */
 
     return 1;
