@@ -41,7 +41,7 @@
 #define BUF_MAGIC2                      (~0xDEADBEEF)
 
 #if LWRB_USE_MAGIC
-#define BUF_IS_VALID(b)                 ((b) != NULL && (b)->magic1 == BUF_MAGIC1 && (b)->magic2 == ~BUF_MAGIC2 && (b)->buff != NULL && (b)->size > 0)
+#define BUF_IS_VALID(b)                 ((b) != NULL && (b)->magic1 == BUF_MAGIC1 && (b)->magic2 == BUF_MAGIC2 && (b)->buff != NULL && (b)->size > 0)
 #else
 #define BUF_IS_VALID(b)                 ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
 #endif /* LWRB_USE_MAGIC */
