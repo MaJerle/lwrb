@@ -1,7 +1,8 @@
 /* Declare variables */
 lwrb_t rb;
 
-/* 2 mutexes, one for write operations, one for read operations */
+/* 2 mutexes, one for write operations,
+    one for read operations */
 mutex_t m_w, m_r;
 
 /* 4 threads below, 2 for write, 2 for read */

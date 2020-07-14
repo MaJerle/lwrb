@@ -1,7 +1,6 @@
-
 #include "lwrb/lwrb.h"
 
-/* Declare buffer variables */
+/* Declare rb instance & raw data */
 lwrb_t buff;
 uint8_t buff_data[8];
 

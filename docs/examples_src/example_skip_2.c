@@ -1,7 +1,8 @@
 /* Initialization part skipped */
 
 /* Get length of linear memory at read pointer */
-/* When function returns 0, there is no memory available in the buffer for read anymore */
+/* When function returns 0, there is no memory
+   available in the buffer for read anymore */
 while ((len = lwrb_get_linear_block_read_length(&buff)) > 0) {
     /* Get pointer to first element in linear block at read address */
     data = lwrb_get_linear_block_read_address(&buff);

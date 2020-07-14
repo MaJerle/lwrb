@@ -11,7 +11,8 @@ uint32_t d[2];
 lwrb_t buff_1;
 lwrb_t buff_2;
 
-/* Create data for buffers. Use sizeof structure, multiplied by N (for N instances) */
+/* Create data for buffers. Use sizeof structure,
+   multiplied by N (for N instances) */
 /* Buffer with + 1 bytes bigger memory */
 uint8_t buff_data_1[sizeof(d) * N + 1];
 /* Buffer without + 1 at the end */
