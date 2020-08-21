@@ -30,6 +30,10 @@ table thead th p {
   margin: 0;
 }
 
+.table-nowrap td {
+  white-space: normal !important;
+}
+
 /* Breathe output changes */
 .breathe-sectiondef.container {
   background: #f9f9f9;
