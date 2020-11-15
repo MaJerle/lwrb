@@ -9,3 +9,4 @@ User manual
     how-it-works
     events
     hw-dma-usage
+    thread-safety

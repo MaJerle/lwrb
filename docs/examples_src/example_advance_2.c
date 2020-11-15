@@ -1,11 +1,11 @@
 #include "lwrb/lwrb.h"
 
-/* Buffer variables */
-lwrb_t buff;                            /* Declare ring buffer structure */
-uint8_t buff_data[8];                       /* Declare raw buffer data array */
+/* Declare rb instance & raw data */
+lwrb_t buff;
+uint8_t buff_data[8];
 
-/* Application variables
-uint8_t data[2];                            /* Application working data */
+/* Application variables */
+uint8_t data[2];
 
 /* Application code ... */
 lwrb_init(&buff, buff_data, sizeof(buff_data)); /* Initialize buffer */
