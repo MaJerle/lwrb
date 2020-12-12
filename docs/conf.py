@@ -112,7 +112,7 @@ html_css_files = [
     'css/custom.css',
 ]
 html_js_files = [
-    'https://kit.fontawesome.com/3102794088.js'
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css'
 ]
 
 master_doc = 'index'
