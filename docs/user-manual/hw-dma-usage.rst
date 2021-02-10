@@ -1,5 +1,5 @@
-DMA on embedded systems
-=======================
+DMA for embedded systems
+========================
 
 One of the key features of LwRB library is that it can be seamlessly integrated with DMA controllers on embedded systems.
 
@@ -17,11 +17,11 @@ Below are ``2`` common use cases:
 * DMA transfers data from LwRB memory to (usually) some hardware IP
 * DMA transfers data from hardware IP to memory
 
-Zero-copy data from memory
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Zero-copy data from LwRB memory
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This describes how to pass LwRB output memory address as pointer to DMA (or any other processing function).
-After all the data are successfully processed, application can skip processed data and free buff for new data being written to it.
+After data is successfully processed, application can skip processed data and mark buffer as free for new data being written to it.
 
 .. figure:: ../static/images/buff_lin_read_skip.svg
     :align: center
@@ -48,12 +48,12 @@ To send all bytes from lwrb, it might be necessary to repeat procedure multiple 
     :linenos:
     :caption: Skip buffer data for non-contiguous block
 
-Zero-copy data to memory
-^^^^^^^^^^^^^^^^^^^^^^^^
+Zero-copy data to LwRB memory
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Similar to reading data from buffer with zero-copy overhead, it is possible to write to lwrb with zero-copy overhead too.
-Only difference is that application now needs pointer to write memory address and length of maximal number of bytes to directly copy in buffer.
-After processing is successful, buffer advance operation is necessary to manually increase write pointer and to increase number of bytes in buffer.
+Only difference is that application now needs pointer to write memory address and length of maximal number of bytes to directly copy into buffer.
+After successful processing, buffer advance operation is necessary to manually increase write pointer and to increase number of bytes in buffer.
 
 .. figure:: ../static/images/buff_lin_write_advance.svg
     :align: center
