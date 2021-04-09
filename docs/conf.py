@@ -39,11 +39,12 @@ for line in res.split("\n"):
         git_branch = line[1:].strip()
 
 # Decision for display version
-if git_branch == 'master' or git_branch == 'main':
+git_branch = git_branch.replace('(HEAD detached at ', '').replace(')', '')
+if git_branch.find('master') >= 0 or git_branch.find('main') >= 0:
     version = os.popen('git describe --tags --abbrev=0').read().strip()
     if version == '':
         version = 'v0.0.0'
-elif git_branch == 'develop':
+elif git_branch.find('develop') != -1 and not (git_branch.find('develop-') >= 0 or git_branch.find('develop/') >= 0):
     version = 'latest-develop'
 else:
     version = 'branch-' + git_branch
