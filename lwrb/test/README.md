@@ -2,6 +2,9 @@
 
 This directory contains an environment for writing and executing tests for the lwrb library. It supports code coverage along with different usage of sanitizers (such as ASAN and UBSAN).
 
+## Requirements
+The repository must have been built recursively for retrieval of the necessary git submodules. Further more, this testing environment requires cmake. For sanitizers you need to use a compiler which has the sanitizer dependencies availble. For coverage, you also need gcov and lcov.
+
 ## Build
 
 ```bash
@@ -27,5 +30,7 @@ ctest
 make coverage
 # Assuming you have google chrome installed on a linux host machine
 google-chrome coverage/index.html  # To see the coverage html output
-
 ```
+
+## Future work
+Run this in a CI environment such as Travis. Pass the result and coverage output as banners in the repository.
