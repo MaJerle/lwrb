@@ -43,10 +43,10 @@ if ((len = lwrb_get_linear_block_write_length(&buff)) > 0) {
 /* Get length of linear memory at write pointer */
 /* Function returns 3 as we can write 3 bytes to buffer in sequence */
 /* When function returns 0, there is no memory available in the buffer for write anymore */
-if ((len = lwrb_get_linear_block_read_length(&buff)) > 0) {
+if ((len = lwrb_get_linear_block_write_length(&buff)) > 0) {
     /* Get pointer to first element in linear block at write address */
     /* Function returns &buff_data[0] */
-    data = lwrb_get_linear_block_read_address(&buff);
+    data = lwrb_get_linear_block_write_address(&buff);
 
     /* Receive data via DMA and wait to finish (for sake of example) */
     /* Any other hardware may directly write to data array */
