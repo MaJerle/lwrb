@@ -140,9 +140,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\lwrb\src\lwrb\lwrb.c" />
     <ClCompile Include="main.c" />
   </ItemGroup>
