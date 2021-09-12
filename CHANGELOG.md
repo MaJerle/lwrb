@@ -1,5 +1,11 @@
 # Changelog
 
+## Develop
+
+- Add `volatile` keyword to all local variables to ensure thread safety in highest optimization
+- Add local variables for all read and write pointer accesses
+- Remove generic `volatile` keyword from func parameter and replace to struct member
+
 ## v2.0.1
 
 - Fix wrong check for valid RB instance

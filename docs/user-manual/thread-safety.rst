@@ -64,7 +64,7 @@ exclusive access only to the part in *dashed-red* rectangle.
     :linenos:
     :caption: Thread safety example
 
-Read and write operations can be used simultaneously therefore it is perfectly valid if
+Read and write operations can be used simultaneously hence it is perfectly valid if
 access is granted to *read* operation while *write* operation from one thread takes place.
 
 .. note::
@@ -75,6 +75,10 @@ access is granted to *read* operation while *write* operation from one thread ta
 .. tip::
     For *multi-entry-point-single-exit-point* use case, *read* mutex is not necessary.
     For *single-entry-point-multi-exit-point* use case, *write* mutex is not necessary.
+
+.. tip::
+   Functions considered as *read* operation are ``read``, ``skip``, ``peek`` and ``linear read``.
+   Functions considered as *write* operation are ``write``, ``advance`` and ``linear write``.
 
 .. toctree::
     :maxdepth: 2
