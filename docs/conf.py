@@ -26,27 +26,32 @@ project = 'LwRB'
 copyright = '2020, Tilen MAJERLE'
 author = 'Tilen MAJERLE'
 
-# The full version, including alpha/beta/rc tags
-version = '2.0.1'
-
 # Try to get branch at which this is running
 # and try to determine which version to display in sphinx
+# Version is using git tag if on master or "latest-develop" if on develop branch
+version = ''
 git_branch = ''
+
+# Get current branch
 res = os.popen('git branch').read().strip()
 for line in res.split("\n"):
     if line[0] == '*':
         git_branch = line[1:].strip()
 
 # Decision for display version
-try:
-    if git_branch.index('develop') >= 0:
-        version = "latest-develop"
-except Exception:
-    print("Exception for index check")
+git_branch = git_branch.replace('(HEAD detached at ', '').replace(')', '')
+if git_branch.find('master') >= 0 or git_branch.find('main') >= 0:
+    version = os.popen('git describe --tags --abbrev=0').read().strip()
+    if version == '':
+        version = 'v0.0.0'
+elif git_branch.find('develop') != -1 and not (git_branch.find('develop-') >= 0 or git_branch.find('develop/') >= 0):
+    version = 'latest-develop'
+else:
+    version = 'branch-' + git_branch
 
-# For debugging purpose
+# For debugging purpose only
 print("GIT BRANCH: " + git_branch)
-print("VERSION: " + version)
+print("GIT VERSION: " + version)
 
 # -- General configuration ---------------------------------------------------
 
@@ -112,7 +117,7 @@ html_css_files = [
     'css/custom.css',
 ]
 html_js_files = [
-    'https://kit.fontawesome.com/3102794088.js'
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css'
 ]
 
 master_doc = 'index'

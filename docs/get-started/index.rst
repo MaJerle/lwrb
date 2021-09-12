@@ -3,6 +3,9 @@
 Getting started
 ===============
 
+Getting started may be the most challenging part of every new library.
+This guide is describing how to start with the library quickly and effectively
+
 .. _download_library:
 
 Download library
@@ -10,8 +13,11 @@ Download library
 
 Library is primarly hosted on `Github <https://github.com/MaJerle/lwrb>`_.
 
-* Download latest release from `releases area <https://github.com/MaJerle/lwrb/releases>`_ on Github
-* Clone `develop` branch for latest development
+You can get it with:
+
+* Downloading latest release from `releases area <https://github.com/MaJerle/lwrb/releases>`_ on Github
+* Cloning ``master`` branch for latest stable version
+* Cloning ``develop`` branch for latest development
 
 Download from releases
 **********************
@@ -24,7 +30,9 @@ Clone from Github
 First-time clone
 """"""""""""""""
 
-* Download and install ``git`` if not already
+This is used when you do not have yet local copy on your machine.
+
+* Make sure ``git`` is installed.
 * Open console and navigate to path in the system to clone repository to. Use command ``cd your_path``
 * Clone repository with one of available ``3`` options
 
@@ -38,7 +46,8 @@ Update cloned to latest version
 """""""""""""""""""""""""""""""
 
 * Open console and navigate to path in the system where your resources repository is. Use command ``cd your_path``
-* Run ``git pull origin master --recurse-submodules`` command to pull latest changes and to fetch latest changes from submodules
+* Run ``git pull origin master --recurse-submodules`` command to pull latest changes and to fetch latest changes from submodules on ``master`` branch
+* Run ``git pull origin develop --recurse-submodules`` command to pull latest changes and to fetch latest changes from submodules on ``develop`` branch
 * Run ``git submodule foreach git pull origin master`` to update & merge all submodules
 
 .. note::
@@ -49,18 +58,21 @@ Add library to project
 ^^^^^^^^^^^^^^^^^^^^^^
 
 At this point it is assumed that you have successfully download library, either cloned it or from releases page.
+Next step is to add the library to the project, by means of source files to compiler inputs and header files in search path
 
-* Copy ``lwrb`` folder to your project
-* Add ``lwrb/src/include`` folder to `include path` of your toolchain
-* Add source files from ``lwrb/src/`` folder to toolchain build
+* Copy ``lwrb`` folder to your project, it contains library files
+* Add ``lwrb/src/include`` folder to `include path` of your toolchain. This is where `C/C++` compiler can find the files during compilation process. Usually using ``-I`` flag
+* Add source files from ``lwrb/src/`` folder to toolchain build. These files are built by `C/C++` compilery
 * Build the project
+
 
 Minimal example code
 ^^^^^^^^^^^^^^^^^^^^
 
-Run below example to test and verify library
+To verify proper library setup, minimal example has been prepared.
+Run it in your main application file to verify its proper execution
 
 .. literalinclude:: ../examples_src/example_minimal.c
     :language: c
     :linenos:
-    :caption: Minimal example code
+    :caption: Absolute minimum example
