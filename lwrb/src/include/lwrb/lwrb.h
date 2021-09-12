@@ -49,15 +49,19 @@ extern "C" {
 
 /**
  * \brief           Enable buffer structure pointer parameters as volatile
- * To use this feature, uncomment keyword below
+ * To use this feature, uncomment keyword below, or define in global compiler settings
  */
+#ifndef LWRB_VOLATILE
 #define LWRB_VOLATILE                           /* volatile */
+#endif
 
 /**
  * \brief           Adds 2 magic words to make sure if memory is corrupted
  *                  application can detect wrong data pointer and maximum size
  */
+#ifndef LWRB_USE_MAGIC
 #define LWRB_USE_MAGIC                          1
+#endif
 
 /**
  * \brief           Event type for buffer operations
