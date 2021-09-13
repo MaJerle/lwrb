@@ -79,6 +79,8 @@ access is granted to *read* operation while *write* operation from one thread ta
 .. tip::
    Functions considered as *read* operation are ``read``, ``skip``, ``peek`` and ``linear read``.
    Functions considered as *write* operation are ``write``, ``advance`` and ``linear write``.
+   Functions considered thread safe for both *read* *write* are ``free``, ``full``.
+   Remaning functions are not thread safe
 
 .. toctree::
     :maxdepth: 2
