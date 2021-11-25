@@ -29,7 +29,7 @@
  * This file is part of LwRB - Lightweight ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
- * Version:         v2.0.2
+ * Version:         v2.0.3
  */
 #include "lwrb/lwrb.h"
 
