@@ -2,6 +2,10 @@
 
 ## Develop
 
+## v2.0.3
+
+- Add `library.json` for Platform.IO
+
 ## v2.0.2
 
 - Add `volatile` keyword to all local variables to ensure thread safety in highest optimization
