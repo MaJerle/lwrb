@@ -76,7 +76,7 @@ Example for DMA transfer from memory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This is an example showing pseudo code for implementing data transfer using DMA with zero-copy overhead.
-For read operation purposes, application gets direct access to LwRB read pointer and length of contigouos memory.
+For read operation purposes, application gets direct access to LwRB read pointer and length of contiguous memory.
 
 It is assumed that after DMA transfer completes, interrupt is generated (embedded system) and buffer is skipped in the interrupt.
 
