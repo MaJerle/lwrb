@@ -1,0 +1,70 @@
+{
+	"version": "2.0.0",
+    
+    /* For this builds, you need
+     *
+     * - Ninja build system
+     * - MSYS2 compiler with ninja support
+     * - C/C++ extension for VSCode
+     * - CMake-Tools extension for VSCode
+     */
+	"tasks": [
+        {
+            "type": "cppbuild",
+            "label": "Build project",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "\"build\""
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Rebuild project",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "\"build\"",
+                "--clean-first"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+        },
+        {
+            "type": "shell",
+            "label": "Clean project",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "\"build\"",
+                "--target",
+                "clean"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "shell",
+            "label": "Run application",
+            "command": "${workspaceFolder}\\build\\LwLibPROJECT.exe",
+            "args": [],
+            "problemMatcher": [],
+        },
+    ]
+}
