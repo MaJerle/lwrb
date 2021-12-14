@@ -13,16 +13,11 @@
             "type": "cppbuild",
             "label": "Build project",
             "command": "cmake",
-            "args": [
-                "--build",
-                "\"build\""
-            ],
+            "args": ["--build", "\"build\""],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "problemMatcher": ["$gcc"],
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -30,30 +25,19 @@
         },
         {
             "type": "shell",
-            "label": "Rebuild project",
+            "label": "Re-build project",
             "command": "cmake",
-            "args": [
-                "--build",
-                "\"build\"",
-                "--clean-first"
-            ],
+            "args": ["--build", "\"build\"", "--clean-first", "-v"],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
-            "problemMatcher": [
-                "$gcc"
-            ],
+            "problemMatcher": ["$gcc"],
         },
         {
             "type": "shell",
             "label": "Clean project",
             "command": "cmake",
-            "args": [
-                "--build",
-                "\"build\"",
-                "--target",
-                "clean"
-            ],
+            "args": ["--build", "\"build\"", "--target", "clean"],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
