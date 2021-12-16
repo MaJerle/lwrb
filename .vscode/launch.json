@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "(Windows) Launch",
-            "type": "cppvsdbg",
+            "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}\\build\\LwLibPROJECT.exe",
             "miDebuggerPath": "c:\\msys64\\mingw64\\bin\\gdb.exe",
