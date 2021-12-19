@@ -20,5 +20,15 @@
 
 	},
 	"frameworks": "*",
-	"platforms": "*"
+	"platforms": "*",
+	"export": {
+		"exclude": [
+			".github",
+			"dev",
+			"docs",
+			"**/.vs",
+			"**/Debug",
+			"build"
+		]
+	}
 }
