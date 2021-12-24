@@ -18,12 +18,12 @@ add_executable(${PROJECT_NAME})
 
 # Add key executable block
 target_sources(${PROJECT_NAME} PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/dev/VisualStudio/main.c
+    ${CMAKE_CURRENT_LIST_DIR}/dev/main.c
     )
 
 # Add key include paths
 target_include_directories(${PROJECT_NAME} PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}/dev/VisualStudio
+    ${CMAKE_CURRENT_LIST_DIR}/dev
     )
 
 # Compilation definition information

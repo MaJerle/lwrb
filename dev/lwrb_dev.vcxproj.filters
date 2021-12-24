@@ -18,7 +18,7 @@
     <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\lwrb\src\lwrb\lwrb.c">
+    <ClCompile Include="..\lwrb\src\lwrb\lwrb.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
