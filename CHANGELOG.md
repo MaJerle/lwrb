@@ -2,6 +2,8 @@
 
 ## Develop
 
+- Split CMakeLists.txt files between library and executable
+
 ## v2.0.3
 
 - Add `library.json` for Platform.IO
