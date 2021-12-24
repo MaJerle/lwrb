@@ -45,10 +45,10 @@ This is used when you do not have yet local copy on your machine.
 Update cloned to latest version
 """""""""""""""""""""""""""""""
 
-* Open console and navigate to path in the system where your resources repository is. Use command ``cd your_path``
-* Run ``git pull origin master --recurse-submodules`` command to pull latest changes and to fetch latest changes from submodules on ``master`` branch
-* Run ``git pull origin develop --recurse-submodules`` command to pull latest changes and to fetch latest changes from submodules on ``develop`` branch
-* Run ``git submodule foreach git pull origin master`` to update & merge all submodules
+* Open console and navigate to path in the system where your repository is located. Use command ``cd your_path``
+* Run ``git pull origin master`` command to get latest changes on ``master`` branch
+* Run ``git pull origin develop`` command to get latest changes on ``develop`` branch
+* Run ``git submodule update --init --remote`` to update submodules to latest version
 
 .. note::
 	This is preferred option to use when you want to evaluate library and run prepared examples.
@@ -64,7 +64,6 @@ Next step is to add the library to the project, by means of source files to comp
 * Add ``lwrb/src/include`` folder to `include path` of your toolchain. This is where `C/C++` compiler can find the files during compilation process. Usually using ``-I`` flag
 * Add source files from ``lwrb/src/`` folder to toolchain build. These files are built by `C/C++` compilery
 * Build the project
-
 
 Minimal example code
 ^^^^^^^^^^^^^^^^^^^^
