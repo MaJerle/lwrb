@@ -4,7 +4,7 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}\\dev\\VisualStudio\\",
+                "${workspaceFolder}\\dev\\",
                 "${workspaceFolder}\\lwrb\\src\\include\\",
                 "${workspaceFolder}\\"    
             ],

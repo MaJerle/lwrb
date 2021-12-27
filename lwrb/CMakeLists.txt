@@ -1,20 +1,14 @@
 cmake_minimum_required(VERSION 3.13)
 
 # Debug message
-message("LWRB: Entering lib source CMakeLists.txt")
+message("Entering ${CMAKE_CURRENT_LIST_DIR}/CMakeLists.txt")
 
-# Set library name
-set(LWRB_LIB_NAME "lwrb")
+# Register core library
+add_library(lwrb INTERFACE)
+target_sources(lwrb PUBLIC ${CMAKE_CURRENT_LIST_DIR}/src/lwrb/lwrb.c)
+target_include_directories(lwrb INTERFACE ${CMAKE_CURRENT_LIST_DIR}/src/include)
 
-# Register library to the system
-add_library(${LWRB_LIB_NAME} INTERFACE)
+# Register other modules
 
-# Setup generic source files
-target_sources(${LWRB_LIB_NAME} INTERFACE
-    ${CMAKE_CURRENT_LIST_DIR}/src/lwrb/lwrb.c
-    )
-
-# Setup include directories
-target_include_directories(${LWRB_LIB_NAME} INTERFACE
-    ${CMAKE_CURRENT_LIST_DIR}/src/include
-    )
+# Debug message
+message("Exiting ${CMAKE_CURRENT_LIST_DIR}/CMakeLists.txt")
