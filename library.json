@@ -9,9 +9,9 @@
 	},
 	"authors": [
 		{
-		  "name": "Tilen Majerle",
-		  "email": "tilen@majerle.eu",
-		  "url": "https://majerle.eu"
+		  	"name": "Tilen Majerle",
+		  	"email": "tilen@majerle.eu",
+		  	"url": "https://majerle.eu"
 		}
 	],
 	"license": "MIT",
@@ -28,7 +28,8 @@
 			"docs",
 			"**/.vs",
 			"**/Debug",
-			"build"
+			"build",
+			"**/build"
 		]
 	}
 }
