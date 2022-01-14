@@ -3,6 +3,7 @@
 ## Develop
 
 - Split CMakeLists.txt files between library and executable
+- Change license year to 2022
 
 ## v2.0.3
 
