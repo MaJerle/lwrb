@@ -1,19 +1,11 @@
 {
 	"version": "2.0.0",
-    
-    /* For this builds, you need
-     *
-     * - Ninja build system
-     * - MSYS2 compiler with ninja support
-     * - C/C++ extension for VSCode
-     * - CMake-Tools extension for VSCode
-     */
 	"tasks": [
         {
             "type": "cppbuild",
             "label": "Build project",
             "command": "cmake",
-            "args": ["--build", "\"build\""],
+            "args": ["--build", "\"build\"", "-j", "8"],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -27,7 +19,7 @@
             "type": "shell",
             "label": "Re-build project",
             "command": "cmake",
-            "args": ["--build", "\"build\"", "--clean-first", "-v"],
+            "args": ["--build", "\"build\"", "--clean-first", "-v", "-j", "8"],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
