@@ -162,7 +162,7 @@ lwrb_write(lwrb_t* buff, const void* data, size_t btw) {
      * This is to ensure no read operation can access intermediate data
      */
     buff->w = buff_w_ptr;
-    
+
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, tocopy + btw);
     return tocopy + btw;
 }

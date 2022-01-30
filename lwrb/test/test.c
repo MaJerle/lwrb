@@ -17,20 +17,23 @@
 /*======= Local Macro Definitions ===========================================*/
 /*======= Local function prototypes =========================================*/
 
-void basic_read_and_write(lwrb_t *buff, uint8_t *data_to_write, size_t data_size);
+void basic_read_and_write(lwrb_t* buff, uint8_t* data_to_write, size_t data_size);
 
 /*======= Local variable declarations =======================================*/
 /*======= Global function implementations ===================================*/
 
 /* Requires a definition for Unity to compile */
 
-void setUp(void) { }
+void
+setUp(void) { }
 
-void tearDown(void) { }
+void
+tearDown(void) { }
 
 /*======= Tests ==============================================================*/
 
-void testNullInputToInit_should_fail(void) {
+void
+testNullInputToInit_should_fail(void) {
     uint8_t ret;
     lwrb_t buff = { 0 };
     uint8_t buff_data[1];
@@ -48,7 +51,8 @@ void testNullInputToInit_should_fail(void) {
     TEST_ASSERT_EQUAL(0, ret);
 }
 
-void testNormalInputToInit_should_succeed(void) {
+void
+testNormalInputToInit_should_succeed(void) {
     uint8_t ret;
     lwrb_t buff = { 0 };
     uint8_t buff_data[1];
@@ -60,13 +64,15 @@ void testNormalInputToInit_should_succeed(void) {
     TEST_ASSERT_EQUAL(1, ret);
 }
 
-void testAddElementsToQueueAndRead_should_succeed(void) {
+void
+testAddElementsToQueueAndRead_should_succeed(void) {
     uint8_t data_to_write[] = {0, 1, 2, 3, 4, 5, 6, 7};
     lwrb_t buff = { 0 };
     basic_read_and_write(&buff, data_to_write, sizeof(data_to_write));
 }
 
-void testAddElementsToQueueAndReadAndVerifyEmpty_should_succeed(void) {
+void
+testAddElementsToQueueAndReadAndVerifyEmpty_should_succeed(void) {
     uint8_t data_to_write[] = {0, 1, 2, 3, 4, 5, 6, 7};
     lwrb_t buff = { 0 };
     basic_read_and_write(&buff, data_to_write, sizeof(data_to_write));
@@ -75,7 +81,8 @@ void testAddElementsToQueueAndReadAndVerifyEmpty_should_succeed(void) {
     TEST_ASSERT_EQUAL(sizeof(data_to_write), n_free_bytes);
 }
 
-void testAddElementsToQueueAndReadTooSmallBuffer_should_fail(void) {
+void
+testAddElementsToQueueAndReadTooSmallBuffer_should_fail(void) {
     uint8_t data_to_write[] = {0, 1, 2, 3, 4, 5, 6, 7};
     lwrb_t buff = { 0 };
 
@@ -94,7 +101,8 @@ void testAddElementsToQueueAndReadTooSmallBuffer_should_fail(void) {
 
 /*======= Main ===============================================================*/
 
-int main (void) {
+int
+main (void) {
     UNITY_BEGIN();
     RUN_TEST(testNullInputToInit_should_fail);
     RUN_TEST(testNormalInputToInit_should_succeed);
@@ -106,10 +114,11 @@ int main (void) {
 
 /*======= Local function implementations =====================================*/
 
-void basic_read_and_write(lwrb_t *buff, uint8_t *data_to_write, size_t data_size) {
+void
+basic_read_and_write(lwrb_t* buff, uint8_t* data_to_write, size_t data_size) {
     uint8_t ret;
     size_t buffer_size = (sizeof(uint8_t) * data_size) + 1;
-    uint8_t *buff_data = malloc(buffer_size);
+    uint8_t* buff_data = malloc(buffer_size);
 
     ret = lwrb_init(buff, buff_data, buffer_size);
     TEST_ASSERT_EQUAL(1, ret);
