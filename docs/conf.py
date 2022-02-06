@@ -23,7 +23,7 @@ subprocess.call('doxygen doxyfile.doxy', shell=True)
 # -- Project information -----------------------------------------------------
 
 project = 'LwRB'
-copyright = '2020, Tilen MAJERLE'
+copyright = '2022, Tilen MAJERLE'
 author = 'Tilen MAJERLE'
 
 # Try to get branch at which this is running
@@ -115,9 +115,10 @@ html_static_path = ['static']
 html_css_files = [
     'css/common.css',
     'css/custom.css',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css',
 ]
 html_js_files = [
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css'
+    ''
 ]
 
 master_doc = 'index'
