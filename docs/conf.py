@@ -28,9 +28,19 @@ author = 'Tilen MAJERLE'
 
 # Try to get branch at which this is running
 # and try to determine which version to display in sphinx
-# Version is using git tag if on master or "latest-develop" if on develop branch
+# Version is using git tag if on master/main or "latest-develop" if on develop branch
 version = ''
 git_branch = ''
+
+def cmd_exec_print(t):
+    print("cmd > ", t, "\n", os.popen(t).read().strip(), "\n")
+
+# Print demo data here
+cmd_exec_print('git branch')
+cmd_exec_print('git describe')
+cmd_exec_print('git describe --tags')
+cmd_exec_print('git describe --tags --abbrev=0')
+cmd_exec_print('git describe --tags --abbrev=1')
 
 # Get current branch
 res = os.popen('git branch').read().strip()
@@ -41,17 +51,18 @@ for line in res.split("\n"):
 # Decision for display version
 git_branch = git_branch.replace('(HEAD detached at ', '').replace(')', '')
 if git_branch.find('master') >= 0 or git_branch.find('main') >= 0:
-    version = os.popen('git describe --tags --abbrev=0').read().strip()
-    if version == '':
-        version = 'v0.0.0'
-elif git_branch.find('develop') != -1 and not (git_branch.find('develop-') >= 0 or git_branch.find('develop/') >= 0):
+    #version = os.popen('git describe --tags --abbrev=0').read().strip()
+    version = 'latest-stable'
+elif git_branch.find('develop-') >= 0 or git_branch.find('develop/') >= 0:
+    version = 'branch-' + git_branch
+elif git_branch == 'develop' or git_branch == 'origin/develop':
     version = 'latest-develop'
 else:
-    version = 'branch-' + git_branch
+    version = os.popen('git describe --tags --abbrev=0').read().strip()
 
 # For debugging purpose only
 print("GIT BRANCH: " + git_branch)
-print("GIT VERSION: " + version)
+print("PROJ VERSION: " + version)
 
 # -- General configuration ---------------------------------------------------
 
