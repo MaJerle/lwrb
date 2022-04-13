@@ -3,18 +3,6 @@
     "configurations": [
         {
             "name": "Win32",
-            "includePath": [
-                "${workspaceFolder}\\dev\\",
-                "${workspaceFolder}\\lwrb\\src\\include\\",
-                "${workspaceFolder}\\"    
-            ],
-            "defines": [
-                "WIN32",
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE",
-                "LWESP_DEV"
-            ],
             "compilerPath": "c:\\msys64\\mingw64\\bin\\gcc.exe",
             "cStandard": "gnu17",
             "cppStandard": "gnu++14",
