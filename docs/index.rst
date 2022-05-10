@@ -83,6 +83,7 @@ Table of contents
 
     LwDTC - DateTimeCron <https://github.com/MaJerle/lwdtc>
     LwESP - ESP-AT library <https://github.com/MaJerle/lwesp>
+    LwEVT - Event manager <https://github.com/MaJerle/lwevt>
     LwGPS - GPS NMEA parser <https://github.com/MaJerle/lwgps>
     LwGSM - GSM-AT library <https://github.com/MaJerle/lwgsm>
     LwJSON - JSON parser <https://github.com/MaJerle/lwjson>
