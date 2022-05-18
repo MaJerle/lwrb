@@ -5,7 +5,7 @@
             "type": "cppbuild",
             "label": "Build project",
             "command": "cmake",
-            "args": ["--build", "\"build\"", "-j", "8"],
+            "args": ["--build", "${command:cmake.buildDirectory}", "-j", "8"],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -19,7 +19,7 @@
             "type": "shell",
             "label": "Re-build project",
             "command": "cmake",
-            "args": ["--build", "\"build\"", "--clean-first", "-v", "-j", "8"],
+            "args": ["--build", "${command:cmake.buildDirectory}", "--clean-first", "-v", "-j", "8"],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -29,7 +29,7 @@
             "type": "shell",
             "label": "Clean project",
             "command": "cmake",
-            "args": ["--build", "\"build\"", "--target", "clean"],
+            "args": ["--build", "${command:cmake.buildDirectory}", "--target", "clean"],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -38,7 +38,7 @@
         {
             "type": "shell",
             "label": "Run application",
-            "command": "${workspaceFolder}\\build\\LwLibPROJECT.exe",
+            "command": "${command:cmake.buildDirectory}\\LwLibPROJECT.exe",
             "args": [],
             "problemMatcher": [],
         },

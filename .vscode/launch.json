@@ -8,13 +8,12 @@
             "name": "(Windows) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}\\build\\LwLibPROJECT.exe",
+            "program": "${command:cmake.buildDirectory}\\LwLibPROJECT.exe",
             "miDebuggerPath": "c:\\msys64\\mingw64\\bin\\gdb.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
-            "environment": [],
-            "console": "integratedTerminal"
+            "environment": []
         }
     ]
 }
