@@ -38,7 +38,7 @@
         {
             "type": "shell",
             "label": "Run application",
-            "command": "${command:cmake.buildDirectory}\\LwLibPROJECT.exe",
+            "command": "${command:cmake.launchTargetPath}",
             "args": [],
             "problemMatcher": [],
         },

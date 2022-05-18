@@ -8,7 +8,7 @@
             "name": "(Windows) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${command:cmake.buildDirectory}\\LwLibPROJECT.exe",
+            "program": "${command:cmake.launchTargetPath}",
             "miDebuggerPath": "c:\\msys64\\mingw64\\bin\\gdb.exe",
             "args": [],
             "stopAtEntry": false,
