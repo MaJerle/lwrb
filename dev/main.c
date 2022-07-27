@@ -9,12 +9,11 @@
 uint8_t lwrb_data[8 + 1];
 lwrb_t buff;
 
-static void debug_buff(uint8_t cmp, size_t r_w, size_t r_r, size_t r_f, size_t r_e);
-
 uint8_t tmp[8];
 
 void
 my_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
+    (void)buff;
     switch (type) {
         case LWRB_EVT_RESET:
             printf("[EVT] Buffer reset event!\r\n");
@@ -59,30 +58,7 @@ main() {
 
     lwrb_reset(&buff);
 
-    //for (size_t r = 0; r < sizeof(lwrb_data); ++r) {
-    //    void* ptr;
-    //    for (size_t w = 0; w < sizeof(lwrb_data); ++w) {
-    //        buff.r = r;
-    //        buff.w = w;
-    //        ptr = lwrb_get_linear_block_write_address(&buff);
-    //        len = lwrb_get_linear_block_write_length(&buff);
-    //        printf("W: %3d, R: %3d, LEN: %3d\r\n", (int)w, (int)r, (int)len);
-    //    }
-    //}
+    (void)len;
 
     return 0;
-}
-
-static void
-debug_buff(uint8_t cmp, size_t r_w, size_t r_r, size_t r_f, size_t r_e) {
-    /* Previous and current write, read pointers and full, empty values */
-    static size_t p_r, p_w, p_f, p_e;
-    size_t r, w, f, e;
-
-    r = buff.r;
-    w = buff.w;
-    f = lwrb_get_full(&buff);
-    e = lwrb_get_free(&buff);
-
-    printf("R: %3d, W: %3d, F: %3d, E: %3d\r\n", (int)r, (int)w, (int)f, (int)e);
 }
