@@ -22,6 +22,11 @@ to process the data from another thread.
 .. note::
     No race-condition is introduced when application uses LwRB with single write entry and single read exit point.
 
+Thread (or interrupt) safety, with one entry and one exit points, is achieved by storing actual buffer read and write pointer variables to the local ones before performing any calculation. Therefore multiple *conditional* checks are guaranteed to be performed on the same local variables, even if actual buffer pointers get modified.
+
+* Read pointer could get changed by interrupt or another thread when application tries to write to buffer
+* Write pointer could get changed by interrupt or another thread when application ties to read from buffer
+
 Thread safety gets broken when application does one of the following:
 
 * Uses multiple write entry points to the single LwRB instance
