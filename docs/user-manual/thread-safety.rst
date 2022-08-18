@@ -8,7 +8,7 @@ Common problem most of implementations have is linked to multi-thread environmen
 This is linked to common question *What happens if I write to buffer while another thread is reading from it?*
 
 One of the main requirements (beside being lightweight) of *LwRB* was to allow *read-while-write* or *write-while-read* operations.
-This can be (and it is) achieved only when there is single write entry point and single read exit point.
+This is  achieved only when there is single write entry point and single read exit point.
 
 .. figure:: ../static/images/buff_thread_safety_single_read_write.svg
     :align: center
@@ -16,18 +16,25 @@ This can be (and it is) achieved only when there is single write entry point and
 
     Write and read operation with single entry and exit points
 
-This is most often used as *pipe* to write (for example) raw data to the buffer allowing another task
+Often called and used as *pipe* to write (for example) raw data to the buffer allowing another task
 to process the data from another thread.
 
 .. note::
     No race-condition is introduced when application uses LwRB with single write entry and single read exit point.
+    LwRB uses *C11* standard ``stdatomic.h`` library to ensure read and write operations are race-free for any platform supporting C11 and its respected atomic library.
 
-Thread (or interrupt) safety, with one entry and one exit points, is achieved by storing actual buffer read and write pointer variables to the local ones before performing any calculation. Therefore multiple *conditional* checks are guaranteed to be performed on the same local variables, even if actual buffer pointers get modified.
+Thread (or interrupt) safety, with one entry and one exit points, is achieved by storing actual buffer read and write pointer variables to the local ones before performing any calculation.
+Therefore multiple *conditional* checks are guaranteed to be performed on the same local variables, even if actual buffer pointers get modified.
 
 * Read pointer could get changed by interrupt or another thread when application tries to write to buffer
 * Write pointer could get changed by interrupt or another thread when application ties to read from buffer
 
-Thread safety gets broken when application does one of the following:
+.. note::
+    Even single entry and single exit points may introduce race condition, especially on smaller system, such as 8-bit or 16-bit system, or in general,
+    where arbitrary type (normaly `size_t`) is `sizeof(type) < architecture_size`.
+    This is solved by C11 atomic library, that ensures atomic reads and writes to key structure members
+
+Thread safety gets completely broken when application does one of the following:
 
 * Uses multiple write entry points to the single LwRB instance
 * Uses multiple read exit points to the single LwRB instance
