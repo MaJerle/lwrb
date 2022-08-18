@@ -238,7 +238,6 @@ lwrb_peek(lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
     if (!BUF_IS_VALID(buff) || data == NULL || btp == 0) {
         return 0;
     }
-
     r = buff->r;
 
     /* Calculate maximum number of bytes available to read */
@@ -278,7 +277,7 @@ lwrb_peek(lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
  * \return          Number of free bytes in memory
  */
 size_t
-lwrb_get_free(lwrb_t* buff) {
+lwrb_get_free(const volatile lwrb_t* buff) {
     size_t size;
     volatile size_t w, r;
 
@@ -286,9 +285,27 @@ lwrb_get_free(lwrb_t* buff) {
         return 0;
     }
 
-    /* Use temporary values in case they are changed during operations */
+    /*
+     * Copy buffer pointers to local variables.
+     *
+     * To ensure thread safety (only when in single-entry, single-exit FIFO mode use case),
+     * it is important to write buffer r and w values to local w and r variables.
+     * 
+     * Local variables will ensure below if statements will always use the same value,
+     * even if buff->w or buff->r get changed during interrupt processing.
+     * 
+     * They may change during load operation, important is that
+     * they do not change during if-elseif-else operations following these assignments.
+     * 
+     * lwrb_get_free is only called for write purpose, and when in FIFO mode, then:
+     * - buff->w pointer will not change by another process/interrupt because we are in write mode just now
+     * - buff->r pointer may change by another process. If it gets changed after buff->r has been loaded to local variable,
+     *    buffer will see "free size" less than it actually is. This is not a problem, application can
+     *    always try again to write more data to remaining free memory that was read just during copy operation
+     */
     w = buff->w;
     r = buff->r;
+
     if (w == r) {
         size = buff->size;
     } else if (r > w) {
@@ -307,7 +324,7 @@ lwrb_get_free(lwrb_t* buff) {
  * \return          Number of bytes ready to be read
  */
 size_t
-lwrb_get_full(lwrb_t* buff) {
+lwrb_get_full(const volatile lwrb_t* buff) {
     size_t size;
     volatile size_t w, r;
 
@@ -315,9 +332,27 @@ lwrb_get_full(lwrb_t* buff) {
         return 0;
     }
 
-    /* Use temporary values in case they are changed during operations */
+    /*
+     * Copy buffer pointers to local variables.
+     *
+     * To ensure thread safety (only when in single-entry, single-exit FIFO mode use case),
+     * it is important to write buffer r and w values to local w and r variables.
+     * 
+     * Local variables will ensure below if statements will always use the same value,
+     * even if buff->w or buff->r get changed during interrupt processing.
+     * 
+     * They may change during load operation, important is that
+     * they do not change during if-elseif-else operations following these assignments.
+     * 
+     * lwrb_get_full is only called for read purpose, and when in FIFO mode, then:
+     * - buff->r pointer will not change by another process/interrupt because we are in read mode just now
+     * - buff->w pointer may change by another process. If it gets changed after buff->w has been loaded to local variable,
+     *    buffer will see "full size" less than it really is. This is not a problem, application can
+     *    always try again to read more data from remaining full memory that was written just during copy operation
+     */
     w = buff->w;
     r = buff->r;
+
     if (w == r) {
         size = 0;
     } else if (w > r) {
@@ -349,7 +384,7 @@ lwrb_reset(lwrb_t* buff) {
  * \return          Linear buffer start address
  */
 void*
-lwrb_get_linear_block_read_address(lwrb_t* buff) {
+lwrb_get_linear_block_read_address(const lwrb_t* buff) {
     if (!BUF_IS_VALID(buff)) {
         return NULL;
     }
@@ -362,7 +397,7 @@ lwrb_get_linear_block_read_address(lwrb_t* buff) {
  * \return          Linear buffer size in units of bytes for read operation
  */
 size_t
-lwrb_get_linear_block_read_length(lwrb_t* buff) {
+lwrb_get_linear_block_read_length(const lwrb_t* buff) {
     size_t len;
     volatile size_t w, r;
 
@@ -418,7 +453,7 @@ lwrb_skip(lwrb_t* buff, size_t len) {
  * \return          Linear buffer start address
  */
 void*
-lwrb_get_linear_block_write_address(lwrb_t* buff) {
+lwrb_get_linear_block_write_address(const lwrb_t* buff) {
     if (!BUF_IS_VALID(buff)) {
         return NULL;
     }
@@ -431,7 +466,7 @@ lwrb_get_linear_block_write_address(lwrb_t* buff) {
  * \return          Linear buffer size in units of bytes for write operation
  */
 size_t
-lwrb_get_linear_block_write_length(lwrb_t* buff) {
+lwrb_get_linear_block_write_length(const lwrb_t* buff) {
     size_t len;
     volatile size_t w, r;
 
