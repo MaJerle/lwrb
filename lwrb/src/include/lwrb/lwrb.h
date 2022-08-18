@@ -36,6 +36,7 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <stdatomic.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,8 +88,8 @@ typedef struct lwrb {
     uint8_t* buff;                              /*!< Pointer to buffer data.
                                                     Buffer is considered initialized when `buff != NULL` and `size > 0` */
     size_t size;                                /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
-    volatile size_t r;                          /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
-    volatile size_t w;                          /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    atomic_size_t r;                            /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    atomic_size_t w;                            /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
     lwrb_evt_fn evt_fn;                         /*!< Pointer to event callback function */
 #if LWRB_USE_MAGIC
     uint32_t magic2;                            /*!< Magic 2 word */
@@ -102,13 +103,13 @@ void        lwrb_reset(lwrb_t* buff);
 void        lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn fn);
 
 /* Read/Write functions */
-size_t      lwrb_write(volatile lwrb_t* buff, const void* data, size_t btw);
-size_t      lwrb_read(volatile lwrb_t* buff, void* data, size_t btr);
-size_t      lwrb_peek(volatile lwrb_t* buff, size_t skip_count, void* data, size_t btp);
+size_t      lwrb_write(lwrb_t* buff, const void* data, size_t btw);
+size_t      lwrb_read(lwrb_t* buff, void* data, size_t btr);
+size_t      lwrb_peek(const lwrb_t* buff, size_t skip_count, void* data, size_t btp);
 
 /* Buffer size information */
-size_t      lwrb_get_free(const volatile lwrb_t* buff);
-size_t      lwrb_get_full(const volatile lwrb_t* buff);
+size_t      lwrb_get_free(const lwrb_t* buff);
+size_t      lwrb_get_full(const lwrb_t* buff);
 
 /* Read data block management */
 void*       lwrb_get_linear_block_read_address(const lwrb_t* buff);

@@ -123,13 +123,14 @@ lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn evt_fn) {
  *                      to copy full data array
  */
 size_t
-lwrb_write(volatile lwrb_t* buff, const void* data, size_t btw) {
+lwrb_write(lwrb_t* buff, const void* data, size_t btw) {
     size_t tocopy, free, buff_w_ptr;
     const uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btw == 0) {
         return 0;
     }
+    buff_w_ptr = atomic_load_explicit(&buff->w, memory_order_relaxed);
 
     /* Calculate maximum number of bytes available to write */
     free = lwrb_get_free(buff);
@@ -139,7 +140,6 @@ lwrb_write(volatile lwrb_t* buff, const void* data, size_t btw) {
     }
 
     /* Step 1: Write data to linear part of buffer */
-    buff_w_ptr = buff->w;
     tocopy = BUF_MIN(buff->size - buff_w_ptr, btw);
     BUF_MEMCPY(&buff->buff[buff_w_ptr], d, tocopy);
     buff_w_ptr += tocopy;
@@ -160,7 +160,7 @@ lwrb_write(volatile lwrb_t* buff, const void* data, size_t btw) {
      * Write final value to the actual running variable.
      * This is to ensure no read operation can access intermediate data
      */
-    buff->w = buff_w_ptr;
+    atomic_store_explicit(&buff->w, buff_w_ptr, memory_order_release);
 
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, tocopy + btw);
     return tocopy + btw;
@@ -176,13 +176,16 @@ lwrb_write(volatile lwrb_t* buff, const void* data, size_t btw) {
  * \return          Number of bytes read and copied to data array
  */
 size_t
-lwrb_read(volatile lwrb_t* buff, void* data, size_t btr) {
+lwrb_read(lwrb_t* buff, void* data, size_t btr) {
     size_t tocopy, full, buff_r_ptr;
     uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btr == 0) {
         return 0;
     }
+
+    /* Get buffer read pointer */
+    buff_r_ptr = atomic_load_explicit(&buff->r, memory_order_relaxed);
 
     /* Calculate maximum number of bytes available to read */
     full = lwrb_get_full(buff);
@@ -192,7 +195,6 @@ lwrb_read(volatile lwrb_t* buff, void* data, size_t btr) {
     }
 
     /* Step 1: Read data from linear part of buffer */
-    buff_r_ptr = buff->r;
     tocopy = BUF_MIN(buff->size - buff_r_ptr, btr);
     BUF_MEMCPY(d, &buff->buff[buff_r_ptr], tocopy);
     buff_r_ptr += tocopy;
@@ -213,7 +215,7 @@ lwrb_read(volatile lwrb_t* buff, void* data, size_t btr) {
      * Write final value to the actual running variable.
      * This is to ensure no write operation can access intermediate data
      */
-    buff->r = buff_r_ptr;
+    atomic_store_explicit(&buff->r, buff_r_ptr, memory_order_release);
 
     BUF_SEND_EVT(buff, LWRB_EVT_READ, tocopy + btr);
     return tocopy + btr;
@@ -228,19 +230,20 @@ lwrb_read(volatile lwrb_t* buff, void* data, size_t btr) {
  * \return          Number of bytes peeked and written to output array
  */
 size_t
-lwrb_peek(volatile lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
+lwrb_peek(const lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
     size_t full, tocopy, r;
     uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btp == 0) {
         return 0;
     }
-    r = buff->r;
+    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
 
-    /* Calculate maximum number of bytes available to read */
+    /*
+     * Calculate maximum number of bytes available to read
+     * and check if we can even fit to it
+     */
     full = lwrb_get_full(buff);
-
-    /* Skip beginning of buffer */
     if (skip_count >= full) {
         return 0;
     }
@@ -274,7 +277,7 @@ lwrb_peek(volatile lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
  * \return          Number of free bytes in memory
  */
 size_t
-lwrb_get_free(const volatile lwrb_t* buff) {
+lwrb_get_free(const lwrb_t* buff) {
     size_t size, w, r;
 
     if (!BUF_IS_VALID(buff)) {
@@ -282,7 +285,7 @@ lwrb_get_free(const volatile lwrb_t* buff) {
     }
 
     /*
-     * Copy buffer pointers to local variables.
+     * Copy buffer pointers to local variables with atomic access.
      *
      * To ensure thread safety (only when in single-entry, single-exit FIFO mode use case),
      * it is important to write buffer r and w values to local w and r variables.
@@ -299,8 +302,8 @@ lwrb_get_free(const volatile lwrb_t* buff) {
      *    buffer will see "free size" less than it actually is. This is not a problem, application can
      *    always try again to write more data to remaining free memory that was read just during copy operation
      */
-    w = buff->w;
-    r = buff->r;
+    w = atomic_load_explicit(&buff->w, memory_order_relaxed);
+    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
 
     if (w == r) {
         size = buff->size;
@@ -320,7 +323,7 @@ lwrb_get_free(const volatile lwrb_t* buff) {
  * \return          Number of bytes ready to be read
  */
 size_t
-lwrb_get_full(const volatile lwrb_t* buff) {
+lwrb_get_full(const lwrb_t* buff) {
     size_t size, w, r;
 
     if (!BUF_IS_VALID(buff)) {
@@ -345,8 +348,8 @@ lwrb_get_full(const volatile lwrb_t* buff) {
      *    buffer will see "full size" less than it really is. This is not a problem, application can
      *    always try again to read more data from remaining full memory that was written just during copy operation
      */
-    w = buff->w;
-    r = buff->r;
+    w = atomic_load_explicit(&buff->w, memory_order_relaxed);
+    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
 
     if (w == r) {
         size = 0;
@@ -367,8 +370,8 @@ lwrb_get_full(const volatile lwrb_t* buff) {
 void
 lwrb_reset(lwrb_t* buff) {
     if (BUF_IS_VALID(buff)) {
-        buff->w = 0;
-        buff->r = 0;
+        atomic_store_explicit(&buff->w, 0, memory_order_release);
+        atomic_store_explicit(&buff->r, 0, memory_order_release);
         BUF_SEND_EVT(buff, LWRB_EVT_RESET, 0);
     }
 }
@@ -401,8 +404,8 @@ lwrb_get_linear_block_read_length(const lwrb_t* buff) {
     }
 
     /* Use temporary values in case they are changed during operations */
-    w = buff->w;
-    r = buff->r;
+    w = atomic_load_explicit(&buff->w, memory_order_relaxed);
+    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
     if (w > r) {
         len = w - r;
     } else if (r > w) {
@@ -424,8 +427,7 @@ lwrb_get_linear_block_read_length(const lwrb_t* buff) {
  */
 size_t
 lwrb_skip(lwrb_t* buff, size_t len) {
-    size_t full;
-    volatile size_t r;
+    size_t full, r;
 
     if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
@@ -433,11 +435,12 @@ lwrb_skip(lwrb_t* buff, size_t len) {
 
     full = lwrb_get_full(buff);
     len = BUF_MIN(len, full);
-    r = buff->r + len;
+    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
+    r += len;
     if (r >= buff->size) {
         r -= buff->size;
     }
-    buff->r = r;
+    atomic_store_explicit(&buff->r, r, memory_order_release);
     BUF_SEND_EVT(buff, LWRB_EVT_READ, len);
     return len;
 }
@@ -470,8 +473,8 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
     }
 
     /* Use temporary values in case they are changed during operations */
-    w = buff->w;
-    r = buff->r;
+    w = atomic_load_explicit(&buff->w, memory_order_relaxed);
+    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
     if (w >= r) {
         len = buff->size - w;
         /*
@@ -505,8 +508,7 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
  */
 size_t
 lwrb_advance(lwrb_t* buff, size_t len) {
-    size_t free;
-    volatile size_t w;
+    size_t free, w;
 
     if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
@@ -515,11 +517,12 @@ lwrb_advance(lwrb_t* buff, size_t len) {
     /* Use local variables before writing back to main structure */
     free = lwrb_get_free(buff);
     len = BUF_MIN(len, free);
-    w = buff->w + len;
+    w = atomic_load_explicit(&buff->w, memory_order_relaxed);
+    w += len;
     if (w >= buff->size) {
         w -= buff->size;
     }
-    buff->w = w;
+    atomic_store_explicit(&buff->w, w, memory_order_release);
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, len);
     return len;
 }
