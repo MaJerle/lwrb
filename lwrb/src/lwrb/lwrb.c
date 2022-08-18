@@ -47,7 +47,7 @@
 #endif /* LWRB_USE_MAGIC */
 #define BUF_MIN(x, y)                   ((x) < (y) ? (x) : (y))
 #define BUF_MAX(x, y)                   ((x) > (y) ? (x) : (y))
-#define BUF_SEND_EVT(b, type, bp)       do { if ((b)->evt_fn != NULL) { (b)->evt_fn((b), (type), (bp)); } } while (0)
+#define BUF_SEND_EVT(b, type, bp)       do { if ((b)->evt_fn != NULL) { (b)->evt_fn((void *)(b), (type), (bp)); } } while (0)
 
 /**
  * \brief           Initialize buffer handle to default values with size and buffer data array
@@ -123,9 +123,8 @@ lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn evt_fn) {
  *                      to copy full data array
  */
 size_t
-lwrb_write(lwrb_t* buff, const void* data, size_t btw) {
-    size_t tocopy, free;
-    volatile size_t buff_w_ptr;
+lwrb_write(volatile lwrb_t* buff, const void* data, size_t btw) {
+    size_t tocopy, free, buff_w_ptr;
     const uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btw == 0) {
@@ -177,9 +176,8 @@ lwrb_write(lwrb_t* buff, const void* data, size_t btw) {
  * \return          Number of bytes read and copied to data array
  */
 size_t
-lwrb_read(lwrb_t* buff, void* data, size_t btr) {
-    size_t tocopy, full;
-    volatile size_t buff_r_ptr;
+lwrb_read(volatile lwrb_t* buff, void* data, size_t btr) {
+    size_t tocopy, full, buff_r_ptr;
     uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btr == 0) {
@@ -230,9 +228,8 @@ lwrb_read(lwrb_t* buff, void* data, size_t btr) {
  * \return          Number of bytes peeked and written to output array
  */
 size_t
-lwrb_peek(lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
-    size_t full, tocopy;
-    volatile size_t r;
+lwrb_peek(volatile lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
+    size_t full, tocopy, r;
     uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btp == 0) {
@@ -278,8 +275,7 @@ lwrb_peek(lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
  */
 size_t
 lwrb_get_free(const volatile lwrb_t* buff) {
-    size_t size;
-    volatile size_t w, r;
+    size_t size, w, r;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
@@ -325,8 +321,7 @@ lwrb_get_free(const volatile lwrb_t* buff) {
  */
 size_t
 lwrb_get_full(const volatile lwrb_t* buff) {
-    size_t size;
-    volatile size_t w, r;
+    size_t size, w, r;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
