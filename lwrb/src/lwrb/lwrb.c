@@ -130,7 +130,7 @@ lwrb_write(lwrb_t* buff, const void* data, size_t btw) {
     if (!BUF_IS_VALID(buff) || data == NULL || btw == 0) {
         return 0;
     }
-    buff_w_ptr = atomic_load_explicit(&buff->w, memory_order_relaxed);
+    buff_w_ptr = atomic_load_explicit(&buff->w, memory_order_acquire);
 
     /* Calculate maximum number of bytes available to write */
     free = lwrb_get_free(buff);
@@ -185,7 +185,7 @@ lwrb_read(lwrb_t* buff, void* data, size_t btr) {
     }
 
     /* Get buffer read pointer */
-    buff_r_ptr = atomic_load_explicit(&buff->r, memory_order_relaxed);
+    buff_r_ptr = atomic_load_explicit(&buff->r, memory_order_acquire);
 
     /* Calculate maximum number of bytes available to read */
     full = lwrb_get_full(buff);
@@ -403,7 +403,10 @@ lwrb_get_linear_block_read_length(const lwrb_t* buff) {
         return 0;
     }
 
-    /* Use temporary values in case they are changed during operations */
+    /*
+     * Use temporary values in case they are changed during operations.
+     * See lwrb_buff_free or lwrb_buff_full functions for more information why this is OK.
+     */
     w = atomic_load_explicit(&buff->w, memory_order_relaxed);
     r = atomic_load_explicit(&buff->r, memory_order_relaxed);
     if (w > r) {
@@ -472,7 +475,10 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
         return 0;
     }
 
-    /* Use temporary values in case they are changed during operations */
+    /*
+     * Use temporary values in case they are changed during operations.
+     * See lwrb_buff_free or lwrb_buff_full functions for more information why this is OK.
+     */
     w = atomic_load_explicit(&buff->w, memory_order_relaxed);
     r = atomic_load_explicit(&buff->r, memory_order_relaxed);
     if (w >= r) {
