@@ -3,7 +3,7 @@ lwrb_t buff;
 uint8_t buff_data[8];
 
 /* Working data length */
-size_t len;
+volatile size_t len;
 
 /* Send data function */
 void send_data(void);

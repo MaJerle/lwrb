@@ -1,6 +1,6 @@
 {
 	"name": "LwRB",
-	"version": "2.0.2",
+	"version": "3.0.0-rc1",
 	"description": "Lightweight general purpose ring buffer with optimizations for embedded systems",
 	"keywords": "buffer, ring buffer, library, rb, cyclic",
 	"repository": {
@@ -9,9 +9,9 @@
 	},
 	"authors": [
 		{
-		  "name": "Tilen Majerle",
-		  "email": "tilen@majerle.eu",
-		  "url": "https://majerle.eu"
+		  	"name": "Tilen Majerle",
+		  	"email": "tilen@majerle.eu",
+		  	"url": "https://majerle.eu"
 		}
 	],
 	"license": "MIT",
@@ -20,5 +20,16 @@
 
 	},
 	"frameworks": "*",
-	"platforms": "*"
+	"platforms": "*",
+	"export": {
+		"exclude": [
+			".github",
+			"dev",
+			"docs",
+			"**/.vs",
+			"**/Debug",
+			"build",
+			"**/build"
+		]
+	}
 }

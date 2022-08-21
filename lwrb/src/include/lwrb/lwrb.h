@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2020 Tilen MAJERLE
+ * Copyright (c) 2022 Tilen MAJERLE
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,13 +29,14 @@
  * This file is part of LwRB - Lightweight ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
- * Version:         v2.0.3
+ * Version:         v3.0.0-rc1
  */
 #ifndef LWRB_HDR_H
 #define LWRB_HDR_H
 
 #include <string.h>
 #include <stdint.h>
+#include <stdatomic.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,14 +47,6 @@ extern "C" {
  * \brief           Lightweight ring buffer manager
  * \{
  */
-
-/**
- * \brief           Enable buffer structure pointer parameters as volatile
- * To use this feature, uncomment keyword below, or define in global compiler settings
- */
-#ifndef LWRB_VOLATILE
-#define LWRB_VOLATILE                           /* volatile */
-#endif
 
 /**
  * \brief           Adds 2 magic words to make sure if memory is corrupted
@@ -94,9 +87,9 @@ typedef struct lwrb {
 #endif /* LWRB_USE_MAGIC */
     uint8_t* buff;                              /*!< Pointer to buffer data.
                                                     Buffer is considered initialized when `buff != NULL` and `size > 0` */
-    LWRB_VOLATILE size_t size;                  /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
-    LWRB_VOLATILE size_t r;                     /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
-    LWRB_VOLATILE size_t w;                     /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    size_t size;                                /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
+    atomic_size_t r;                            /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    atomic_size_t w;                            /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
     lwrb_evt_fn evt_fn;                         /*!< Pointer to event callback function */
 #if LWRB_USE_MAGIC
     uint32_t magic2;                            /*!< Magic 2 word */
@@ -112,20 +105,20 @@ void        lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn fn);
 /* Read/Write functions */
 size_t      lwrb_write(lwrb_t* buff, const void* data, size_t btw);
 size_t      lwrb_read(lwrb_t* buff, void* data, size_t btr);
-size_t      lwrb_peek(lwrb_t* buff, size_t skip_count, void* data, size_t btp);
+size_t      lwrb_peek(const lwrb_t* buff, size_t skip_count, void* data, size_t btp);
 
 /* Buffer size information */
-size_t      lwrb_get_free(lwrb_t* buff);
-size_t      lwrb_get_full(lwrb_t* buff);
+size_t      lwrb_get_free(const lwrb_t* buff);
+size_t      lwrb_get_full(const lwrb_t* buff);
 
 /* Read data block management */
-void*       lwrb_get_linear_block_read_address(lwrb_t* buff);
-size_t      lwrb_get_linear_block_read_length(lwrb_t* buff);
+void*       lwrb_get_linear_block_read_address(const lwrb_t* buff);
+size_t      lwrb_get_linear_block_read_length(const lwrb_t* buff);
 size_t      lwrb_skip(lwrb_t* buff, size_t len);
 
 /* Write data block management */
-void*       lwrb_get_linear_block_write_address(lwrb_t* buff);
-size_t      lwrb_get_linear_block_write_length(lwrb_t* buff);
+void*       lwrb_get_linear_block_write_address(const lwrb_t* buff);
+size_t      lwrb_get_linear_block_write_length(const lwrb_t* buff);
 size_t      lwrb_advance(lwrb_t* buff, size_t len);
 
 /**

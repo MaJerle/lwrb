@@ -22,8 +22,12 @@
 *.uvoptx
 *.__i
 *.i
+*.txt
 !docs/*.txt
+!CMakeLists.txt
 RTE/
+
+*debug
 
 # IAR Settings
 **/settings/*.crun
@@ -68,6 +72,7 @@ RTE/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+[Dd]ebug*/
 x64/
 x86/
 bld/
@@ -75,6 +80,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 _build/
+build/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -382,3 +388,13 @@ log_file.txt
 project.ioc
 mx.scratch
 *.tilen majerle
+
+
+# Altium
+Project outputs*
+History/
+*.SchDocPreview
+*.$$$Preview
+
+# VSCode projects
+project_vscode_compiled.exe

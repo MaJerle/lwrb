@@ -1,0 +1,14 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+            /*
+             * Full configuration is provided by CMake plugin for vscode,
+             * that shall be installed by user
+             */
+            "name": "Win32",
+            "intelliSenseMode": "${default}",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ]
+}
