@@ -7,12 +7,13 @@ Library provides generic FIFO ring buffer implementation.
 ## Features
 
 * Written in ANSI C99, compatible with ``size_t`` for size data types
-* Platform independent, no architecture specific code
+* Platform independent default code - with restrictions for smaller CPU architectures (`< sizeof(size_t)`)
 * FIFO (First In First Out) buffer implementation
 * No dynamic memory allocation, data is static array
 * Uses optimized memory copy instead of loops to read/write data from/to memory
-* Thread safe when used as pipe with single write and single read entries
-* Interrupt safe when used as pipe with single write and single read entries
+* Thread safe when used as pipe with single write and single read entries - when CPU read/write operation for `size_t` are single instruction (ARM Cortex-M for instance)
+* Interrupt safe when used as pipe with single write and single read entries - when CPU read/write operation for `size_t` are single instruction (ARM Cortex-M for instance)
+* For CPU systems with smaller achitecture than `sizeof(size_t)` (AVR for instance), atomic protection is required for read-write operation of buffer writes
 * Suitable for DMA transfers from and to memory with zero-copy overhead between buffer and application memory
 * Supports data peek, skip for read and advance for write
 * Implements support for event notifications

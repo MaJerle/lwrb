@@ -5,6 +5,7 @@
 - Split CMakeLists.txt files between library and executable
 - Change license year to 2022
 - Update code style with astyle
+- Potential compatibility break: Minimum required version is C11, with requirement of `stdatomic.h` library
 
 ## v2.0.3
 

@@ -75,6 +75,7 @@ Table of contents
     user-manual/index
     tips-tricks/index
     api-reference/index
+    changelog/index
 
 .. toctree::
     :maxdepth: 2
