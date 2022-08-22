@@ -130,7 +130,6 @@ lwrb_write(lwrb_t* buff, const void* data, size_t btw) {
     if (!BUF_IS_VALID(buff) || data == NULL || btw == 0) {
         return 0;
     }
-    buff_w_ptr = atomic_load_explicit(&buff->w, memory_order_acquire);
 
     /* Calculate maximum number of bytes available to write */
     free = lwrb_get_free(buff);
@@ -138,6 +137,7 @@ lwrb_write(lwrb_t* buff, const void* data, size_t btw) {
     if (btw == 0) {
         return 0;
     }
+    buff_w_ptr = atomic_load_explicit(&buff->w, memory_order_acquire);
 
     /* Step 1: Write data to linear part of buffer */
     tocopy = BUF_MIN(buff->size - buff_w_ptr, btw);
@@ -184,15 +184,13 @@ lwrb_read(lwrb_t* buff, void* data, size_t btr) {
         return 0;
     }
 
-    /* Get buffer read pointer */
-    buff_r_ptr = atomic_load_explicit(&buff->r, memory_order_acquire);
-
     /* Calculate maximum number of bytes available to read */
     full = lwrb_get_full(buff);
     btr = BUF_MIN(full, btr);
     if (btr == 0) {
         return 0;
     }
+    buff_r_ptr = atomic_load_explicit(&buff->r, memory_order_acquire);
 
     /* Step 1: Read data from linear part of buffer */
     tocopy = BUF_MIN(buff->size - buff_r_ptr, btr);
@@ -237,7 +235,6 @@ lwrb_peek(const lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
     if (!BUF_IS_VALID(buff) || data == NULL || btp == 0) {
         return 0;
     }
-    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
 
     /*
      * Calculate maximum number of bytes available to read
@@ -247,6 +244,7 @@ lwrb_peek(const lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
     if (skip_count >= full) {
         return 0;
     }
+    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
     r += skip_count;
     full -= skip_count;
     if (r >= buff->size) {
