@@ -37,14 +37,7 @@
 #define BUF_MEMSET                      memset
 #define BUF_MEMCPY                      memcpy
 
-#define BUF_MAGIC1                      (0xDEADBEEF)
-#define BUF_MAGIC2                      (~0xDEADBEEF)
-
-#if LWRB_USE_MAGIC
-#define BUF_IS_VALID(b)                 ((b) != NULL && (b)->magic1 == BUF_MAGIC1 && (b)->magic2 == BUF_MAGIC2 && (b)->buff != NULL && (b)->size > 0)
-#else
 #define BUF_IS_VALID(b)                 ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
-#endif /* LWRB_USE_MAGIC */
 #define BUF_MIN(x, y)                   ((x) < (y) ? (x) : (y))
 #define BUF_MAX(x, y)                   ((x) > (y) ? (x) : (y))
 #define BUF_SEND_EVT(b, type, bp)       do { if ((b)->evt_fn != NULL) { (b)->evt_fn((void *)(b), (type), (bp)); } } while (0)
@@ -63,16 +56,11 @@ lwrb_init(lwrb_t* buff, void* buffdata, size_t size) {
         return 0;
     }
 
-    BUF_MEMSET((void*)buff, 0x00, sizeof(*buff));
-
+    buff->evt_fn = NULL;
     buff->size = size;
     buff->buff = buffdata;
-
-#if LWRB_USE_MAGIC
-    buff->magic1 = BUF_MAGIC1;
-    buff->magic2 = BUF_MAGIC2;
-#endif /* LWRB_USE_MAGIC */
-
+    atomic_init(&buff->w, 0);
+    atomic_init(&buff->r, 0);
     return 1;
 }
 

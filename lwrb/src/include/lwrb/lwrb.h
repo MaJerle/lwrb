@@ -36,7 +36,6 @@
 
 #include <string.h>
 #include <stdint.h>
-#include <stdatomic.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,12 +47,11 @@ extern "C" {
  * \{
  */
 
-/**
- * \brief           Adds 2 magic words to make sure if memory is corrupted
- *                  application can detect wrong data pointer and maximum size
- */
-#ifndef LWRB_USE_MAGIC
-#define LWRB_USE_MAGIC                          1
+#ifdef __cplusplus
+typedef unsigned long lwrb_atomic_ulong_t;
+#else
+#include <stdatomic.h>
+typedef atomic_ulong lwrb_atomic_ulong_t;
 #endif
 
 /**
@@ -82,18 +80,12 @@ typedef void (*lwrb_evt_fn)(struct lwrb* buff, lwrb_evt_type_t evt, size_t bp);
  * \brief           Buffer structure
  */
 typedef struct lwrb {
-#if LWRB_USE_MAGIC
-    uint32_t magic1;                            /*!< Magic 1 word */
-#endif /* LWRB_USE_MAGIC */
     uint8_t* buff;                              /*!< Pointer to buffer data.
                                                     Buffer is considered initialized when `buff != NULL` and `size > 0` */
     size_t size;                                /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
-    atomic_size_t r;                            /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
-    atomic_size_t w;                            /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    lwrb_atomic_ulong_t r;                            /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    lwrb_atomic_ulong_t w;                            /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
     lwrb_evt_fn evt_fn;                         /*!< Pointer to event callback function */
-#if LWRB_USE_MAGIC
-    uint32_t magic2;                            /*!< Magic 2 word */
-#endif /* LWRB_USE_MAGIC */
 } lwrb_t;
 
 uint8_t     lwrb_init(lwrb_t* buff, void* buffdata, size_t size);
