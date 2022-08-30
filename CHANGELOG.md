@@ -8,6 +8,7 @@
 - Change license year to 2022
 - Update code style with astyle
 - Minimum required version is C11, with requirement of `stdatomic.h` library
+- Add `.clang-format` draft
 
 ## v2.0.3
 
