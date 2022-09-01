@@ -26,5 +26,15 @@
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         }
+    ],
+    "buildPresets": [
+        {
+            "name": "Win32-Debug",
+            "configurePreset": "Win32-Debug"
+        },
+        {
+            "name": "Win64-Debug",
+            "configurePreset": "Win64-Debug"
+        }
     ]
 }
