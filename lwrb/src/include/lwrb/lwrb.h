@@ -34,8 +34,8 @@
 #ifndef LWRB_HDR_H
 #define LWRB_HDR_H
 
-#include <string.h>
 #include <stdint.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,9 +58,9 @@ typedef atomic_ulong lwrb_atomic_ulong_t;
  * \brief           Event type for buffer operations
  */
 typedef enum {
-    LWRB_EVT_READ,                              /*!< Read event */
-    LWRB_EVT_WRITE,                             /*!< Write event */
-    LWRB_EVT_RESET,                             /*!< Reset event */
+    LWRB_EVT_READ,  /*!< Read event */
+    LWRB_EVT_WRITE, /*!< Write event */
+    LWRB_EVT_RESET, /*!< Reset event */
 } lwrb_evt_type_t;
 
 /**
@@ -80,38 +80,40 @@ typedef void (*lwrb_evt_fn)(struct lwrb* buff, lwrb_evt_type_t evt, size_t bp);
  * \brief           Buffer structure
  */
 typedef struct lwrb {
-    uint8_t* buff;                              /*!< Pointer to buffer data.
+    uint8_t* buff; /*!< Pointer to buffer data.
                                                     Buffer is considered initialized when `buff != NULL` and `size > 0` */
-    size_t size;                                /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
-    lwrb_atomic_ulong_t r;                            /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
-    lwrb_atomic_ulong_t w;                            /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
-    lwrb_evt_fn evt_fn;                         /*!< Pointer to event callback function */
+    size_t size;   /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
+    lwrb_atomic_ulong_t
+        r; /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    lwrb_atomic_ulong_t
+        w;              /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    lwrb_evt_fn evt_fn; /*!< Pointer to event callback function */
 } lwrb_t;
 
-uint8_t     lwrb_init(lwrb_t* buff, void* buffdata, size_t size);
-uint8_t     lwrb_is_ready(lwrb_t* buff);
-void        lwrb_free(lwrb_t* buff);
-void        lwrb_reset(lwrb_t* buff);
-void        lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn fn);
+uint8_t lwrb_init(lwrb_t* buff, void* buffdata, size_t size);
+uint8_t lwrb_is_ready(lwrb_t* buff);
+void lwrb_free(lwrb_t* buff);
+void lwrb_reset(lwrb_t* buff);
+void lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn fn);
 
 /* Read/Write functions */
-size_t      lwrb_write(lwrb_t* buff, const void* data, size_t btw);
-size_t      lwrb_read(lwrb_t* buff, void* data, size_t btr);
-size_t      lwrb_peek(const lwrb_t* buff, size_t skip_count, void* data, size_t btp);
+size_t lwrb_write(lwrb_t* buff, const void* data, size_t btw);
+size_t lwrb_read(lwrb_t* buff, void* data, size_t btr);
+size_t lwrb_peek(const lwrb_t* buff, size_t skip_count, void* data, size_t btp);
 
 /* Buffer size information */
-size_t      lwrb_get_free(const lwrb_t* buff);
-size_t      lwrb_get_full(const lwrb_t* buff);
+size_t lwrb_get_free(const lwrb_t* buff);
+size_t lwrb_get_full(const lwrb_t* buff);
 
 /* Read data block management */
-void*       lwrb_get_linear_block_read_address(const lwrb_t* buff);
-size_t      lwrb_get_linear_block_read_length(const lwrb_t* buff);
-size_t      lwrb_skip(lwrb_t* buff, size_t len);
+void* lwrb_get_linear_block_read_address(const lwrb_t* buff);
+size_t lwrb_get_linear_block_read_length(const lwrb_t* buff);
+size_t lwrb_skip(lwrb_t* buff, size_t len);
 
 /* Write data block management */
-void*       lwrb_get_linear_block_write_address(const lwrb_t* buff);
-size_t      lwrb_get_linear_block_write_length(const lwrb_t* buff);
-size_t      lwrb_advance(lwrb_t* buff, size_t len);
+void* lwrb_get_linear_block_write_address(const lwrb_t* buff);
+size_t lwrb_get_linear_block_write_length(const lwrb_t* buff);
+size_t lwrb_advance(lwrb_t* buff, size_t len);
 
 /**
  * \}

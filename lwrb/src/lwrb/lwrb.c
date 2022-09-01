@@ -34,13 +34,18 @@
 #include "lwrb/lwrb.h"
 
 /* Memory set and copy functions */
-#define BUF_MEMSET                      memset
-#define BUF_MEMCPY                      memcpy
+#define BUF_MEMSET      memset
+#define BUF_MEMCPY      memcpy
 
-#define BUF_IS_VALID(b)                 ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
-#define BUF_MIN(x, y)                   ((x) < (y) ? (x) : (y))
-#define BUF_MAX(x, y)                   ((x) > (y) ? (x) : (y))
-#define BUF_SEND_EVT(b, type, bp)       do { if ((b)->evt_fn != NULL) { (b)->evt_fn((void *)(b), (type), (bp)); } } while (0)
+#define BUF_IS_VALID(b) ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
+#define BUF_MIN(x, y)   ((x) < (y) ? (x) : (y))
+#define BUF_MAX(x, y)   ((x) > (y) ? (x) : (y))
+#define BUF_SEND_EVT(b, type, bp)                                                                                      \
+    do {                                                                                                               \
+        if ((b)->evt_fn != NULL) {                                                                                     \
+            (b)->evt_fn((void*)(b), (type), (bp));                                                                     \
+        }                                                                                                              \
+    } while (0)
 
 /**
  * \brief           Initialize buffer handle to default values with size and buffer data array
