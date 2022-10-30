@@ -82,6 +82,7 @@ Table of contents
     :caption: Other projects
     :hidden:
 
+    LwBTN - Button manager <https://github.com/MaJerle/lwbtn>
     LwDTC - DateTimeCron <https://github.com/MaJerle/lwdtc>
     LwESP - ESP-AT library <https://github.com/MaJerle/lwesp>
     LwEVT - Event manager <https://github.com/MaJerle/lwevt>
