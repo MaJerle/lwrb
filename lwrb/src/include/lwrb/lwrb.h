@@ -47,11 +47,11 @@ extern "C" {
  * \{
  */
 
-#ifdef __cplusplus
-typedef unsigned long lwrb_atomic_ulong_t;
+#ifdef LWRB_DISABLE_ATOMIC
+typedef unsigned long lwrb_ulong_t;
 #else
 #include <stdatomic.h>
-typedef atomic_ulong lwrb_atomic_ulong_t;
+typedef atomic_ulong lwrb_ulong_t;
 #endif
 
 /**
@@ -80,13 +80,10 @@ typedef void (*lwrb_evt_fn)(struct lwrb* buff, lwrb_evt_type_t evt, size_t bp);
  * \brief           Buffer structure
  */
 typedef struct lwrb {
-    uint8_t* buff; /*!< Pointer to buffer data.
-                                                    Buffer is considered initialized when `buff != NULL` and `size > 0` */
-    size_t size;   /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
-    lwrb_atomic_ulong_t
-        r; /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
-    lwrb_atomic_ulong_t
-        w;              /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    uint8_t* buff;  /*!< Pointer to buffer data. Buffer is considered initialized when `buff != NULL` and `size > 0` */
+    size_t size;    /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
+    lwrb_ulong_t r; /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    lwrb_ulong_t w; /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
     lwrb_evt_fn evt_fn; /*!< Pointer to event callback function */
 } lwrb_t;
 
