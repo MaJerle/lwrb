@@ -31,5 +31,9 @@
 			"build",
 			"**/build"
 		]
+	},
+	"build": {
+		"includeDir": "lwrb/src/include",
+		"srcDir": "lwrb/src/lwrb"
 	}
 }
