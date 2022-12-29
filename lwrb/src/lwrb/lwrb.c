@@ -217,11 +217,7 @@ lwrb_read(lwrb_t* buff, void* data, size_t btr) {
      * Write final value to the actual running variable.
      * This is to ensure no write operation can access intermediate data
      */
-#ifdef LWRB_DISABLE_ATOMIC
-    buff->r = buff_r_ptr;
-#else
-    atomic_store_explicit(&buff->r, buff_r_ptr, memory_order_release);
-#endif
+    LWRB_STORE(buff->r, buff_r_ptr, memory_order_release);
 
     BUF_SEND_EVT(buff, LWRB_EVT_READ, tocopy + btr);
     return tocopy + btr;
