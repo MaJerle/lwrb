@@ -2,6 +2,8 @@
 
 ## Develop
 
+- Added macros for optional STDATOMIC. Global `-DLWRB_DISABLE_ATOMIC` macro will disable C11 `<stdatomic.h>` functionality.
+
 ## v3.0.0-RC1
 
 - Split CMakeLists.txt files between library and executable
