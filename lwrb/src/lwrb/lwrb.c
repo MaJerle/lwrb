@@ -47,6 +47,17 @@
         }                                                                                                              \
     } while (0)
 
+/* Optional atomic opeartions */
+#ifdef LWRB_DISABLE_ATOMIC
+#define LWRB_INIT(var, val)        (var) = (val)
+#define LWRB_LOAD(var, type)       (var)
+#define LWRB_STORE(var, val, type) (var) = (val)
+#else
+#define LWRB_INIT(var, val)        atomic_init(&(var), (val))
+#define LWRB_LOAD(var, type)       atomic_load_explicit(&(var), (type))
+#define LWRB_STORE(var, val, type) atomic_store_explicit(&(var), (val), (type))
+#endif
+
 /**
  * \brief           Initialize buffer handle to default values with size and buffer data array
  * \param[in]       buff: Buffer handle
@@ -64,8 +75,8 @@ lwrb_init(lwrb_t* buff, void* buffdata, size_t size) {
     buff->evt_fn = NULL;
     buff->size = size;
     buff->buff = buffdata;
-    atomic_init(&buff->w, 0);
-    atomic_init(&buff->r, 0);
+    LWRB_INIT(buff->w, 0);
+    LWRB_INIT(buff->r, 0);
     return 1;
 }
 
@@ -130,7 +141,7 @@ lwrb_write(lwrb_t* buff, const void* data, size_t btw) {
     if (btw == 0) {
         return 0;
     }
-    buff_w_ptr = atomic_load_explicit(&buff->w, memory_order_acquire);
+    buff_w_ptr = LWRB_LOAD(buff->w, memory_order_acquire);
 
     /* Step 1: Write data to linear part of buffer */
     tocopy = BUF_MIN(buff->size - buff_w_ptr, btw);
@@ -153,7 +164,7 @@ lwrb_write(lwrb_t* buff, const void* data, size_t btw) {
      * Write final value to the actual running variable.
      * This is to ensure no read operation can access intermediate data
      */
-    atomic_store_explicit(&buff->w, buff_w_ptr, memory_order_release);
+    LWRB_STORE(buff->w, buff_w_ptr, memory_order_release);
 
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, tocopy + btw);
     return tocopy + btw;
@@ -183,7 +194,7 @@ lwrb_read(lwrb_t* buff, void* data, size_t btr) {
     if (btr == 0) {
         return 0;
     }
-    buff_r_ptr = atomic_load_explicit(&buff->r, memory_order_acquire);
+    buff_r_ptr = LWRB_LOAD(buff->r, memory_order_acquire);
 
     /* Step 1: Read data from linear part of buffer */
     tocopy = BUF_MIN(buff->size - buff_r_ptr, btr);
@@ -206,7 +217,7 @@ lwrb_read(lwrb_t* buff, void* data, size_t btr) {
      * Write final value to the actual running variable.
      * This is to ensure no write operation can access intermediate data
      */
-    atomic_store_explicit(&buff->r, buff_r_ptr, memory_order_release);
+    LWRB_STORE(buff->r, buff_r_ptr, memory_order_release);
 
     BUF_SEND_EVT(buff, LWRB_EVT_READ, tocopy + btr);
     return tocopy + btr;
@@ -237,7 +248,7 @@ lwrb_peek(const lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
     if (skip_count >= full) {
         return 0;
     }
-    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
+    r = LWRB_LOAD(buff->r, memory_order_relaxed);
     r += skip_count;
     full -= skip_count;
     if (r >= buff->size) {
@@ -280,21 +291,21 @@ lwrb_get_free(const lwrb_t* buff) {
      *
      * To ensure thread safety (only when in single-entry, single-exit FIFO mode use case),
      * it is important to write buffer r and w values to local w and r variables.
-     * 
+     *
      * Local variables will ensure below if statements will always use the same value,
      * even if buff->w or buff->r get changed during interrupt processing.
-     * 
+     *
      * They may change during load operation, important is that
      * they do not change during if-elseif-else operations following these assignments.
-     * 
+     *
      * lwrb_get_free is only called for write purpose, and when in FIFO mode, then:
      * - buff->w pointer will not change by another process/interrupt because we are in write mode just now
      * - buff->r pointer may change by another process. If it gets changed after buff->r has been loaded to local variable,
      *    buffer will see "free size" less than it actually is. This is not a problem, application can
      *    always try again to write more data to remaining free memory that was read just during copy operation
      */
-    w = atomic_load_explicit(&buff->w, memory_order_relaxed);
-    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
+    w = LWRB_LOAD(buff->w, memory_order_relaxed);
+    r = LWRB_LOAD(buff->r, memory_order_relaxed);
 
     if (w == r) {
         size = buff->size;
@@ -326,21 +337,21 @@ lwrb_get_full(const lwrb_t* buff) {
      *
      * To ensure thread safety (only when in single-entry, single-exit FIFO mode use case),
      * it is important to write buffer r and w values to local w and r variables.
-     * 
+     *
      * Local variables will ensure below if statements will always use the same value,
      * even if buff->w or buff->r get changed during interrupt processing.
-     * 
+     *
      * They may change during load operation, important is that
      * they do not change during if-elseif-else operations following these assignments.
-     * 
+     *
      * lwrb_get_full is only called for read purpose, and when in FIFO mode, then:
      * - buff->r pointer will not change by another process/interrupt because we are in read mode just now
      * - buff->w pointer may change by another process. If it gets changed after buff->w has been loaded to local variable,
      *    buffer will see "full size" less than it really is. This is not a problem, application can
      *    always try again to read more data from remaining full memory that was written just during copy operation
      */
-    w = atomic_load_explicit(&buff->w, memory_order_relaxed);
-    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
+    w = LWRB_LOAD(buff->w, memory_order_relaxed);
+    r = LWRB_LOAD(buff->r, memory_order_relaxed);
 
     if (w == r) {
         size = 0;
@@ -361,8 +372,8 @@ lwrb_get_full(const lwrb_t* buff) {
 void
 lwrb_reset(lwrb_t* buff) {
     if (BUF_IS_VALID(buff)) {
-        atomic_store_explicit(&buff->w, 0, memory_order_release);
-        atomic_store_explicit(&buff->r, 0, memory_order_release);
+        LWRB_STORE(buff->w, 0, memory_order_release);
+        LWRB_STORE(buff->r, 0, memory_order_release);
         BUF_SEND_EVT(buff, LWRB_EVT_RESET, 0);
     }
 }
@@ -398,8 +409,9 @@ lwrb_get_linear_block_read_length(const lwrb_t* buff) {
      * Use temporary values in case they are changed during operations.
      * See lwrb_buff_free or lwrb_buff_full functions for more information why this is OK.
      */
-    w = atomic_load_explicit(&buff->w, memory_order_relaxed);
-    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
+    w = LWRB_LOAD(buff->w, memory_order_relaxed);
+    r = LWRB_LOAD(buff->r, memory_order_relaxed);
+
     if (w > r) {
         len = w - r;
     } else if (r > w) {
@@ -429,12 +441,12 @@ lwrb_skip(lwrb_t* buff, size_t len) {
 
     full = lwrb_get_full(buff);
     len = BUF_MIN(len, full);
-    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
+    r = LWRB_LOAD(buff->r, memory_order_relaxed);
     r += len;
     if (r >= buff->size) {
         r -= buff->size;
     }
-    atomic_store_explicit(&buff->r, r, memory_order_release);
+    LWRB_STORE(buff->r, r, memory_order_release);
     BUF_SEND_EVT(buff, LWRB_EVT_READ, len);
     return len;
 }
@@ -470,8 +482,9 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
      * Use temporary values in case they are changed during operations.
      * See lwrb_buff_free or lwrb_buff_full functions for more information why this is OK.
      */
-    w = atomic_load_explicit(&buff->w, memory_order_relaxed);
-    r = atomic_load_explicit(&buff->r, memory_order_relaxed);
+    w = LWRB_LOAD(buff->w, memory_order_relaxed);
+    r = LWRB_LOAD(buff->r, memory_order_relaxed);
+
     if (w >= r) {
         len = buff->size - w;
         /*
@@ -514,12 +527,12 @@ lwrb_advance(lwrb_t* buff, size_t len) {
     /* Use local variables before writing back to main structure */
     free = lwrb_get_free(buff);
     len = BUF_MIN(len, free);
-    w = atomic_load_explicit(&buff->w, memory_order_relaxed);
+    w = LWRB_LOAD(buff->w, memory_order_relaxed);
     w += len;
     if (w >= buff->size) {
         w -= buff->size;
     }
-    atomic_store_explicit(&buff->w, w, memory_order_release);
+    LWRB_STORE(buff->w, w, memory_order_release);
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, len);
     return len;
 }
