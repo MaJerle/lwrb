@@ -104,3 +104,49 @@ size_t lwrb_overwrite(lwrb_t* buff, const void* data, size_t btw)
 
     return (btw);
 }
+
+
+
+/**
+ * \brief           Copy one ring buffer to another, upto the amount of data in the source, or amount 
+ * of data free in the destination.
+ * \param[in]       dest: Buffer handle that the copied data will be written to
+ * \param[in]       src:  Buffer handle that the copied data will come from
+ * \return          Number of bytes written to buffer
+ * \note            This operation is a read op to the source, on success it will update the r index. 
+ * As well as a write op to the destination, and may update the w index. For thread-safety mutexes may 
+ * be desired, see documentation.
+ */
+size_t lwrb_copy(lwrb_t* dest, lwrb_t* src)
+{
+    size_t dest_w, src_r;
+    size_t len_to_copy = BUF_MIN(lwrb_get_full(src), lwrb_get_free(dest));
+    size_t i;
+
+    if (!BUF_IS_VALID(dest) || !BUF_IS_VALID(src))
+    {
+        return 0;
+    }
+
+    dest_w = atomic_load_explicit(&dest->w, memory_order_relaxed);
+    src_r  = atomic_load_explicit(&src->r, memory_order_relaxed);
+
+    /* For the lesser amount in source or free in destination, copy byte by byte */
+    for (i = 0; i < len_to_copy; i++)
+    {
+
+        /* Handle roll-over / wrap for both source and destination indexes */
+        if (dest_w >= dest->size)
+            dest_w = 0;
+
+        if (src_r >= src->size)
+            src_r = 0;
+
+        dest->buff[dest_w++] = src->buff[src_r++];
+   }
+
+    atomic_store_explicit(&dest->w, dest_w, memory_order_release);
+    atomic_store_explicit(&src->r, src_r, memory_order_release);
+
+    return (len_to_copy);
+}
