@@ -135,14 +135,13 @@ size_t lwrb_copy(lwrb_t* dest, lwrb_t* src)
     for (i = 0; i < len_to_copy; i++)
     {
 
+        dest->buff[dest_w++] = src->buff[src_r++];
+        
         /* Handle roll-over / wrap for both source and destination indexes */
         if (dest_w >= dest->size)
             dest_w = 0;
-
         if (src_r >= src->size)
             src_r = 0;
-
-        dest->buff[dest_w++] = src->buff[src_r++];
    }
 
     atomic_store_explicit(&dest->w, dest_w, memory_order_release);
