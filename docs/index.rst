@@ -96,3 +96,4 @@ Table of contents
     LwRB - Ring buffer <https://github.com/MaJerle/lwrb>
     LwSHELL - Shell <https://github.com/MaJerle/lwshell>
     LwUTIL - Utility functions <https://github.com/MaJerle/lwutil>
+    LwWDG - RTOS task watchdog <https://github.com/MaJerle/lwwdg>
