@@ -551,8 +551,8 @@ lwrb_advance(lwrb_t* buff, size_t len) {
  * \return          `1` if \arg bts found, `0` otherwise
  */
 uint8_t
-lwrb_find(lwrb_t* buff, const void* bts, size_t len, size_t start_offset, size_t* found_idx) {
-    size_t full;
+lwrb_find(const lwrb_t* buff, const void* bts, size_t len, size_t start_offset, size_t* found_idx) {
+    size_t full, r;
     uint8_t found = 0;
     const uint8_t* needle = bts;
 
@@ -567,19 +567,28 @@ lwrb_find(lwrb_t* buff, const void* bts, size_t len, size_t start_offset, size_t
         return 0;
     }
 
-    /* TODO: Improve the algorithm by direct access to the buffer memory */
-    for (size_t buff_x = start_offset; !found && buff_x < full; ++buff_x) {
-        uint8_t b;
+    /* Max number of for loops is buff_full - input_len - start_offset of buffer length */
+    for (size_t skip_x = start_offset; !found && skip_x < (full - start_offset - len); ++skip_x) {
+        found = 1; /* Found by default */
 
-        found = 1;
+        /* Prepare the starting point for reading */
+        r = buff->r + skip_x;
+        if (r >= buff->size) {
+            r -= buff->size;
+        }
+
+        /* Search in the buffer */
         for (size_t i = 0; i < len; ++i) {
-            if (!lwrb_peek(buff, buff_x + i, &b, 1) || b != needle[i]) {
+            if (buff->buff[r] != needle[i]) {
                 found = 0;
                 break;
             }
+            if (++r >= buff->size) {
+                r = 0;
+            }
         }
         if (found) {
-            *found_idx = buff_x;
+            *found_idx = skip_x;
         }
     }
     return found;

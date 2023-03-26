@@ -88,6 +88,16 @@ main() {
         FIND_TEST("456", 3, 0, 1); /* Must find it */
         FIND_TEST("123", 3, 1, 0); /* Must not find it - start offset is later */
 
+        /* Restart by setting write and read as empty with offset */
+        /* This should generate data for search in overflow mode */
+        buff.w = 8;
+        buff.r = 8;
+        lwrb_write(&buff, "12345678", 8);
+
+        FIND_TEST("1234", 3, 0, 1); /* Must find it */
+        FIND_TEST("4567", 3, 0, 1); /* Must find it */
+        FIND_TEST("1234", 3, 1, 0); /* Must not find it - start offset is later */
+
 #undef FIND_TEST
     }
     return 0;
