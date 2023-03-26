@@ -112,6 +112,9 @@ void* lwrb_get_linear_block_write_address(const lwrb_t* buff);
 size_t lwrb_get_linear_block_write_length(const lwrb_t* buff);
 size_t lwrb_advance(lwrb_t* buff, size_t len);
 
+/* Search in buffer */
+uint8_t lwrb_find(lwrb_t* buff, const void* bts, size_t len, size_t start_offset, size_t* found_idx);
+
 /**
  * \}
  */

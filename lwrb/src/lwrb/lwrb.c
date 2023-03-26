@@ -536,3 +536,51 @@ lwrb_advance(lwrb_t* buff, size_t len) {
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, len);
     return len;
 }
+
+/**
+ * \brief           Searches for a *needle* in an array, starting from given offset.
+ * 
+ * \note            This function is not thread-safe. 
+ * 
+ * \param           buff: Ring buffer to search for needle in
+ * \param           bts: Constant byte array sequence to search for in a buffer
+ * \param           len: Length of the \arg bts array 
+ * \param           start_offset: Start offset in the buffer
+ * \param           found_idx: Pointer to variable to write index in array where bts has been found
+ *                      Must not be set to `NULL`
+ * \return          `1` if \arg bts found, `0` otherwise
+ */
+uint8_t
+lwrb_find(lwrb_t* buff, const void* bts, size_t len, size_t start_offset, size_t* found_idx) {
+    size_t full;
+    uint8_t found = 0;
+    const uint8_t* needle = bts;
+
+    if (!BUF_IS_VALID(buff) || needle == NULL || len == 0 || found_idx == NULL) {
+        return 0;
+    }
+    *found_idx = 0;
+
+    full = lwrb_get_full(buff);
+    /* Verify initial conditions */
+    if (full < (len + start_offset)) {
+        return 0;
+    }
+
+    /* TODO: Improve the algorithm by direct access to the buffer memory */
+    for (size_t buff_x = start_offset; !found && buff_x < full; ++buff_x) {
+        uint8_t b;
+
+        found = 1;
+        for (size_t i = 0; i < len; ++i) {
+            if (!lwrb_peek(buff, buff_x + i, &b, 1) || b != needle[i]) {
+                found = 0;
+                break;
+            }
+        }
+        if (found) {
+            *found_idx = buff_x;
+        }
+    }
+    return found;
+}
