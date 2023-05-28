@@ -16,14 +16,14 @@ AlignConsecutiveBitFields:
 AlignConsecutiveDeclarations: None
 AlignEscapedNewlines: Right
 AlignOperands: Align
-SortIncludes: false
+SortIncludes: true
 InsertBraces: true # Control statements must have curly brackets
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortEnumsOnASingleLine: true
 AllowShortBlocksOnASingleLine: Empty
-AllowShortCaseLabelsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
 AllowShortLambdasOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: Never
