@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 # Setup project
-project(LwLibPROJECT)
+project(LwLibPROJECT C)
 
 if(NOT PROJECT_IS_TOP_LEVEL)
     add_subdirectory(lwrb)

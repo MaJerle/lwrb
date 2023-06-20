@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2022 Tilen MAJERLE
+ * Copyright (c) 2023 Tilen MAJERLE
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -112,9 +112,8 @@ void* lwrb_get_linear_block_write_address(const lwrb_t* buff);
 size_t lwrb_get_linear_block_write_length(const lwrb_t* buff);
 size_t lwrb_advance(lwrb_t* buff, size_t len);
 
-/* Extended functions */
-size_t lwrb_overwrite(lwrb_t* buff, const void* data, size_t btw);
-size_t lwrb_copy(lwrb_t* dest, lwrb_t* src);
+/* Search in buffer */
+uint8_t lwrb_find(const lwrb_t* buff, const void* bts, size_t len, size_t start_offset, size_t* found_idx);
 
 /**
  * \}

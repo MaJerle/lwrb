@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2022 Tilen MAJERLE
+ * Copyright (c) 2023 Tilen MAJERLE
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -398,8 +398,7 @@ lwrb_get_linear_block_read_address(const lwrb_t* buff) {
  */
 size_t
 lwrb_get_linear_block_read_length(const lwrb_t* buff) {
-    size_t len;
-    volatile size_t w, r;
+    size_t len, w, r;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
@@ -441,7 +440,7 @@ lwrb_skip(lwrb_t* buff, size_t len) {
 
     full = lwrb_get_full(buff);
     len = BUF_MIN(len, full);
-    r = LWRB_LOAD(buff->r, memory_order_relaxed);
+    r = LWRB_LOAD(buff->r, memory_order_acquire);
     r += len;
     if (r >= buff->size) {
         r -= buff->size;
@@ -471,8 +470,7 @@ lwrb_get_linear_block_write_address(const lwrb_t* buff) {
  */
 size_t
 lwrb_get_linear_block_write_length(const lwrb_t* buff) {
-    size_t len;
-    volatile size_t w, r;
+    size_t len, w, r;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
@@ -527,7 +525,7 @@ lwrb_advance(lwrb_t* buff, size_t len) {
     /* Use local variables before writing back to main structure */
     free = lwrb_get_free(buff);
     len = BUF_MIN(len, free);
-    w = LWRB_LOAD(buff->w, memory_order_relaxed);
+    w = LWRB_LOAD(buff->w, memory_order_acquire);
     w += len;
     if (w >= buff->size) {
         w -= buff->size;
@@ -535,4 +533,61 @@ lwrb_advance(lwrb_t* buff, size_t len) {
     LWRB_STORE(buff->w, w, memory_order_release);
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, len);
     return len;
+}
+
+/**
+ * \brief           Searches for a *needle* in an array, starting from given offset.
+ * 
+ * \note            This function is not thread-safe. 
+ * 
+ * \param           buff: Ring buffer to search for needle in
+ * \param           bts: Constant byte array sequence to search for in a buffer
+ * \param           len: Length of the \arg bts array 
+ * \param           start_offset: Start offset in the buffer
+ * \param           found_idx: Pointer to variable to write index in array where bts has been found
+ *                      Must not be set to `NULL`
+ * \return          `1` if \arg bts found, `0` otherwise
+ */
+uint8_t
+lwrb_find(const lwrb_t* buff, const void* bts, size_t len, size_t start_offset, size_t* found_idx) {
+    size_t full, r;
+    uint8_t found = 0;
+    const uint8_t* needle = bts;
+
+    if (!BUF_IS_VALID(buff) || needle == NULL || len == 0 || found_idx == NULL) {
+        return 0;
+    }
+    *found_idx = 0;
+
+    full = lwrb_get_full(buff);
+    /* Verify initial conditions */
+    if (full < (len + start_offset)) {
+        return 0;
+    }
+
+    /* Max number of for loops is buff_full - input_len - start_offset of buffer length */
+    for (size_t skip_x = start_offset; !found && skip_x < (full - start_offset - len); ++skip_x) {
+        found = 1; /* Found by default */
+
+        /* Prepare the starting point for reading */
+        r = buff->r + skip_x;
+        if (r >= buff->size) {
+            r -= buff->size;
+        }
+
+        /* Search in the buffer */
+        for (size_t i = 0; i < len; ++i) {
+            if (buff->buff[r] != needle[i]) {
+                found = 0;
+                break;
+            }
+            if (++r >= buff->size) {
+                r = 0;
+            }
+        }
+        if (found) {
+            *found_idx = skip_x;
+        }
+    }
+    return found;
 }
