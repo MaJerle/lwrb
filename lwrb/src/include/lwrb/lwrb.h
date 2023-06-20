@@ -114,6 +114,8 @@ size_t lwrb_advance(lwrb_t* buff, size_t len);
 
 /* Search in buffer */
 uint8_t lwrb_find(const lwrb_t* buff, const void* bts, size_t len, size_t start_offset, size_t* found_idx);
+size_t lwrb_overwrite(lwrb_t* buff, const void* data, size_t btw);
+size_t lwrb_move(lwrb_t* dest, lwrb_t* src);
 
 /**
  * \}

@@ -15,17 +15,10 @@ void
 my_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
     (void)buff;
     switch (type) {
-        case LWRB_EVT_RESET:
-            printf("[EVT] Buffer reset event!\r\n");
-            break;
-        case LWRB_EVT_READ:
-            printf("[EVT] Buffer read event: %d byte(s)!\r\n", (int)len);
-            break;
-        case LWRB_EVT_WRITE:
-            printf("[EVT] Buffer write event: %d byte(s)!\r\n", (int)len);
-            break;
-        default:
-            break;
+        case LWRB_EVT_RESET: printf("[EVT] Buffer reset event!\r\n"); break;
+        case LWRB_EVT_READ: printf("[EVT] Buffer read event: %d byte(s)!\r\n", (int)len); break;
+        case LWRB_EVT_WRITE: printf("[EVT] Buffer write event: %d byte(s)!\r\n", (int)len); break;
+        default: break;
     }
 }
 
@@ -57,6 +50,80 @@ main() {
     memset(lwrb_get_linear_block_write_address(&buff), 'C', lwrb_get_linear_block_write_length(&buff));
     lwrb_advance(&buff, lwrb_get_linear_block_write_length(&buff));
     lwrb_reset(&buff);
+
+    printf("Overwrite test\r\n");
+    {
+#define OVERWRITE_TEST(_exp_content_, _exp_len_)                                                                       \
+    do {                                                                                                               \
+        len = lwrb_peek(&buff, 0, tmp, buff.size);                                                                     \
+        printf("overwrite data read: %.*s, len: %u, as_expected: %u\r\n", (int)len, tmp, (unsigned)len,                \
+               (unsigned)(strncmp((_exp_content_), (const void*)tmp, len) == 0 && len == (_exp_len_)));                \
+    } while (0)
+
+        /* Test overwrite */
+        lwrb_reset(&buff);
+        lwrb_write(&buff, "abcdef", 6); /* Initial data */
+        OVERWRITE_TEST("abcdef", 6);
+
+        lwrb_overwrite(&buff, "0", 1);
+        OVERWRITE_TEST("abcdef0", 7);
+
+        lwrb_overwrite(&buff, "1", 1);
+        OVERWRITE_TEST("abcdef01", 8);
+
+        lwrb_overwrite(&buff, "2", 1);
+        OVERWRITE_TEST("bcdef012", 8);
+
+        lwrb_overwrite(&buff, "3", 1);
+        OVERWRITE_TEST("cdef0123", 8);
+
+        lwrb_overwrite(&buff, "4", 1);
+        OVERWRITE_TEST("def01234", 8);
+
+        lwrb_overwrite(&buff, "5", 1);
+        OVERWRITE_TEST("ef012345", 8);
+
+        /* Bigger write which will completely change the buffer structure */
+        lwrb_overwrite(&buff, "lwrb_new_test_structure", 23);
+        OVERWRITE_TEST("tructure", 8);
+#undef OVERWRITE_TEST
+    }
+
+    printf("Move test\r\n");
+    {
+#define MOVE_TEST(_exp_content_, _exp_move_len_, _exp_buff_len_)                                                       \
+    do {                                                                                                               \
+        size_t move_len;                                                                                               \
+        move_len = lwrb_move(&dst, &src);                                                                              \
+        len = lwrb_peek(&dst, 0, tmp, dst.size);                                                                       \
+        printf("move data: len: %d, dest data: %.*s, as_expected: %u\r\n", (int)len, (int)len, tmp,                    \
+               (unsigned)(strncmp((_exp_content_), (const void*)tmp, len) == 0 && move_len == (_exp_move_len_)         \
+                          && len == (_exp_buff_len_)));                                                                \
+    } while (0)
+
+        lwrb_t src, dst;
+        uint8_t src_data[16], dst_data[8];
+        lwrb_init(&src, src_data, sizeof(src_data));
+        lwrb_init(&dst, dst_data, sizeof(dst_data));
+
+        lwrb_reset(&src);
+        lwrb_reset(&dst);
+        lwrb_write(&src, "012345", 6);
+        MOVE_TEST("012345", 6, 6);
+
+        lwrb_reset(&src);
+        lwrb_reset(&dst);
+        lwrb_write(&src, "0123456789ABCDEF", 16);
+        MOVE_TEST("0123456", 7, 7);
+
+        lwrb_reset(&src);
+        lwrb_reset(&dst);
+        lwrb_write(&src, "0123456789ABCDEF", 16);
+        lwrb_write(&dst, "TT", 2);
+        MOVE_TEST("TT01234", 5, 7);
+
+#undef MOVE_TEST
+    }
 
     (void)len;
 
