@@ -37,4 +37,5 @@ else()
     # Add subdir with lwrb and link to project
     add_subdirectory(lwrb)
     target_link_libraries(${PROJECT_NAME} lwrb)
+    target_link_libraries(${PROJECT_NAME} lwrb_ex)
 endif()
