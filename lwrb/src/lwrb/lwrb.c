@@ -398,8 +398,7 @@ lwrb_get_linear_block_read_address(const lwrb_t* buff) {
  */
 size_t
 lwrb_get_linear_block_read_length(const lwrb_t* buff) {
-    size_t len;
-    volatile size_t w, r;
+    size_t len, w, r;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
@@ -471,8 +470,7 @@ lwrb_get_linear_block_write_address(const lwrb_t* buff) {
  */
 size_t
 lwrb_get_linear_block_write_length(const lwrb_t* buff) {
-    size_t len;
-    volatile size_t w, r;
+    size_t len, w, r;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
