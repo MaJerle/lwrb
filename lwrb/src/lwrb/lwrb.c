@@ -441,7 +441,7 @@ lwrb_skip(lwrb_t* buff, size_t len) {
 
     full = lwrb_get_full(buff);
     len = BUF_MIN(len, full);
-    r = LWRB_LOAD(buff->r, memory_order_relaxed);
+    r = LWRB_LOAD(buff->r, memory_order_acquire);
     r += len;
     if (r >= buff->size) {
         r -= buff->size;
@@ -527,7 +527,7 @@ lwrb_advance(lwrb_t* buff, size_t len) {
     /* Use local variables before writing back to main structure */
     free = lwrb_get_free(buff);
     len = BUF_MIN(len, free);
-    w = LWRB_LOAD(buff->w, memory_order_relaxed);
+    w = LWRB_LOAD(buff->w, memory_order_acquire);
     w += len;
     if (w >= buff->size) {
         w -= buff->size;
