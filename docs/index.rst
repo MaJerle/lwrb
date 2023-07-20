@@ -16,7 +16,7 @@ LwRB is a generic *FIFO* (First In; First Out) buffer library optimized for embe
 Features
 ^^^^^^^^
 
-* Written in ANSI C99, compatible with ``size_t`` for size data types
+* Written in C (C11), compatible with ``size_t`` for size data types
 * Platform independent, no architecture specific code
 * FIFO (First In First Out) buffer implementation
 * No dynamic memory allocation, data is static array
@@ -87,7 +87,7 @@ Table of contents
     LwESP - ESP-AT library <https://github.com/MaJerle/lwesp>
     LwEVT - Event manager <https://github.com/MaJerle/lwevt>
     LwGPS - GPS NMEA parser <https://github.com/MaJerle/lwgps>
-    LwGSM - GSM-AT library <https://github.com/MaJerle/lwgsm>
+    LwCELL - Cellular modem host AT library <https://github.com/MaJerle/lwcell>
     LwJSON - JSON parser <https://github.com/MaJerle/lwjson>
     LwMEM - Memory manager <https://github.com/MaJerle/lwmem>
     LwOW - OneWire with UART <https://github.com/MaJerle/lwow>

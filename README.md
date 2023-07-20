@@ -6,7 +6,7 @@ Library provides generic FIFO ring buffer implementation.
 
 ## Features
 
-* Written in ANSI C99, compatible with ``size_t`` for size data types
+* Written in C (C11), compatible with ``size_t`` for size data types
 * Platform independent default code - with restrictions for smaller CPU architectures (`< sizeof(size_t)`)
 * FIFO (First In First Out) buffer implementation
 * No dynamic memory allocation, data is static array
