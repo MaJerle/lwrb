@@ -2,6 +2,8 @@
 
 ## Develop
 
+## v3.0.0
+
 - Added macros for optional STDATOMIC. Global `-DLWRB_DISABLE_ATOMIC` macro will disable C11 `<stdatomic.h>` functionality.
 - Add `lwrb_move` and `lwrb_overwrite`
 - Fix `lwrb_find` which failed to properly search for tokens at corner cases
