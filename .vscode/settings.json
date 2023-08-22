@@ -6,7 +6,8 @@
         "string.h": "c",
         "lwevt_opt.h": "c",
         "stdatomic.h": "c",
-        "lwrb.h": "c"
+        "lwrb.h": "c",
+        "*.tcc": "c"
     },
     "esbonio.sphinx.confDir": ""
 }

@@ -2,12 +2,19 @@
 
 ## Develop
 
+## v3.0.0
+
+- Added macros for optional STDATOMIC. Global `-DLWRB_DISABLE_ATOMIC` macro will disable C11 `<stdatomic.h>` functionality.
+- Add `lwrb_move` and `lwrb_overwrite`
+- Fix `lwrb_find` which failed to properly search for tokens at corner cases
+
 ## v3.0.0-RC1
 
 - Split CMakeLists.txt files between library and executable
 - Change license year to 2022
 - Update code style with astyle
 - Minimum required version is C11, with requirement of `stdatomic.h` library
+- Add `.clang-format` draft
 
 ## v2.0.3
 
