@@ -550,7 +550,7 @@ lwrb_advance(lwrb_t* buff, size_t len) {
  */
 uint8_t
 lwrb_find(const lwrb_t* buff, const void* bts, size_t len, size_t start_offset, size_t* found_idx) {
-    size_t full, r;
+    size_t full, r, max_x;
     uint8_t found = 0;
     const uint8_t* needle = bts;
 
@@ -566,7 +566,8 @@ lwrb_find(const lwrb_t* buff, const void* bts, size_t len, size_t start_offset, 
     }
 
     /* Max number of for loops is buff_full - input_len - start_offset of buffer length */
-    for (size_t skip_x = start_offset; !found && skip_x < (full - start_offset - len); ++skip_x) {
+    max_x = full - len;
+    for (size_t skip_x = start_offset; !found && skip_x <= max_x; ++skip_x) {
         found = 1; /* Found by default */
 
         /* Prepare the starting point for reading */
