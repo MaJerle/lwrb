@@ -41,7 +41,9 @@
 #endif
 
 /**
- * \brief           Similar to \ref lwrb_write, writes data to buffer, will overwrite existing values 
+ * \brief           Writes data to buffer with overwrite function, if no enough space to hold
+ *                  complete input data object.
+ * \note            Similar to \ref lwrb_write but overwrites
  * \param[in]       buff: Buffer handle
  * \param[in]       data: Data to write to ring buffer
  * \param[in]       btw: Bytes To Write, length
@@ -62,10 +64,18 @@ lwrb_overwrite(lwrb_t* buff, const void* data, size_t btw) {
 
     /* Process complete input array */
     max_cap = buff->size - 1; /* Maximum capacity buffer can hold */
-    if (btw > max_cap) {      /* When buffer is larger than max buffer capacity */
-        d += btw - max_cap;   /* Advance data */
-        btw = max_cap;        /* Limit data to write */
-        lwrb_reset(buff);     /* Reset buffer */
+    if (btw > max_cap) {
+        /*
+         * When data to write is larger than max buffer capacity,
+         * we can reset the buffer and simply write last part of 
+         * the input buffer.
+         * 
+         * This is done here, by calculating remaining
+         * length and then advancing to the end of input buffer
+         */
+        d += btw - max_cap; /* Advance data */
+        btw = max_cap;      /* Limit data to write */
+        lwrb_reset(buff);   /* Reset buffer */
     } else {
         /* 
          * Bytes to write is less than capacity
