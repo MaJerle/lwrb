@@ -31,8 +31,8 @@ Therefore multiple *conditional* checks are guaranteed to be performed on the sa
 
 .. note::
     Even single entry and single exit points may introduce race condition, especially on smaller system, such as 8-bit or 16-bit system, or in general,
-    where arbitrary type (normaly `size_t`) is `sizeof(type) < architecture_size`.
-    This is solved by C11 atomic library, that ensures atomic reads and writes to key structure members
+    where arbitrary type (normaly `size_t`) is `sizeof(type) > architecture_size`.
+    This is solved by C11 atomic library, that ensures atomic reads and writes to key structure members.
 
 Thread safety gets completely broken when application does one of the following:
 
