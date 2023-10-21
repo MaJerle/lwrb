@@ -48,12 +48,22 @@ extern "C" {
  * \{
  */
 
-#ifdef LWRB_DISABLE_ATOMIC
-typedef unsigned long lwrb_sz_atomic_t;
+#if !defined(LWRB_DISABLE_ATOMIC) || __DOXYGEN__
+#include <stdatomic.h>
+
+/**
+ * \brief           Atomic type for size variable.
+ * Default value is set to be `unsigned 32-bits` type
+ */
+typedef atomic_ulong lwrb_sz_atomic_t;
+
+/**
+ * \brief           Size variable for all library operations.
+ * Default value is set to be `unsigned 32-bits` type
+ */
 typedef unsigned long lwrb_sz_t;
 #else
-#include <stdatomic.h>
-typedef atomic_ulong lwrb_sz_atomic_t;
+typedef unsigned long lwrb_sz_atomic_t;
 typedef unsigned long lwrb_sz_t;
 #endif
 
