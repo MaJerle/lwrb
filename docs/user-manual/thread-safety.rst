@@ -4,8 +4,8 @@ Thread safety
 =============
 
 Ring buffers are effectively used in embedded systems with or without operating systems.
-Common problem most of implementations have is linked to multi-thread environment (when using OS) or reading/writing from/to interrupts.
-This is linked to common question *What happens if I write to buffer while another thread is reading from it?*
+Common problem most of implementations have, is linked to multi-thread environment (when using OS) or reading/writing from/to interrupts.
+Question becomes *What happens if I write to buffer while another thread is reading from it?*
 
 One of the main requirements (beside being lightweight) of *LwRB* was to allow *read-while-write* or *write-while-read* operations.
 This is  achieved only when there is single write entry point and single read exit point.
@@ -94,3 +94,21 @@ access is granted to *read* operation while *write* operation from one thread ta
 
 .. toctree::
     :maxdepth: 2
+
+Atomicity
+=========
+
+While thread-safety concepts are very important, depending on the system architecture and variable sizes (and hardware cache),
+application must also ensure that all the writes and reads to the internal variables are executed in atomic manner.
+
+Especially critical case is when read/write from/to variable isn't ``1`` cycle on specific architecture (for instance 32-bit variable on 8-bit CPU).
+
+Library (in its default configuration) uses ``stdatomic`` feature from *C11* language, and relies on a compiler to properly
+generate necessary calls to make sure, all reads and writes are atomic.
+
+.. note::
+    Atomicity is required even if ring buffer is configured in *fifo* mode, with single write point and single read point.
+
+.. tip::
+    You can disable atomic operations in the library, by defining ``LWRB_DISABLE_ATOMIC`` global macro (typically with ``-D`` compiler option).
+    It is then up to the developer to make sure architecture properly handles atomic operations.
