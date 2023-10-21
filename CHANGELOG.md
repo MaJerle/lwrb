@@ -2,6 +2,11 @@
 
 ## Develop
 
+- Preparation for `v3.1`
+- Replace `size_t` with custom defined type `lwrb_sz_t` which matches atomicity requirements
+- `lwrb_sz_t` is by default typedef-ed as `unsigned long`
+- Prepare `lwrb_write_ex` and `lwrb_read_ex` function
+
 ## v3.0.0
 
 - Added macros for optional STDATOMIC. Global `-DLWRB_DISABLE_ATOMIC` macro will disable C11 `<stdatomic.h>` functionality.

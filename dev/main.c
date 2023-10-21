@@ -12,7 +12,7 @@ lwrb_t buff;
 uint8_t tmp[8];
 
 void
-my_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
+my_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, lwrb_sz_t len) {
     (void)buff;
     (void)len;
     switch (type) {
@@ -25,7 +25,7 @@ my_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
 
 int
 main() {
-    size_t len;
+    lwrb_sz_t len;
 
     /* Init buffer */
     lwrb_init(&buff, lwrb_data, sizeof(lwrb_data));
@@ -99,7 +99,7 @@ main() {
     {
 #define MOVE_TEST(_exp_content_, _exp_move_len_, _exp_buff_len_)                                                       \
     do {                                                                                                               \
-        size_t move_len;                                                                                               \
+        lwrb_sz_t move_len;                                                                                            \
         move_len = lwrb_move(&dst, &src);                                                                              \
         len = lwrb_peek(&dst, 0, tmp, dst.size);                                                                       \
         printf("move data: len: %d, dest data: %.*s, as_expected: %u\r\n", (int)len, (int)len, tmp,                    \
@@ -137,7 +137,7 @@ main() {
     {
 #define FIND_TEST(_bts_, _bts_len_, _start_offset_, _exp_result_)                                                      \
     do {                                                                                                               \
-        size_t found_idx;                                                                                              \
+        lwrb_sz_t found_idx;                                                                                           \
         uint8_t found;                                                                                                 \
         found = lwrb_find(&buff, (_bts_), (_bts_len_), (_start_offset_), &found_idx);                                  \
         printf("Find \"%s\" (len %d), start_offset: %d, found_index: %d; Found: %d; As expected: %d\r\n", (_bts_),     \

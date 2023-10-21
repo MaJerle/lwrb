@@ -53,9 +53,9 @@
  *                      it. This operation is a read op as well as a write op. For thread-safety mutexes may be desired,
  *                      see documentation.
  */
-size_t
-lwrb_overwrite(lwrb_t* buff, const void* data, size_t btw) {
-    size_t orig_btw = btw, max_cap;
+lwrb_sz_t
+lwrb_overwrite(lwrb_t* buff, const void* data, lwrb_sz_t btw) {
+    lwrb_sz_t orig_btw = btw, max_cap;
     const uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btw == 0) {
@@ -84,7 +84,7 @@ lwrb_overwrite(lwrb_t* buff, const void* data, size_t btw) {
          * btw, otherwise we skip the operation
          * and only write the data.
          */
-        size_t f = lwrb_get_free(buff);
+        lwrb_sz_t f = lwrb_get_free(buff);
         if (f < btw) {
             lwrb_skip(buff, btw - f);
         }
@@ -104,9 +104,9 @@ lwrb_overwrite(lwrb_t* buff, const void* data, size_t btw) {
  *                  As well as a write op to the destination, and may update the w index.
  *                  For thread-safety mutexes may be desired, see documentation.
  */
-size_t
+lwrb_sz_t
 lwrb_move(lwrb_t* dest, lwrb_t* src) {
-    size_t len_to_copy, len_to_copy_orig, src_full, dest_free;
+    lwrb_sz_t len_to_copy, len_to_copy_orig, src_full, dest_free;
 
     if (!BUF_IS_VALID(dest) || !BUF_IS_VALID(src)) {
         return 0;
@@ -119,7 +119,7 @@ lwrb_move(lwrb_t* dest, lwrb_t* src) {
     /* Calculations for available length to copy is done above.
         We safely assume operations inside loop will properly complete. */
     while (len_to_copy > 0) {
-        size_t max_seq_read, max_seq_write, op_len;
+        lwrb_sz_t max_seq_read, max_seq_write, op_len;
         const uint8_t* d_src;
         uint8_t* d_dst;
 
@@ -134,7 +134,7 @@ lwrb_move(lwrb_t* dest, lwrb_t* src) {
         d_dst = lwrb_get_linear_block_write_address(dest);
 
         /* Byte by byte copy */
-        for (size_t i = 0; i < op_len; ++i) {
+        for (lwrb_sz_t i = 0; i < op_len; ++i) {
             *d_dst++ = *d_src++;
         }
 

@@ -67,7 +67,7 @@
  * \return          `1` on success, `0` otherwise
  */
 uint8_t
-lwrb_init(lwrb_t* buff, void* buffdata, size_t size) {
+lwrb_init(lwrb_t* buff, void* buffdata, lwrb_sz_t size) {
     if (buff == NULL || buffdata == NULL || size == 0) {
         return 0;
     }
@@ -126,9 +126,9 @@ lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn evt_fn) {
  *                      When returned value is less than `btw`, there was no enough memory available
  *                      to copy full data array
  */
-size_t
-lwrb_write(lwrb_t* buff, const void* data, size_t btw) {
-    size_t tocopy, free, buff_w_ptr;
+lwrb_sz_t
+lwrb_write(lwrb_t* buff, const void* data, lwrb_sz_t btw) {
+    lwrb_sz_t tocopy, free, buff_w_ptr;
     const uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btw == 0) {
@@ -179,9 +179,9 @@ lwrb_write(lwrb_t* buff, const void* data, size_t btw) {
  * \param[in]       btr: Number of bytes to read
  * \return          Number of bytes read and copied to data array
  */
-size_t
-lwrb_read(lwrb_t* buff, void* data, size_t btr) {
-    size_t tocopy, full, buff_r_ptr;
+lwrb_sz_t
+lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr) {
+    lwrb_sz_t tocopy, full, buff_r_ptr;
     uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btr == 0) {
@@ -231,9 +231,9 @@ lwrb_read(lwrb_t* buff, void* data, size_t btr) {
  * \param[in]       btp: Number of bytes to peek
  * \return          Number of bytes peeked and written to output array
  */
-size_t
-lwrb_peek(const lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
-    size_t full, tocopy, r;
+lwrb_sz_t
+lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp) {
+    lwrb_sz_t full, tocopy, r;
     uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btp == 0) {
@@ -278,9 +278,9 @@ lwrb_peek(const lwrb_t* buff, size_t skip_count, void* data, size_t btp) {
  * \param[in]       buff: Buffer handle
  * \return          Number of free bytes in memory
  */
-size_t
+lwrb_sz_t
 lwrb_get_free(const lwrb_t* buff) {
-    size_t size, w, r;
+    lwrb_sz_t size, w, r;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
@@ -324,9 +324,9 @@ lwrb_get_free(const lwrb_t* buff) {
  * \param[in]       buff: Buffer handle
  * \return          Number of bytes ready to be read
  */
-size_t
+lwrb_sz_t
 lwrb_get_full(const lwrb_t* buff) {
-    size_t size, w, r;
+    lwrb_sz_t size, w, r;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
@@ -396,9 +396,9 @@ lwrb_get_linear_block_read_address(const lwrb_t* buff) {
  * \param[in]       buff: Buffer handle
  * \return          Linear buffer size in units of bytes for read operation
  */
-size_t
+lwrb_sz_t
 lwrb_get_linear_block_read_length(const lwrb_t* buff) {
-    size_t len, w, r;
+    lwrb_sz_t len, w, r;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
@@ -430,9 +430,9 @@ lwrb_get_linear_block_read_length(const lwrb_t* buff) {
  * \param[in]       len: Number of bytes to skip and mark as read
  * \return          Number of bytes skipped
  */
-size_t
-lwrb_skip(lwrb_t* buff, size_t len) {
-    size_t full, r;
+lwrb_sz_t
+lwrb_skip(lwrb_t* buff, lwrb_sz_t len) {
+    lwrb_sz_t full, r;
 
     if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
@@ -468,9 +468,9 @@ lwrb_get_linear_block_write_address(const lwrb_t* buff) {
  * \param[in]       buff: Buffer handle
  * \return          Linear buffer size in units of bytes for write operation
  */
-size_t
+lwrb_sz_t
 lwrb_get_linear_block_write_length(const lwrb_t* buff) {
-    size_t len, w, r;
+    lwrb_sz_t len, w, r;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
@@ -514,9 +514,9 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
  * \param[in]       len: Number of bytes to advance
  * \return          Number of bytes advanced for write operation
  */
-size_t
-lwrb_advance(lwrb_t* buff, size_t len) {
-    size_t free, w;
+lwrb_sz_t
+lwrb_advance(lwrb_t* buff, lwrb_sz_t len) {
+    lwrb_sz_t free, w;
 
     if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
@@ -549,8 +549,8 @@ lwrb_advance(lwrb_t* buff, size_t len) {
  * \return          `1` if \arg bts found, `0` otherwise
  */
 uint8_t
-lwrb_find(const lwrb_t* buff, const void* bts, size_t len, size_t start_offset, size_t* found_idx) {
-    size_t full, r, max_x;
+lwrb_find(const lwrb_t* buff, const void* bts, lwrb_sz_t len, lwrb_sz_t start_offset, lwrb_sz_t* found_idx) {
+    lwrb_sz_t full, r, max_x;
     uint8_t found = 0;
     const uint8_t* needle = bts;
 
@@ -567,7 +567,7 @@ lwrb_find(const lwrb_t* buff, const void* bts, size_t len, size_t start_offset, 
 
     /* Max number of for loops is buff_full - input_len - start_offset of buffer length */
     max_x = full - len;
-    for (size_t skip_x = start_offset; !found && skip_x <= max_x; ++skip_x) {
+    for (lwrb_sz_t skip_x = start_offset; !found && skip_x <= max_x; ++skip_x) {
         found = 1; /* Found by default */
 
         /* Prepare the starting point for reading */
@@ -577,7 +577,7 @@ lwrb_find(const lwrb_t* buff, const void* bts, size_t len, size_t start_offset, 
         }
 
         /* Search in the buffer */
-        for (size_t i = 0; i < len; ++i) {
+        for (lwrb_sz_t i = 0; i < len; ++i) {
             if (buff->buff[r] != needle[i]) {
                 found = 0;
                 break;
