@@ -57,6 +57,43 @@ main() {
 #undef RW_TEST
     }
 
+    printf("Read/Write extended test\r\n");
+    {
+        uint8_t rw_buff[8];
+        lwrb_sz_t written, read;
+        uint8_t success;
+
+#define RW_TEST(_w_exp_, _r_exp_, _success_, _rw_len_, _rw_exp_len_)                                                   \
+    do {                                                                                                               \
+        printf("W ptr: %u, R ptr: %u, R/W success: %u, R/W len: %u, as_expected: %u\r\n", (unsigned)buff.w,            \
+               (unsigned)buff.r, (unsigned)(_success_), (unsigned)(_rw_len_),                                          \
+               (unsigned)(buff.w == (_w_exp_) && buff.r == (_r_exp_) && (_rw_len_) == (_rw_exp_len_)));                \
+    } while (0)
+
+        lwrb_reset(&buff);
+        written = 0;
+        success = lwrb_write_ex(&buff, "abcdefg", 7, &written, LWRB_FLAG_WRITE_ALL); /* Write all bytes */
+        RW_TEST(7, 0, success, written, 7);
+        success = lwrb_read_ex(&buff, rw_buff, 3, &read, LWRB_FLAG_READ_ALL); /* Read 3 bytes only */
+        printf("RW FULL READ: %u, as_expected: %u\r\n", (unsigned)success, (unsigned)(success == 1));
+        RW_TEST(7, 3, success, written, 7);
+
+        /* This one shall failed, not enough memory available */
+        success = lwrb_write_ex(&buff, "abcdefg", 7, &written, LWRB_FLAG_WRITE_ALL); /* Write all bytes */
+        printf("RW FULL WRITE: %u, as_expected: %u\r\n", (unsigned)success, (unsigned)(success == 0));
+
+        /* Read few more bytes to allow full write */
+        success = lwrb_read_ex(&buff, rw_buff, 3, &read, LWRB_FLAG_READ_ALL); /* Read 3 bytes only */
+        printf("RW FULL READ: %u, as_expected: %u\r\n", (unsigned)success, (unsigned)(success == 1));
+
+        /* Now it should go through */
+        success = lwrb_write_ex(&buff, "abcdefg", 7, &written, LWRB_FLAG_WRITE_ALL); /* Write all bytes */
+        printf("RW FULL WRITE: %u, as_expected: %u\r\n", (unsigned)success, (unsigned)(success == 1));
+
+#undef RW_TEST
+        return 0;
+    }
+
     printf("Overwrite test\r\n");
     {
 #define OVERWRITE_TEST(_exp_content_, _exp_len_)                                                                       \

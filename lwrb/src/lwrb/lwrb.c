@@ -60,7 +60,7 @@
 
 /**
  * \brief           Initialize buffer handle to default values with size and buffer data array
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \param[in]       buffdata: Pointer to memory to use as buffer data
  * \param[in]       size: Size of `buffdata` in units of bytes
  *                      Maximum number of bytes buffer can hold is `size - 1`
@@ -82,7 +82,7 @@ lwrb_init(lwrb_t* buff, void* buffdata, lwrb_sz_t size) {
 
 /**
  * \brief           Check if buff is initialized and ready to use
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \return          `1` if ready, `0` otherwise
  */
 uint8_t
@@ -94,7 +94,7 @@ lwrb_is_ready(lwrb_t* buff) {
  * \brief           Free buffer memory
  * \note            Since implementation does not use dynamic allocation,
  *                  it just sets buffer handle to `NULL`
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  */
 void
 lwrb_free(lwrb_t* buff) {
@@ -105,7 +105,7 @@ lwrb_free(lwrb_t* buff) {
 
 /**
  * \brief           Set event function callback for different buffer operations
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \param[in]       evt_fn: Callback function
  */
 void
@@ -119,15 +119,37 @@ lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn evt_fn) {
  * \brief           Write data to buffer.
  * Copies data from `data` array to buffer and marks buffer as full for maximum `btw` number of bytes
  *
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \param[in]       data: Pointer to data to write into buffer
  * \param[in]       btw: Number of bytes to write
  * \return          Number of bytes written to buffer.
  *                      When returned value is less than `btw`, there was no enough memory available
- *                      to copy full data array
+ *                      to copy full data array.
  */
 lwrb_sz_t
 lwrb_write(lwrb_t* buff, const void* data, lwrb_sz_t btw) {
+    lwrb_sz_t written = 0;
+
+    if (lwrb_write_ex(buff, data, btw, &written, 0)) {
+        return written;
+    }
+    return 0;
+}
+
+/**
+ * \brief           Write extended functionality
+ * 
+ * \param           buff: Ring buffer instance
+ * \param           data: Pointer to data to write into buffer
+ * \param           btw: Number of bytes to write
+ * \param           bw: Output pointer to write number of bytes written
+ * \param           flags: Optional flags.
+ *                      \ref LWRB_FLAG_WRITE_ALL: Request to write all data (up to btw).
+ *                          Will early return if no memory available
+ * \return          `1` if write operation OK, `0` otherwise
+ */
+uint8_t
+lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bw, uint16_t flags) {
     lwrb_sz_t tocopy, free, buff_w_ptr;
     const uint8_t* d = data;
 
@@ -137,10 +159,11 @@ lwrb_write(lwrb_t* buff, const void* data, lwrb_sz_t btw) {
 
     /* Calculate maximum number of bytes available to write */
     free = lwrb_get_free(buff);
-    btw = BUF_MIN(free, btw);
-    if (btw == 0) {
+    /* If no memory, or if user wants to write ALL data but no enough space, exit early */
+    if (free == 0 || (free < btw && flags & LWRB_FLAG_WRITE_ALL)) {
         return 0;
     }
+    btw = BUF_MIN(free, btw);
     buff_w_ptr = LWRB_LOAD(buff->w, memory_order_acquire);
 
     /* Step 1: Write data to linear part of buffer */
@@ -167,20 +190,45 @@ lwrb_write(lwrb_t* buff, const void* data, lwrb_sz_t btw) {
     LWRB_STORE(buff->w, buff_w_ptr, memory_order_release);
 
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, tocopy + btw);
-    return tocopy + btw;
+    if (bw != NULL) {
+        *bw = tocopy + btw;
+    }
+    return 1;
 }
 
 /**
  * \brief           Read data from buffer.
  * Copies data from buffer to `data` array and marks buffer as free for maximum `btr` number of bytes
  *
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \param[out]      data: Pointer to output memory to copy buffer data to
  * \param[in]       btr: Number of bytes to read
  * \return          Number of bytes read and copied to data array
  */
 lwrb_sz_t
 lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr) {
+    lwrb_sz_t read = 0;
+
+    if (lwrb_read_ex(buff, data, btr, &read, 0)) {
+        return read;
+    }
+    return 0;
+}
+
+/**
+ * \brief           Write extended functionality
+ * 
+ * \param           buff: Ring buffer instance
+ * \param           data: Pointer to memory to write read data from buffer 
+ * \param           btr: Number of bytes to read
+ * \param           br: Output pointer to write number of bytes read
+ * \param           flags: Optional flags
+ *                      \ref LWRB_FLAG_READ_ALL: Request to read all data (up to btr).
+ *                          Will early return if no enough bytes in the buffer
+ * \return          `1` if read operation OK, `0` otherwise
+ */
+uint8_t
+lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* br, uint16_t flags) {
     lwrb_sz_t tocopy, full, buff_r_ptr;
     uint8_t* d = data;
 
@@ -190,10 +238,10 @@ lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr) {
 
     /* Calculate maximum number of bytes available to read */
     full = lwrb_get_full(buff);
-    btr = BUF_MIN(full, btr);
-    if (btr == 0) {
+    if (full == 0 || (full < btr && (flags & LWRB_FLAG_READ_ALL))) {
         return 0;
     }
+    btr = BUF_MIN(full, btr);
     buff_r_ptr = LWRB_LOAD(buff->r, memory_order_acquire);
 
     /* Step 1: Read data from linear part of buffer */
@@ -220,12 +268,15 @@ lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr) {
     LWRB_STORE(buff->r, buff_r_ptr, memory_order_release);
 
     BUF_SEND_EVT(buff, LWRB_EVT_READ, tocopy + btr);
-    return tocopy + btr;
+    if (br != NULL) {
+        *br = tocopy + btr;
+    }
+    return 1;
 }
 
 /**
  * \brief           Read from buffer without changing read pointer (peek only)
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \param[in]       skip_count: Number of bytes to skip before reading data
  * \param[out]      data: Pointer to output memory to copy buffer data to
  * \param[in]       btp: Number of bytes to peek
@@ -275,7 +326,7 @@ lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp) {
 
 /**
  * \brief           Get available size in buffer for write operation
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \return          Number of free bytes in memory
  */
 lwrb_sz_t
@@ -321,7 +372,7 @@ lwrb_get_free(const lwrb_t* buff) {
 
 /**
  * \brief           Get number of bytes currently available in buffer
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \return          Number of bytes ready to be read
  */
 lwrb_sz_t
@@ -367,7 +418,7 @@ lwrb_get_full(const lwrb_t* buff) {
  * \brief           Resets buffer to default values. Buffer size is not modified
  * \note            This function is not thread safe.
  *                      When used, application must ensure there is no active read/write operation
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  */
 void
 lwrb_reset(lwrb_t* buff) {
@@ -380,7 +431,7 @@ lwrb_reset(lwrb_t* buff) {
 
 /**
  * \brief           Get linear address for buffer for fast read
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \return          Linear buffer start address
  */
 void*
@@ -393,7 +444,7 @@ lwrb_get_linear_block_read_address(const lwrb_t* buff) {
 
 /**
  * \brief           Get length of linear block address before it overflows for read operation
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \return          Linear buffer size in units of bytes for read operation
  */
 lwrb_sz_t
@@ -426,7 +477,7 @@ lwrb_get_linear_block_read_length(const lwrb_t* buff) {
  * Marks data as read in the buffer and increases free memory for up to `len` bytes
  *
  * \note            Useful at the end of streaming transfer such as DMA
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \param[in]       len: Number of bytes to skip and mark as read
  * \return          Number of bytes skipped
  */
@@ -452,7 +503,7 @@ lwrb_skip(lwrb_t* buff, lwrb_sz_t len) {
 
 /**
  * \brief           Get linear address for buffer for fast read
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \return          Linear buffer start address
  */
 void*
@@ -465,7 +516,7 @@ lwrb_get_linear_block_write_address(const lwrb_t* buff) {
 
 /**
  * \brief           Get length of linear block address before it overflows for write operation
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \return          Linear buffer size in units of bytes for write operation
  */
 lwrb_sz_t
@@ -510,7 +561,7 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
  *
  * \note            Useful when hardware is writing to buffer and application needs to increase number
  *                      of bytes written to buffer by hardware
- * \param[in]       buff: Buffer handle
+ * \param[in]       buff: Ring buffer instance
  * \param[in]       len: Number of bytes to advance
  * \return          Number of bytes advanced for write operation
  */

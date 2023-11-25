@@ -89,6 +89,10 @@ struct lwrb;
  */
 typedef void (*lwrb_evt_fn)(struct lwrb* buff, lwrb_evt_type_t evt, lwrb_sz_t bp);
 
+/* List of flags */
+#define LWRB_FLAG_READ_ALL  ((uint16_t)0x0001)
+#define LWRB_FLAG_WRITE_ALL ((uint16_t)0x0001)
+
 /**
  * \brief           Buffer structure
  */
