@@ -5,7 +5,8 @@
 - Preparation for `v3.1`
 - Replace `size_t` with custom defined type `lwrb_sz_t` which matches atomicity requirements
 - `lwrb_sz_t` is by default typedef-ed as `unsigned long`
-- Prepare `lwrb_write_ex` and `lwrb_read_ex` function
+- Prepare `lwrb_write_ex` and `lwrb_read_ex` functions
+- Implement `lwrb_write_ex` and `lwrb_read_ex` functions
 
 ## v3.0.0
 

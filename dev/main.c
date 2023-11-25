@@ -91,7 +91,6 @@ main() {
         printf("RW FULL WRITE: %u, as_expected: %u\r\n", (unsigned)success, (unsigned)(success == 1));
 
 #undef RW_TEST
-        return 0;
     }
 
     printf("Overwrite test\r\n");
