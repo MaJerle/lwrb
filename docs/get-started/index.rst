@@ -65,6 +65,10 @@ Next step is to add the library to the project, by means of source files to comp
 * Add source files from ``lwrb/src/`` folder to toolchain build. These files are built by `C/C++` compiler. CMake configuration comes with the library, allows users to include library in the project as **subdirectory** and **library**.y
 * Build the project
 
+.. tip::
+    If you use the *CMake* build system, you can add the library to the project adding the ``lwshell``
+    directory with ``add_directory()`` command, followed by linking the target using ``target_link_libraries()``
+
 Minimal example code
 ^^^^^^^^^^^^^^^^^^^^
 
