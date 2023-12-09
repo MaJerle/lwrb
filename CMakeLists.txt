@@ -24,7 +24,6 @@ else()
         WIN32
         _DEBUG
         CONSOLE
-        LWRB_DEV
     )
 
     # Compiler options
@@ -35,6 +34,7 @@ else()
     )
 
     # Add subdir with lwrb and link to project
+    set(LWRB_COMPILE_DEFINITIONS LWRB_DEV)
     add_subdirectory(lwrb)
     target_link_libraries(${PROJECT_NAME} lwrb)
     target_link_libraries(${PROJECT_NAME} lwrb_ex)
