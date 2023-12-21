@@ -33,12 +33,12 @@
  */
 #include "lwrb/lwrb.h"
 
+#if defined(LWRB_DEV)
+
+/* Do not build if development mode isn't enabled */
+
 #define BUF_IS_VALID(b) ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
 #define BUF_MIN(x, y)   ((x) < (y) ? (x) : (y))
-
-#ifndef LWRB_DEV
-#error "This file needs development & extensive tests - not to be used!"
-#endif
 
 /**
  * \brief           Writes data to buffer with overwrite function, if no enough space to hold
@@ -148,3 +148,5 @@ lwrb_move(lwrb_t* dest, lwrb_t* src) {
     }
     return len_to_copy_orig;
 }
+
+#endif /* defined(LWRB_DEV) */
