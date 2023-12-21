@@ -12,7 +12,7 @@ lwrb_t buff;
 uint8_t tmp[8];
 
 void
-my_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
+my_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, lwrb_sz_t len) {
     (void)buff;
     (void)len;
     switch (type) {
@@ -25,7 +25,7 @@ my_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
 
 int
 main() {
-    size_t len;
+    lwrb_sz_t len;
 
     /* Init buffer */
     lwrb_init(&buff, lwrb_data, sizeof(lwrb_data));
@@ -53,6 +53,42 @@ main() {
 
         len = lwrb_write(&buff, "abc", 3); /* Write 3 bytes -> buffer should go over */
         RW_TEST(0, 6, len, 3);
+
+#undef RW_TEST
+    }
+
+    printf("Read/Write extended test\r\n");
+    {
+        uint8_t rw_buff[8];
+        lwrb_sz_t written, read;
+        uint8_t success;
+
+#define RW_TEST(_w_exp_, _r_exp_, _success_, _rw_len_, _rw_exp_len_)                                                   \
+    do {                                                                                                               \
+        printf("W ptr: %u, R ptr: %u, R/W success: %u, R/W len: %u, as_expected: %u\r\n", (unsigned)buff.w,            \
+               (unsigned)buff.r, (unsigned)(_success_), (unsigned)(_rw_len_),                                          \
+               (unsigned)(buff.w == (_w_exp_) && buff.r == (_r_exp_) && (_rw_len_) == (_rw_exp_len_)));                \
+    } while (0)
+
+        lwrb_reset(&buff);
+        written = 0;
+        success = lwrb_write_ex(&buff, "abcdefg", 7, &written, LWRB_FLAG_WRITE_ALL); /* Write all bytes */
+        RW_TEST(7, 0, success, written, 7);
+        success = lwrb_read_ex(&buff, rw_buff, 3, &read, LWRB_FLAG_READ_ALL); /* Read 3 bytes only */
+        printf("RW FULL READ: %u, as_expected: %u\r\n", (unsigned)success, (unsigned)(success == 1));
+        RW_TEST(7, 3, success, written, 7);
+
+        /* This one shall failed, not enough memory available */
+        success = lwrb_write_ex(&buff, "abcdefg", 7, &written, LWRB_FLAG_WRITE_ALL); /* Write all bytes */
+        printf("RW FULL WRITE: %u, as_expected: %u\r\n", (unsigned)success, (unsigned)(success == 0));
+
+        /* Read few more bytes to allow full write */
+        success = lwrb_read_ex(&buff, rw_buff, 3, &read, LWRB_FLAG_READ_ALL); /* Read 3 bytes only */
+        printf("RW FULL READ: %u, as_expected: %u\r\n", (unsigned)success, (unsigned)(success == 1));
+
+        /* Now it should go through */
+        success = lwrb_write_ex(&buff, "abcdefg", 7, &written, LWRB_FLAG_WRITE_ALL); /* Write all bytes */
+        printf("RW FULL WRITE: %u, as_expected: %u\r\n", (unsigned)success, (unsigned)(success == 1));
 
 #undef RW_TEST
     }
@@ -99,7 +135,7 @@ main() {
     {
 #define MOVE_TEST(_exp_content_, _exp_move_len_, _exp_buff_len_)                                                       \
     do {                                                                                                               \
-        size_t move_len;                                                                                               \
+        lwrb_sz_t move_len;                                                                                            \
         move_len = lwrb_move(&dst, &src);                                                                              \
         len = lwrb_peek(&dst, 0, tmp, dst.size);                                                                       \
         printf("move data: len: %d, dest data: %.*s, as_expected: %u\r\n", (int)len, (int)len, tmp,                    \
@@ -137,7 +173,7 @@ main() {
     {
 #define FIND_TEST(_bts_, _bts_len_, _start_offset_, _exp_result_)                                                      \
     do {                                                                                                               \
-        size_t found_idx;                                                                                              \
+        lwrb_sz_t found_idx;                                                                                           \
         uint8_t found;                                                                                                 \
         found = lwrb_find(&buff, (_bts_), (_bts_len_), (_start_offset_), &found_idx);                                  \
         printf("Find \"%s\" (len %d), start_offset: %d, found_index: %d; Found: %d; As expected: %d\r\n", (_bts_),     \

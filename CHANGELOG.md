@@ -2,13 +2,22 @@
 
 ## Develop
 
+## v3.1.0
+
+- Preparation for `v3.1`
+- Replace `size_t` with custom defined type `lwrb_sz_t` which matches atomicity requirements
+- `lwrb_sz_t` is by default typedef-ed as `unsigned long`
+- Prepare `lwrb_write_ex` and `lwrb_read_ex` functions
+- Implement `lwrb_write_ex` and `lwrb_read_ex` functions
+- Fix `_ex` module throwing an error for Platform.IO
+
 ## v3.0.0
 
 - Added macros for optional STDATOMIC. Global `-DLWRB_DISABLE_ATOMIC` macro will disable C11 `<stdatomic.h>` functionality.
 - Add `lwrb_move` and `lwrb_overwrite`
 - Fix `lwrb_find` which failed to properly search for tokens at corner cases
 
-## v3.0.0-RC1
+## v3.1.0-RC1
 
 - Split CMakeLists.txt files between library and executable
 - Change license year to 2022

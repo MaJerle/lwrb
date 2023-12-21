@@ -29,19 +29,21 @@
  * This file is part of LwRB - Lightweight ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
- * Version:         v3.0.0-rc1
+ * Version:         v3.1.0
  */
 #include "lwrb/lwrb.h"
+
+#if defined(LWRB_DEV)
+
+/* Do not build if development mode isn't enabled */
 
 #define BUF_IS_VALID(b) ((b) != NULL && (b)->buff != NULL && (b)->size > 0)
 #define BUF_MIN(x, y)   ((x) < (y) ? (x) : (y))
 
-#ifndef LWRB_DEV
-#error "This file needs development & extensive tests - not to be used!"
-#endif
-
 /**
- * \brief           Similar to \ref lwrb_write, writes data to buffer, will overwrite existing values 
+ * \brief           Writes data to buffer with overwrite function, if no enough space to hold
+ *                  complete input data object.
+ * \note            Similar to \ref lwrb_write but overwrites
  * \param[in]       buff: Buffer handle
  * \param[in]       data: Data to write to ring buffer
  * \param[in]       btw: Bytes To Write, length
@@ -51,9 +53,9 @@
  *                      it. This operation is a read op as well as a write op. For thread-safety mutexes may be desired,
  *                      see documentation.
  */
-size_t
-lwrb_overwrite(lwrb_t* buff, const void* data, size_t btw) {
-    size_t orig_btw = btw, max_cap;
+lwrb_sz_t
+lwrb_overwrite(lwrb_t* buff, const void* data, lwrb_sz_t btw) {
+    lwrb_sz_t orig_btw = btw, max_cap;
     const uint8_t* d = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btw == 0) {
@@ -62,10 +64,18 @@ lwrb_overwrite(lwrb_t* buff, const void* data, size_t btw) {
 
     /* Process complete input array */
     max_cap = buff->size - 1; /* Maximum capacity buffer can hold */
-    if (btw > max_cap) {      /* When buffer is larger than max buffer capacity */
-        d += btw - max_cap;   /* Advance data */
-        btw = max_cap;        /* Limit data to write */
-        lwrb_reset(buff);     /* Reset buffer */
+    if (btw > max_cap) {
+        /*
+         * When data to write is larger than max buffer capacity,
+         * we can reset the buffer and simply write last part of 
+         * the input buffer.
+         * 
+         * This is done here, by calculating remaining
+         * length and then advancing to the end of input buffer
+         */
+        d += btw - max_cap; /* Advance data */
+        btw = max_cap;      /* Limit data to write */
+        lwrb_reset(buff);   /* Reset buffer */
     } else {
         /* 
          * Bytes to write is less than capacity
@@ -74,7 +84,7 @@ lwrb_overwrite(lwrb_t* buff, const void* data, size_t btw) {
          * btw, otherwise we skip the operation
          * and only write the data.
          */
-        size_t f = lwrb_get_free(buff);
+        lwrb_sz_t f = lwrb_get_free(buff);
         if (f < btw) {
             lwrb_skip(buff, btw - f);
         }
@@ -94,9 +104,9 @@ lwrb_overwrite(lwrb_t* buff, const void* data, size_t btw) {
  *                  As well as a write op to the destination, and may update the w index.
  *                  For thread-safety mutexes may be desired, see documentation.
  */
-size_t
+lwrb_sz_t
 lwrb_move(lwrb_t* dest, lwrb_t* src) {
-    size_t len_to_copy, len_to_copy_orig, src_full, dest_free;
+    lwrb_sz_t len_to_copy, len_to_copy_orig, src_full, dest_free;
 
     if (!BUF_IS_VALID(dest) || !BUF_IS_VALID(src)) {
         return 0;
@@ -109,7 +119,7 @@ lwrb_move(lwrb_t* dest, lwrb_t* src) {
     /* Calculations for available length to copy is done above.
         We safely assume operations inside loop will properly complete. */
     while (len_to_copy > 0) {
-        size_t max_seq_read, max_seq_write, op_len;
+        lwrb_sz_t max_seq_read, max_seq_write, op_len;
         const uint8_t* d_src;
         uint8_t* d_dst;
 
@@ -124,7 +134,7 @@ lwrb_move(lwrb_t* dest, lwrb_t* src) {
         d_dst = lwrb_get_linear_block_write_address(dest);
 
         /* Byte by byte copy */
-        for (size_t i = 0; i < op_len; ++i) {
+        for (lwrb_sz_t i = 0; i < op_len; ++i) {
             *d_dst++ = *d_src++;
         }
 
@@ -138,3 +148,5 @@ lwrb_move(lwrb_t* dest, lwrb_t* src) {
     }
     return len_to_copy_orig;
 }
+
+#endif /* defined(LWRB_DEV) */

@@ -58,7 +58,17 @@ Add library to project
 ^^^^^^^^^^^^^^^^^^^^^^
 
 At this point it is assumed that you have successfully download library, either cloned it or from releases page.
-Next step is to add the library to the project, by means of source files to compiler inputs and header files in search path
+Next step is to add the library to the project, by means of source files to compiler inputs and header files in search path.
+
+*CMake* is the main supported build system. Package comes with the ``CMakeLists.txt`` and ``library.cmake`` files, both located in the ``lwrb`` directory:
+
+* ``CMakeLists.txt``: Is a wrapper and only includes ``library.cmake`` file. It is used if target application uses ``add_subdirectory`` and then uses ``target_link_libraries`` to include the library in the project
+* ``library.cmake``: It is a fully configured set of variables. User must use ``include(path/to/library.cmake)`` to include the library and must manually add files/includes to the final target
+
+.. tip::
+    Open ``library.cmake`` file and manually analyze all the possible variables you can set for full functionality.
+
+If you do not use the *CMake*, you can do the following:
 
 * Copy ``lwrb`` folder to your project, it contains library files
 * Add ``lwrb/src/include`` folder to `include path` of your toolchain. This is where `C/C++` compiler can find the files during compilation process. Usually using ``-I`` flag
