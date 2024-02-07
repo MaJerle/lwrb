@@ -2,6 +2,8 @@
 
 ## Develop
 
+- Add user argument option
+
 ## v3.1.0
 
 - Preparation for `v3.1`

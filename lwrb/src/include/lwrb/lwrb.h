@@ -102,6 +102,7 @@ typedef struct lwrb {
     lwrb_sz_atomic_t r; /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
     lwrb_sz_atomic_t w; /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
     lwrb_evt_fn evt_fn; /*!< Pointer to event callback function */
+    void* arg;          /*!< Event custom user argument */
 } lwrb_t;
 
 uint8_t lwrb_init(lwrb_t* buff, void* buffdata, lwrb_sz_t size);
@@ -109,6 +110,8 @@ uint8_t lwrb_is_ready(lwrb_t* buff);
 void lwrb_free(lwrb_t* buff);
 void lwrb_reset(lwrb_t* buff);
 void lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn fn);
+void lwrb_set_arg(lwrb_t* buff, void* arg);
+void* lwrb_get_arg(lwrb_t* buff);
 
 /* Read/Write functions */
 lwrb_sz_t lwrb_write(lwrb_t* buff, const void* data, lwrb_sz_t btw);

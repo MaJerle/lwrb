@@ -116,6 +116,28 @@ lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn evt_fn) {
 }
 
 /**
+ * \brief           Set custom buffer argument, that can be retrieved in the event function
+ * \param[in]       buff: Ring buffer instance
+ * \param[in]       arg: Custom user argument
+ */
+void
+lwrb_set_arg(lwrb_t* buff, void* arg) {
+    if (BUF_IS_VALID(buff)) {
+        buff->arg = arg;
+    }
+}
+
+/**
+ * \brief           Get custom buffer argument, previously set with \ref lwrb_set_arg
+ * \param[in]       buff: Ring buffer instance
+ * \return          User argument, previously set with \ref lwrb_set_arg
+ */
+void*
+lwrb_get_arg(lwrb_t* buff) {
+    return buff != NULL ? buff->arg : NULL;
+}
+
+/**
  * \brief           Write data to buffer.
  * Copies data from `data` array to buffer and marks buffer as full for maximum `btw` number of bytes
  *
