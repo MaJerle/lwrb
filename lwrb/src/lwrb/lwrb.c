@@ -369,7 +369,7 @@ lwrb_get_free(const lwrb_t* buff) {
      * even if buff->w or buff->r get changed during interrupt processing.
      *
      * They may change during load operation, important is that
-     * they do not change during if-elseif-else operations following these assignments.
+     * they do not change during if-else operations following these assignments.
      *
      * lwrb_get_free is only called for write purpose, and when in FIFO mode, then:
      * - buff->w pointer will not change by another process/interrupt because we are in write mode just now
@@ -380,12 +380,10 @@ lwrb_get_free(const lwrb_t* buff) {
     w = LWRB_LOAD(buff->w, memory_order_relaxed);
     r = LWRB_LOAD(buff->r, memory_order_relaxed);
 
-    if (w == r) {
-        size = buff->size;
-    } else if (r > w) {
-        size = r - w;
-    } else {
+    if (w >= r) {
         size = buff->size - (w - r);
+    } else {
+        size = r - w;
     }
 
     /* Buffer free size is always 1 less than actual size */
@@ -415,7 +413,7 @@ lwrb_get_full(const lwrb_t* buff) {
      * even if buff->w or buff->r get changed during interrupt processing.
      *
      * They may change during load operation, important is that
-     * they do not change during if-elseif-else operations following these assignments.
+     * they do not change during if-else operations following these assignments.
      *
      * lwrb_get_full is only called for read purpose, and when in FIFO mode, then:
      * - buff->r pointer will not change by another process/interrupt because we are in read mode just now
@@ -426,9 +424,7 @@ lwrb_get_full(const lwrb_t* buff) {
     w = LWRB_LOAD(buff->w, memory_order_relaxed);
     r = LWRB_LOAD(buff->r, memory_order_relaxed);
 
-    if (w == r) {
-        size = 0;
-    } else if (w > r) {
+    if (w >= r) {
         size = w - r;
     } else {
         size = buff->size - (r - w);
