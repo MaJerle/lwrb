@@ -1,4 +1,6 @@
 # 
+# LIB_PREFIX: LWRB
+#
 # This file provides set of variables for end user
 # and also generates one (or more) libraries, that can be added to the project using target_link_libraries(...)
 #
@@ -7,6 +9,9 @@
 # LWRB_COMPILE_OPTIONS: If defined, it provide compiler options for generated library.
 # LWRB_COMPILE_DEFINITIONS: If defined, it provides "-D" definitions to the library build
 #
+
+# Custom include directory
+set(LWRB_CUSTOM_INC_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib_inc)
 
 # Library core sources
 set(lwrb_core_SRCS 
@@ -21,6 +26,7 @@ set(lwrb_ex_SRCS
 # Setup include directories
 set(lwrb_include_DIRS
     ${CMAKE_CURRENT_LIST_DIR}/src/include
+    ${LWPKT_CUSTOM_INC_DIR}
 )
 
 # Register library to the system
