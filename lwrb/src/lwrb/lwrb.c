@@ -182,7 +182,7 @@ lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bw, uint
     /* Calculate maximum number of bytes available to write */
     free = lwrb_get_free(buff);
     /* If no memory, or if user wants to write ALL data but no enough space, exit early */
-    if (free == 0 || (free < btw && flags & LWRB_FLAG_WRITE_ALL)) {
+    if (free == 0 || (free < btw && (flags & LWRB_FLAG_WRITE_ALL))) {
         return 0;
     }
     btw = BUF_MIN(free, btw);
