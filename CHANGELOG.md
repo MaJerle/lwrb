@@ -2,7 +2,10 @@
 
 ## Develop
 
+## v3.2.0
+
 - Add user argument option
+- Improve the variable names to better conform *LLVM* tidy config
 
 ## v3.1.0
 
@@ -19,7 +22,7 @@
 - Add `lwrb_move` and `lwrb_overwrite`
 - Fix `lwrb_find` which failed to properly search for tokens at corner cases
 
-## v3.1.0-RC1
+## v3.0.0-RC1
 
 - Split CMakeLists.txt files between library and executable
 - Change license year to 2022

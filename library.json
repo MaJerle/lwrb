@@ -1,6 +1,6 @@
 {
     "name": "LwRB",
-    "version": "3.1.0",
+    "version": "3.2.0",
     "description": "Lightweight general purpose ring buffer with optimizations for embedded systems",
     "keywords": "buffer, ring buffer, library, rb, cyclic",
     "repository": {
