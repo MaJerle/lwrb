@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2023 Tilen MAJERLE
+ * Copyright (c) 2024 Tilen MAJERLE
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,7 +29,7 @@
  * This file is part of LwRB - Lightweight ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
- * Version:         v3.1.0
+ * Version:         v3.2.0
  */
 #ifndef LWRB_HDR_H
 #define LWRB_HDR_H
@@ -99,9 +99,12 @@ typedef void (*lwrb_evt_fn)(struct lwrb* buff, lwrb_evt_type_t evt, lwrb_sz_t bp
 typedef struct lwrb {
     uint8_t* buff;  /*!< Pointer to buffer data. Buffer is considered initialized when `buff != NULL` and `size > 0` */
     lwrb_sz_t size; /*!< Size of buffer data. Size of actual buffer is `1` byte less than value holds */
-    lwrb_sz_atomic_t r; /*!< Next read pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
-    lwrb_sz_atomic_t w; /*!< Next write pointer. Buffer is considered empty when `r == w` and full when `w == r - 1` */
-    lwrb_evt_fn evt_fn; /*!< Pointer to event callback function */
+    lwrb_sz_atomic_t r_ptr; /*!< Next read pointer.
+                                Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    lwrb_sz_atomic_t w_ptr; /*!< Next write pointer.
+                                Buffer is considered empty when `r == w` and full when `w == r - 1` */
+    lwrb_evt_fn evt_fn;     /*!< Pointer to event callback function */
+    void* arg;              /*!< Event custom user argument */
 } lwrb_t;
 
 uint8_t lwrb_init(lwrb_t* buff, void* buffdata, lwrb_sz_t size);
@@ -109,6 +112,8 @@ uint8_t lwrb_is_ready(lwrb_t* buff);
 void lwrb_free(lwrb_t* buff);
 void lwrb_reset(lwrb_t* buff);
 void lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn fn);
+void lwrb_set_arg(lwrb_t* buff, void* arg);
+void* lwrb_get_arg(lwrb_t* buff);
 
 /* Read/Write functions */
 lwrb_sz_t lwrb_write(lwrb_t* buff, const void* data, lwrb_sz_t btw);
@@ -116,8 +121,8 @@ lwrb_sz_t lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr);
 lwrb_sz_t lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp);
 
 /* Extended read/write functions */
-uint8_t lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bw, uint16_t flags);
-uint8_t lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* br, uint16_t flags);
+uint8_t lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bwritten, uint16_t flags);
+uint8_t lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* bread, uint16_t flags);
 
 /* Buffer size information */
 lwrb_sz_t lwrb_get_free(const lwrb_t* buff);
