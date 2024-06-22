@@ -170,14 +170,14 @@ lwrb_write(lwrb_t* buff, const void* data, lwrb_sz_t btw) {
  * \param           buff: Ring buffer instance
  * \param           data: Pointer to data to write into buffer
  * \param           btw: Number of bytes to write
- * \param           bw: Output pointer to write number of bytes written
+ * \param           bwritten: Output pointer to write number of bytes written into the buffer
  * \param           flags: Optional flags.
  *                      \ref LWRB_FLAG_WRITE_ALL: Request to write all data (up to btw).
  *                          Will early return if no memory available
  * \return          `1` if write operation OK, `0` otherwise
  */
 uint8_t
-lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bw, uint16_t flags) {
+lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bwritten, uint16_t flags) {
     lwrb_sz_t tocopy = 0, free = 0, w_ptr = 0;
     const uint8_t* d_ptr = data;
 
@@ -219,8 +219,8 @@ lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bw, uint
     LWRB_STORE(buff->w_ptr, w_ptr, memory_order_release);
 
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, tocopy + btw);
-    if (bw != NULL) {
-        *bw = tocopy + btw;
+    if (bwritten != NULL) {
+        *bwritten = tocopy + btw;
     }
     return 1;
 }
@@ -254,14 +254,15 @@ lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr) {
  * \param           buff: Ring buffer instance
  * \param           data: Pointer to memory to write read data from buffer 
  * \param           btr: Number of bytes to read
- * \param           br: Output pointer to write number of bytes read
+ * \param           bread: Output pointer to write number of bytes read from buffer and written to the 
+ *                      output `data` variable
  * \param           flags: Optional flags
  *                      \ref LWRB_FLAG_READ_ALL: Request to read all data (up to btr).
  *                          Will early return if no enough bytes in the buffer
  * \return          `1` if read operation OK, `0` otherwise
  */
 uint8_t
-lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* br, uint16_t flags) {
+lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* bread, uint16_t flags) {
     lwrb_sz_t tocopy = 0, full = 0, r_ptr = 0;
     uint8_t* d_ptr = data;
 
@@ -302,8 +303,8 @@ lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* br, uint16_t fl
     LWRB_STORE(buff->r_ptr, r_ptr, memory_order_release);
 
     BUF_SEND_EVT(buff, LWRB_EVT_READ, tocopy + btr);
-    if (br != NULL) {
-        *br = tocopy + btr;
+    if (bread != NULL) {
+        *bread = tocopy + btr;
     }
     return 1;
 }

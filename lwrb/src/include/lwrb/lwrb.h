@@ -121,8 +121,8 @@ lwrb_sz_t lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr);
 lwrb_sz_t lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp);
 
 /* Extended read/write functions */
-uint8_t lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bw, uint16_t flags);
-uint8_t lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* br, uint16_t flags);
+uint8_t lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bwritten, uint16_t flags);
+uint8_t lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* bread, uint16_t flags);
 
 /* Buffer size information */
 lwrb_sz_t lwrb_get_free(const lwrb_t* buff);
