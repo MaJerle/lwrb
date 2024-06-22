@@ -75,8 +75,8 @@ lwrb_init(lwrb_t* buff, void* buffdata, lwrb_sz_t size) {
     buff->evt_fn = NULL;
     buff->size = size;
     buff->buff = buffdata;
-    LWRB_INIT(buff->w, 0);
-    LWRB_INIT(buff->r, 0);
+    LWRB_INIT(buff->w_ptr, 0);
+    LWRB_INIT(buff->r_ptr, 0);
     return 1;
 }
 
@@ -178,8 +178,8 @@ lwrb_write(lwrb_t* buff, const void* data, lwrb_sz_t btw) {
  */
 uint8_t
 lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bw, uint16_t flags) {
-    lwrb_sz_t tocopy, free, buff_w_ptr;
-    const uint8_t* d = data;
+    lwrb_sz_t tocopy = 0, free = 0, w_ptr = 0;
+    const uint8_t* d_ptr = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btw == 0) {
         return 0;
@@ -192,30 +192,31 @@ lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bw, uint
         return 0;
     }
     btw = BUF_MIN(free, btw);
-    buff_w_ptr = LWRB_LOAD(buff->w, memory_order_acquire);
+    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_acquire);
 
     /* Step 1: Write data to linear part of buffer */
-    tocopy = BUF_MIN(buff->size - buff_w_ptr, btw);
-    BUF_MEMCPY(&buff->buff[buff_w_ptr], d, tocopy);
-    buff_w_ptr += tocopy;
+    tocopy = BUF_MIN(buff->size - w_ptr, btw);
+    BUF_MEMCPY(&buff->buff[w_ptr], d_ptr, tocopy);
+    d_ptr += tocopy;
+    w_ptr += tocopy;
     btw -= tocopy;
 
     /* Step 2: Write data to beginning of buffer (overflow part) */
     if (btw > 0) {
-        BUF_MEMCPY(buff->buff, &d[tocopy], btw);
-        buff_w_ptr = btw;
+        BUF_MEMCPY(buff->buff, d_ptr, btw);
+        w_ptr = btw;
     }
 
     /* Step 3: Check end of buffer */
-    if (buff_w_ptr >= buff->size) {
-        buff_w_ptr = 0;
+    if (w_ptr >= buff->size) {
+        w_ptr = 0;
     }
 
     /*
      * Write final value to the actual running variable.
      * This is to ensure no read operation can access intermediate data
      */
-    LWRB_STORE(buff->w, buff_w_ptr, memory_order_release);
+    LWRB_STORE(buff->w_ptr, w_ptr, memory_order_release);
 
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, tocopy + btw);
     if (bw != NULL) {
@@ -261,8 +262,8 @@ lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr) {
  */
 uint8_t
 lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* br, uint16_t flags) {
-    lwrb_sz_t tocopy, full, buff_r_ptr;
-    uint8_t* d = data;
+    lwrb_sz_t tocopy = 0, full = 0, r_ptr = 0;
+    uint8_t* d_ptr = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btr == 0) {
         return 0;
@@ -274,30 +275,31 @@ lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* br, uint16_t fl
         return 0;
     }
     btr = BUF_MIN(full, btr);
-    buff_r_ptr = LWRB_LOAD(buff->r, memory_order_acquire);
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_acquire);
 
     /* Step 1: Read data from linear part of buffer */
-    tocopy = BUF_MIN(buff->size - buff_r_ptr, btr);
-    BUF_MEMCPY(d, &buff->buff[buff_r_ptr], tocopy);
-    buff_r_ptr += tocopy;
+    tocopy = BUF_MIN(buff->size - r_ptr, btr);
+    BUF_MEMCPY(d_ptr, &buff->buff[r_ptr], tocopy);
+    d_ptr += tocopy;
+    r_ptr += tocopy;
     btr -= tocopy;
 
     /* Step 2: Read data from beginning of buffer (overflow part) */
     if (btr > 0) {
-        BUF_MEMCPY(&d[tocopy], buff->buff, btr);
-        buff_r_ptr = btr;
+        BUF_MEMCPY(d_ptr, buff->buff, btr);
+        r_ptr = btr;
     }
 
     /* Step 3: Check end of buffer */
-    if (buff_r_ptr >= buff->size) {
-        buff_r_ptr = 0;
+    if (r_ptr >= buff->size) {
+        r_ptr = 0;
     }
 
     /*
      * Write final value to the actual running variable.
      * This is to ensure no write operation can access intermediate data
      */
-    LWRB_STORE(buff->r, buff_r_ptr, memory_order_release);
+    LWRB_STORE(buff->r_ptr, r_ptr, memory_order_release);
 
     BUF_SEND_EVT(buff, LWRB_EVT_READ, tocopy + btr);
     if (br != NULL) {
@@ -316,8 +318,8 @@ lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* br, uint16_t fl
  */
 lwrb_sz_t
 lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp) {
-    lwrb_sz_t full, tocopy, r;
-    uint8_t* d = data;
+    lwrb_sz_t full = 0, tocopy = 0, r_ptr = 0;
+    uint8_t* d_ptr = data;
 
     if (!BUF_IS_VALID(buff) || data == NULL || btp == 0) {
         return 0;
@@ -331,11 +333,11 @@ lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp) {
     if (skip_count >= full) {
         return 0;
     }
-    r = LWRB_LOAD(buff->r, memory_order_relaxed);
-    r += skip_count;
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
+    r_ptr += skip_count;
     full -= skip_count;
-    if (r >= buff->size) {
-        r -= buff->size;
+    if (r_ptr >= buff->size) {
+        r_ptr -= buff->size;
     }
 
     /* Check maximum number of bytes available to read after skip */
@@ -345,13 +347,14 @@ lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp) {
     }
 
     /* Step 1: Read data from linear part of buffer */
-    tocopy = BUF_MIN(buff->size - r, btp);
-    BUF_MEMCPY(d, &buff->buff[r], tocopy);
+    tocopy = BUF_MIN(buff->size - r_ptr, btp);
+    BUF_MEMCPY(d_ptr, &buff->buff[r_ptr], tocopy);
+    d_ptr += tocopy;
     btp -= tocopy;
 
     /* Step 2: Read data from beginning of buffer (overflow part) */
     if (btp > 0) {
-        BUF_MEMCPY(&d[tocopy], buff->buff, btp);
+        BUF_MEMCPY(d_ptr, buff->buff, btp);
     }
     return tocopy + btp;
 }
@@ -363,7 +366,7 @@ lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp) {
  */
 lwrb_sz_t
 lwrb_get_free(const lwrb_t* buff) {
-    lwrb_sz_t size, w, r;
+    lwrb_sz_t size = 0, w_ptr = 0, r_ptr = 0;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
@@ -387,13 +390,13 @@ lwrb_get_free(const lwrb_t* buff) {
      *    buffer will see "free size" less than it actually is. This is not a problem, application can
      *    always try again to write more data to remaining free memory that was read just during copy operation
      */
-    w = LWRB_LOAD(buff->w, memory_order_relaxed);
-    r = LWRB_LOAD(buff->r, memory_order_relaxed);
+    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
 
-    if (w >= r) {
-        size = buff->size - (w - r);
+    if (w_ptr >= r_ptr) {
+        size = buff->size - (w_ptr - r_ptr);
     } else {
-        size = r - w;
+        size = r_ptr - w_ptr;
     }
 
     /* Buffer free size is always 1 less than actual size */
@@ -407,7 +410,7 @@ lwrb_get_free(const lwrb_t* buff) {
  */
 lwrb_sz_t
 lwrb_get_full(const lwrb_t* buff) {
-    lwrb_sz_t size, w, r;
+    lwrb_sz_t size = 0, w_ptr = 0, r_ptr = 0;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
@@ -431,13 +434,13 @@ lwrb_get_full(const lwrb_t* buff) {
      *    buffer will see "full size" less than it really is. This is not a problem, application can
      *    always try again to read more data from remaining full memory that was written just during copy operation
      */
-    w = LWRB_LOAD(buff->w, memory_order_relaxed);
-    r = LWRB_LOAD(buff->r, memory_order_relaxed);
+    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
 
-    if (w >= r) {
-        size = w - r;
+    if (w_ptr >= r_ptr) {
+        size = w_ptr - r_ptr;
     } else {
-        size = buff->size - (r - w);
+        size = buff->size - (r_ptr - w_ptr);
     }
     return size;
 }
@@ -451,8 +454,8 @@ lwrb_get_full(const lwrb_t* buff) {
 void
 lwrb_reset(lwrb_t* buff) {
     if (BUF_IS_VALID(buff)) {
-        LWRB_STORE(buff->w, 0, memory_order_release);
-        LWRB_STORE(buff->r, 0, memory_order_release);
+        LWRB_STORE(buff->w_ptr, 0, memory_order_release);
+        LWRB_STORE(buff->r_ptr, 0, memory_order_release);
         BUF_SEND_EVT(buff, LWRB_EVT_RESET, 0);
     }
 }
@@ -464,10 +467,13 @@ lwrb_reset(lwrb_t* buff) {
  */
 void*
 lwrb_get_linear_block_read_address(const lwrb_t* buff) {
+    lwrb_sz_t ptr = 0;
+
     if (!BUF_IS_VALID(buff)) {
         return NULL;
     }
-    return &buff->buff[buff->r];
+    ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
+    return &buff->buff[ptr];
 }
 
 /**
@@ -477,7 +483,7 @@ lwrb_get_linear_block_read_address(const lwrb_t* buff) {
  */
 lwrb_sz_t
 lwrb_get_linear_block_read_length(const lwrb_t* buff) {
-    lwrb_sz_t len, w, r;
+    lwrb_sz_t len = 0, w_ptr = 0, r_ptr = 0;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
@@ -487,13 +493,13 @@ lwrb_get_linear_block_read_length(const lwrb_t* buff) {
      * Use temporary values in case they are changed during operations.
      * See lwrb_buff_free or lwrb_buff_full functions for more information why this is OK.
      */
-    w = LWRB_LOAD(buff->w, memory_order_relaxed);
-    r = LWRB_LOAD(buff->r, memory_order_relaxed);
+    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
 
-    if (w > r) {
-        len = w - r;
-    } else if (r > w) {
-        len = buff->size - r;
+    if (w_ptr > r_ptr) {
+        len = w_ptr - r_ptr;
+    } else if (r_ptr > w_ptr) {
+        len = buff->size - r_ptr;
     } else {
         len = 0;
     }
@@ -511,7 +517,7 @@ lwrb_get_linear_block_read_length(const lwrb_t* buff) {
  */
 lwrb_sz_t
 lwrb_skip(lwrb_t* buff, lwrb_sz_t len) {
-    lwrb_sz_t full, r;
+    lwrb_sz_t full = 0, r_ptr = 0;
 
     if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
@@ -519,12 +525,12 @@ lwrb_skip(lwrb_t* buff, lwrb_sz_t len) {
 
     full = lwrb_get_full(buff);
     len = BUF_MIN(len, full);
-    r = LWRB_LOAD(buff->r, memory_order_acquire);
-    r += len;
-    if (r >= buff->size) {
-        r -= buff->size;
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_acquire);
+    r_ptr += len;
+    if (r_ptr >= buff->size) {
+        r_ptr -= buff->size;
     }
-    LWRB_STORE(buff->r, r, memory_order_release);
+    LWRB_STORE(buff->r_ptr, r_ptr, memory_order_release);
     BUF_SEND_EVT(buff, LWRB_EVT_READ, len);
     return len;
 }
@@ -536,10 +542,13 @@ lwrb_skip(lwrb_t* buff, lwrb_sz_t len) {
  */
 void*
 lwrb_get_linear_block_write_address(const lwrb_t* buff) {
+    lwrb_sz_t ptr = 0;
+
     if (!BUF_IS_VALID(buff)) {
         return NULL;
     }
-    return &buff->buff[buff->w];
+    ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
+    return &buff->buff[ptr];
 }
 
 /**
@@ -549,7 +558,7 @@ lwrb_get_linear_block_write_address(const lwrb_t* buff) {
  */
 lwrb_sz_t
 lwrb_get_linear_block_write_length(const lwrb_t* buff) {
-    lwrb_sz_t len, w, r;
+    lwrb_sz_t len = 0, w_ptr = 0, r_ptr = 0;
 
     if (!BUF_IS_VALID(buff)) {
         return 0;
@@ -559,17 +568,17 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
      * Use temporary values in case they are changed during operations.
      * See lwrb_buff_free or lwrb_buff_full functions for more information why this is OK.
      */
-    w = LWRB_LOAD(buff->w, memory_order_relaxed);
-    r = LWRB_LOAD(buff->r, memory_order_relaxed);
+    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
 
-    if (w >= r) {
-        len = buff->size - w;
+    if (w_ptr >= r_ptr) {
+        len = buff->size - w_ptr;
         /*
          * When read pointer is 0,
          * maximal length is one less as if too many bytes
          * are written, buffer would be considered empty again (r == w)
          */
-        if (r == 0) {
+        if (r_ptr == 0) {
             /*
              * Cannot overflow:
              * - If r is not 0, statement does not get called
@@ -578,7 +587,7 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
             --len;
         }
     } else {
-        len = r - w - 1;
+        len = r_ptr - w_ptr - 1;
     }
     return len;
 }
@@ -595,7 +604,7 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
  */
 lwrb_sz_t
 lwrb_advance(lwrb_t* buff, lwrb_sz_t len) {
-    lwrb_sz_t free, w;
+    lwrb_sz_t free = 0, w_ptr = 0;
 
     if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
@@ -604,12 +613,12 @@ lwrb_advance(lwrb_t* buff, lwrb_sz_t len) {
     /* Use local variables before writing back to main structure */
     free = lwrb_get_free(buff);
     len = BUF_MIN(len, free);
-    w = LWRB_LOAD(buff->w, memory_order_acquire);
-    w += len;
-    if (w >= buff->size) {
-        w -= buff->size;
+    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_acquire);
+    w_ptr += len;
+    if (w_ptr >= buff->size) {
+        w_ptr -= buff->size;
     }
-    LWRB_STORE(buff->w, w, memory_order_release);
+    LWRB_STORE(buff->w_ptr, w_ptr, memory_order_release);
     BUF_SEND_EVT(buff, LWRB_EVT_WRITE, len);
     return len;
 }
@@ -629,7 +638,7 @@ lwrb_advance(lwrb_t* buff, lwrb_sz_t len) {
  */
 uint8_t
 lwrb_find(const lwrb_t* buff, const void* bts, lwrb_sz_t len, lwrb_sz_t start_offset, lwrb_sz_t* found_idx) {
-    lwrb_sz_t full, r, max_x;
+    lwrb_sz_t full = 0, r_ptr = 0, buff_r_ptr = 0, max_x = 0;
     uint8_t found = 0;
     const uint8_t* needle = bts;
 
@@ -644,25 +653,28 @@ lwrb_find(const lwrb_t* buff, const void* bts, lwrb_sz_t len, lwrb_sz_t start_of
         return 0;
     }
 
+    /* Get actual buffer read pointer for this search */
+    buff_r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
+
     /* Max number of for loops is buff_full - input_len - start_offset of buffer length */
     max_x = full - len;
     for (lwrb_sz_t skip_x = start_offset; !found && skip_x <= max_x; ++skip_x) {
         found = 1; /* Found by default */
 
         /* Prepare the starting point for reading */
-        r = buff->r + skip_x;
-        if (r >= buff->size) {
-            r -= buff->size;
+        r_ptr = buff_r_ptr + skip_x;
+        if (r_ptr >= buff->size) {
+            r_ptr -= buff->size;
         }
 
         /* Search in the buffer */
-        for (lwrb_sz_t i = 0; i < len; ++i) {
-            if (buff->buff[r] != needle[i]) {
+        for (lwrb_sz_t idx = 0; idx < len; ++idx) {
+            if (buff->buff[r_ptr] != needle[idx]) {
                 found = 0;
                 break;
             }
-            if (++r >= buff->size) {
-                r = 0;
+            if (++r_ptr >= buff->size) {
+                r_ptr = 0;
             }
         }
         if (found) {

@@ -36,9 +36,9 @@ main() {
 
 #define RW_TEST(_w_exp_, _r_exp_, _rw_len_, _rw_exp_len_)                                                              \
     do {                                                                                                               \
-        printf("W ptr: %u, R ptr: %u, R/W len: %u, as_expected: %u\r\n", (unsigned)buff.w, (unsigned)buff.r,           \
+        printf("W ptr: %u, R ptr: %u, R/W len: %u, as_expected: %u\r\n", (unsigned)buff.w_ptr, (unsigned)buff.r_ptr,   \
                (unsigned)(_rw_len_),                                                                                   \
-               (unsigned)(buff.w == (_w_exp_) && buff.r == (_r_exp_) && (_rw_len_) == (_rw_exp_len_)));                \
+               (unsigned)(buff.w_ptr == (_w_exp_) && buff.r_ptr == (_r_exp_) && (_rw_len_) == (_rw_exp_len_)));        \
     } while (0)
 
         lwrb_reset(&buff);
@@ -65,9 +65,9 @@ main() {
 
 #define RW_TEST(_w_exp_, _r_exp_, _success_, _rw_len_, _rw_exp_len_)                                                   \
     do {                                                                                                               \
-        printf("W ptr: %u, R ptr: %u, R/W success: %u, R/W len: %u, as_expected: %u\r\n", (unsigned)buff.w,            \
-               (unsigned)buff.r, (unsigned)(_success_), (unsigned)(_rw_len_),                                          \
-               (unsigned)(buff.w == (_w_exp_) && buff.r == (_r_exp_) && (_rw_len_) == (_rw_exp_len_)));                \
+        printf("W ptr: %u, R ptr: %u, R/W success: %u, R/W len: %u, as_expected: %u\r\n", (unsigned)buff.w_ptr,        \
+               (unsigned)buff.r_ptr, (unsigned)(_success_), (unsigned)(_rw_len_),                                      \
+               (unsigned)(buff.w_ptr == (_w_exp_) && buff.r_ptr == (_r_exp_) && (_rw_len_) == (_rw_exp_len_)));        \
     } while (0)
 
         lwrb_reset(&buff);
@@ -190,8 +190,8 @@ main() {
         FIND_TEST("678", 3, 0, 1);
 
         /* Restart by setting write and read as empty with offset */
-        buff.w = 6;
-        buff.r = 6;
+        buff.w_ptr = 6;
+        buff.r_ptr = 6;
         lwrb_write(&buff, "12345678", 8);
 
         FIND_TEST("123", 3, 0, 1); /* Must find it */
@@ -200,8 +200,8 @@ main() {
 
         /* Restart by setting write and read as empty with offset */
         /* This should generate data for search in overflow mode */
-        buff.w = 8;
-        buff.r = 8;
+        buff.w_ptr = 8;
+        buff.r_ptr = 8;
         lwrb_write(&buff, "12345678", 8);
 
         FIND_TEST("1234", 3, 0, 1); /* Must find it */
