@@ -63,7 +63,7 @@ Next step is to add the library to the project, by means of source files to comp
 *CMake* is the main supported build system. Package comes with the ``CMakeLists.txt`` and ``library.cmake`` files, both located in the ``lwrb`` directory:
 
 * ``library.cmake``: It is a fully configured set of variables and with library definition. User can include this file to the project file with ``include(path/to/library.cmake)`` and then manually use the variables provided by the file, such as list of source files, include paths or necessary compiler definitions. It is up to the user to properly use the this file on its own.
-* ``CMakeLists.txt``: It is a wrapper-only file and includes ``library.cmake`` file. It is used for when user wants to include the library to the main project by simply calling ``add_subdirectory`` **CMake** command, followed by ``target_link_libraries`` to add library as an external library.
+* ``CMakeLists.txt``: It is a wrapper-only file and includes ``library.cmake`` file. It is used for when user wants to include the library to the main project by simply calling *CMake* ``add_subdirectory`` command, followed by ``target_link_libraries`` to link external library to the final project.
 
 .. tip::
     Open ``library.cmake`` and analyze the provided information. Among variables, you can also find list of all possible exposed libraries for the user.
