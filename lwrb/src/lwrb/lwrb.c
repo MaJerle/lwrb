@@ -139,7 +139,13 @@ lwrb_get_arg(lwrb_t* buff) {
 
 /**
  * \brief           Write data to buffer.
- * Copies data from `data` array to buffer and marks buffer as full for maximum `btw` number of bytes
+ *                  Copies data from `data` array to buffer and advances the write pointer for a maximum of `btw` number of bytes.
+ * 
+ *                  It copies less if there is less memory available in the buffer.
+ *                  User must check the return value of the function and compare it to
+ *                  the requested write length, to determine if everything has been written
+ * 
+ * \note            Use \ref lwrb_write_ex for more advanced usage
  *
  * \param[in]       buff: Ring buffer instance
  * \param[in]       data: Pointer to data to write into buffer
@@ -220,7 +226,11 @@ lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bw, uint
 
 /**
  * \brief           Read data from buffer.
- * Copies data from buffer to `data` array and marks buffer as free for maximum `btr` number of bytes
+ *                  Copies data from `data` array to buffer and advances the read pointer for a maximum of `btr` number of bytes.
+ * 
+ *                  It copies less if there is less data available in the buffer.
+ * 
+ * \note            Use \ref lwrb_read_ex for more advanced usage
  *
  * \param[in]       buff: Ring buffer instance
  * \param[out]      data: Pointer to output memory to copy buffer data to
@@ -238,7 +248,7 @@ lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr) {
 }
 
 /**
- * \brief           Write extended functionality
+ * \brief           Read extended functionality
  * 
  * \param           buff: Ring buffer instance
  * \param           data: Pointer to memory to write read data from buffer 
