@@ -2,6 +2,8 @@
 
 ## Develop
 
+- Rework library CMake with removed INTERFACE type
+
 ## v3.2.0
 
 - Add user argument option

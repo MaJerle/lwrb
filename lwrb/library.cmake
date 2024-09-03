@@ -31,14 +31,14 @@ set(lwrb_include_DIRS
 
 # Register library to the system
 add_library(lwrb)
-target_sources(lwrb PUBLIC ${lwrb_core_SRCS})
+target_sources(lwrb PRIVATE ${lwrb_core_SRCS})
 target_include_directories(lwrb PUBLIC ${lwrb_include_DIRS})
-target_compile_options(lwrb PUBLIC ${LWRB_COMPILE_OPTIONS})
-target_compile_definitions(lwrb PUBLIC ${LWRB_COMPILE_DEFINITIONS})
+target_compile_options(lwrb PRIVATE ${LWRB_COMPILE_OPTIONS})
+target_compile_definitions(lwrb PRIVATE ${LWRB_COMPILE_DEFINITIONS})
 
 # Register extended part
 add_library(lwrb_ex)
-target_sources(lwrb_ex PUBLIC ${lwrb_ex_SRCS})
+target_sources(lwrb_ex PRIVATE ${lwrb_ex_SRCS})
 target_include_directories(lwrb_ex PUBLIC ${lwrb_include_DIRS})
-target_compile_options(lwrb_ex PUBLIC ${LWRB_COMPILE_OPTIONS})
-target_compile_definitions(lwrb_ex PUBLIC ${LWRB_COMPILE_DEFINITIONS} LWRB_EXTENDED)
+target_compile_options(lwrb_ex PRIVATE ${LWRB_COMPILE_OPTIONS})
+target_compile_definitions(lwrb_ex PRIVATE ${LWRB_COMPILE_DEFINITIONS} LWRB_EXTENDED)
