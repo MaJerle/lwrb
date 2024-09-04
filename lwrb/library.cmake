@@ -1,4 +1,4 @@
-# 
+#
 # LIB_PREFIX: LWRB
 #
 # This file provides set of variables for end user
@@ -14,12 +14,12 @@
 set(LWRB_CUSTOM_INC_DIR ${CMAKE_CURRENT_BINARY_DIR}/lib_inc)
 
 # Library core sources
-set(lwrb_core_SRCS 
+set(lwrb_core_SRCS
     ${CMAKE_CURRENT_LIST_DIR}/src/lwrb/lwrb.c
 )
 
 # Library extended sources
-set(lwrb_ex_SRCS 
+set(lwrb_ex_SRCS
     ${CMAKE_CURRENT_LIST_DIR}/src/lwrb/lwrb_ex.c
 )
 
@@ -42,3 +42,4 @@ target_sources(lwrb_ex PRIVATE ${lwrb_ex_SRCS})
 target_include_directories(lwrb_ex PUBLIC ${lwrb_include_DIRS})
 target_compile_options(lwrb_ex PRIVATE ${LWRB_COMPILE_OPTIONS})
 target_compile_definitions(lwrb_ex PRIVATE ${LWRB_COMPILE_DEFINITIONS} LWRB_EXTENDED)
+target_link_libraries(lwrb_ex PUBLIC lwrb)
