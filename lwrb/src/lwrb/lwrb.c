@@ -537,7 +537,7 @@ lwrb_skip(lwrb_t* buff, lwrb_sz_t len) {
 }
 
 /**
- * \brief           Get linear address for buffer for fast read
+ * \brief           Get linear address for buffer for fast write
  * \param[in]       buff: Ring buffer instance
  * \return          Linear buffer start address
  */
