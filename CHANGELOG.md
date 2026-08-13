@@ -2,6 +2,8 @@
 
 ## Develop
 
+## v3.3.0
+
 - Rework library CMake with removed INTERFACE type
 - Fix the platformio library package description
 - Remove the redundant checks for peek. Introduce the peek tests
