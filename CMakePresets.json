@@ -25,6 +25,14 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
+        },
+        {
+            "name": "Gcc-Debug",
+            "inherits": "default",
+            "toolchainFile": "${sourceDir}/cmake/gcc.cmake",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
         }
     ],
     "buildPresets": [
@@ -35,6 +43,10 @@
         {
             "name": "Win64-Debug",
             "configurePreset": "Win64-Debug"
+        },
+        {
+            "name": "Gcc-Debug",
+            "configurePreset": "Gcc-Debug"
         }
     ]
 }

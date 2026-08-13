@@ -29,7 +29,7 @@
  * This file is part of LwRB - Lightweight ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
- * Version:         v3.2.0
+ * Version:         v3.3.0
  */
 #include "lwrb/lwrb.h"
 
@@ -47,7 +47,7 @@
         }                                                                                                              \
     } while (0)
 
-/* Optional atomic opeartions */
+/* Optional atomic operations */
 #ifdef LWRB_DISABLE_ATOMIC
 #define LWRB_INIT(var, val)        (var) = (val)
 #define LWRB_LOAD(var, type)       (var)
@@ -328,7 +328,10 @@ lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp) {
 
     /*
      * Calculate maximum number of bytes available to read
-     * and check if we can even fit to it
+     * and check if we can even fit to it.
+     * 
+     * The skip count at size of buffer or above is invalid input,
+     * thus we can safely exit the function call
      */
     full = lwrb_get_full(buff);
     if (skip_count >= full) {
@@ -340,20 +343,15 @@ lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp) {
     if (r_ptr >= buff->size) {
         r_ptr -= buff->size;
     }
-
-    /* Check maximum number of bytes available to read after skip */
     btp = BUF_MIN(full, btp);
-    if (btp == 0) {
-        return 0;
-    }
 
-    /* Step 1: Read data from linear part of buffer */
+    /* Step 1: Read data from linear part of the buffer */
     tocopy = BUF_MIN(buff->size - r_ptr, btp);
     BUF_MEMCPY(d_ptr, &buff->buff[r_ptr], tocopy);
     d_ptr += tocopy;
     btp -= tocopy;
 
-    /* Step 2: Read data from beginning of buffer (overflow part) */
+    /* Step 2: Read data from the beginning of the buffer (overflow part) */
     if (btp > 0) {
         BUF_MEMCPY(d_ptr, buff->buff, btp);
     }
@@ -392,7 +390,7 @@ lwrb_get_free(const lwrb_t* buff) {
      *    always try again to write more data to remaining free memory that was read just during copy operation
      */
     w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
-    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_acquire);
 
     if (w_ptr >= r_ptr) {
         size = buff->size - (w_ptr - r_ptr);
@@ -435,7 +433,7 @@ lwrb_get_full(const lwrb_t* buff) {
      *    buffer will see "full size" less than it really is. This is not a problem, application can
      *    always try again to read more data from remaining full memory that was written just during copy operation
      */
-    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
+    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_acquire);
     r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
 
     if (w_ptr >= r_ptr) {
@@ -494,7 +492,7 @@ lwrb_get_linear_block_read_length(const lwrb_t* buff) {
      * Use temporary values in case they are changed during operations.
      * See lwrb_buff_free or lwrb_buff_full functions for more information why this is OK.
      */
-    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
+    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_acquire);
     r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
 
     if (w_ptr > r_ptr) {
@@ -537,7 +535,7 @@ lwrb_skip(lwrb_t* buff, lwrb_sz_t len) {
 }
 
 /**
- * \brief           Get linear address for buffer for fast read
+ * \brief           Get linear address for buffer for fast write
  * \param[in]       buff: Ring buffer instance
  * \return          Linear buffer start address
  */
@@ -570,7 +568,7 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
      * See lwrb_buff_free or lwrb_buff_full functions for more information why this is OK.
      */
     w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
-    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_acquire);
 
     if (w_ptr >= r_ptr) {
         len = buff->size - w_ptr;

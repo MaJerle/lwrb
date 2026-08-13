@@ -24,7 +24,8 @@ my_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, lwrb_sz_t len) {
 }
 
 int
-main() {
+main(void) {
+    int retval = 0;
     lwrb_sz_t len;
 
     /* Init buffer */
@@ -36,9 +37,13 @@ main() {
 
 #define RW_TEST(_w_exp_, _r_exp_, _rw_len_, _rw_exp_len_)                                                              \
     do {                                                                                                               \
+        uint8_t is_as_expected = (buff.w_ptr == (_w_exp_) && buff.r_ptr == (_r_exp_) && (_rw_len_) == (_rw_exp_len_)); \
         printf("W ptr: %u, R ptr: %u, R/W len: %u, as_expected: %u\r\n", (unsigned)buff.w_ptr, (unsigned)buff.r_ptr,   \
-               (unsigned)(_rw_len_),                                                                                   \
-               (unsigned)(buff.w_ptr == (_w_exp_) && buff.r_ptr == (_r_exp_) && (_rw_len_) == (_rw_exp_len_)));        \
+               (unsigned)(_rw_len_), (unsigned)is_as_expected);                                                        \
+        if (!is_as_expected) {                                                                                         \
+            printf("Test failed on line %u", (unsigned)__LINE__);                                                      \
+            retval = -1;                                                                                               \
+        }                                                                                                              \
     } while (0)
 
         lwrb_reset(&buff);
@@ -65,9 +70,13 @@ main() {
 
 #define RW_TEST(_w_exp_, _r_exp_, _success_, _rw_len_, _rw_exp_len_)                                                   \
     do {                                                                                                               \
+        uint8_t is_as_expected = (buff.w_ptr == (_w_exp_) && buff.r_ptr == (_r_exp_) && (_rw_len_) == (_rw_exp_len_)); \
         printf("W ptr: %u, R ptr: %u, R/W success: %u, R/W len: %u, as_expected: %u\r\n", (unsigned)buff.w_ptr,        \
-               (unsigned)buff.r_ptr, (unsigned)(_success_), (unsigned)(_rw_len_),                                      \
-               (unsigned)(buff.w_ptr == (_w_exp_) && buff.r_ptr == (_r_exp_) && (_rw_len_) == (_rw_exp_len_)));        \
+               (unsigned)buff.r_ptr, (unsigned)(_success_), (unsigned)(_rw_len_), (unsigned)is_as_expected);           \
+        if (!is_as_expected) {                                                                                         \
+            printf("Test failed on line %u", (unsigned)__LINE__);                                                      \
+            retval = -1;                                                                                               \
+        }                                                                                                              \
     } while (0)
 
         lwrb_reset(&buff);
@@ -98,8 +107,13 @@ main() {
 #define OVERWRITE_TEST(_exp_content_, _exp_len_)                                                                       \
     do {                                                                                                               \
         len = lwrb_peek(&buff, 0, tmp, buff.size);                                                                     \
+        uint32_t is_as_expected = (strncmp((_exp_content_), (const void*)tmp, len) == 0 && len == (_exp_len_));        \
         printf("overwrite data read: %.*s, len: %u, as_expected: %u\r\n", (int)len, tmp, (unsigned)len,                \
-               (unsigned)(strncmp((_exp_content_), (const void*)tmp, len) == 0 && len == (_exp_len_)));                \
+               (unsigned)is_as_expected);                                                                              \
+        if (!is_as_expected) {                                                                                         \
+            printf("Test failed on line %u", (unsigned)__LINE__);                                                      \
+            retval = -1;                                                                                               \
+        }                                                                                                              \
     } while (0)
 
         /* Test overwrite */
@@ -138,9 +152,15 @@ main() {
         lwrb_sz_t move_len;                                                                                            \
         move_len = lwrb_move(&dst, &src);                                                                              \
         len = lwrb_peek(&dst, 0, tmp, dst.size);                                                                       \
+                                                                                                                       \
+        uint32_t is_as_expected = (strncmp((_exp_content_), (const void*)tmp, len) == 0                                \
+                                   && move_len == (_exp_move_len_) && len == (_exp_buff_len_));                        \
         printf("move data: len: %d, dest data: %.*s, as_expected: %u\r\n", (int)len, (int)len, tmp,                    \
-               (unsigned)(strncmp((_exp_content_), (const void*)tmp, len) == 0 && move_len == (_exp_move_len_)         \
-                          && len == (_exp_buff_len_)));                                                                \
+               (unsigned)is_as_expected);                                                                              \
+        if (!is_as_expected) {                                                                                         \
+            printf("Test failed on line %u", (unsigned)__LINE__);                                                      \
+            retval = -1;                                                                                               \
+        }                                                                                                              \
     } while (0)
 
         lwrb_t src, dst;
@@ -176,8 +196,14 @@ main() {
         lwrb_sz_t found_idx;                                                                                           \
         uint8_t found;                                                                                                 \
         found = lwrb_find(&buff, (_bts_), (_bts_len_), (_start_offset_), &found_idx);                                  \
+                                                                                                                       \
+        uint32_t is_as_expected = (!!found == !!(_exp_result_));                                                       \
         printf("Find \"%s\" (len %d), start_offset: %d, found_index: %d; Found: %d; As expected: %d\r\n", (_bts_),     \
-               (_bts_len_), (_start_offset_), (int)found_idx, (int)found, (int)(!!found == !!(_exp_result_)));         \
+               (_bts_len_), (_start_offset_), (int)found_idx, (int)found, (int)is_as_expected);                        \
+        if (!is_as_expected) {                                                                                         \
+            printf("Test failed on line %u", (unsigned)__LINE__);                                                      \
+            retval = -1;                                                                                               \
+        }                                                                                                              \
     } while (0)
 
         /* Prepare buffer and write data */
@@ -210,5 +236,67 @@ main() {
 
 #undef FIND_TEST
     }
-    return 0;
+
+    printf("Peek test\r\n");
+    {
+        uint8_t peek_buff[8];
+        size_t peek_len;
+#define PEEK_TEST(_cond_)                                                                                              \
+    do {                                                                                                               \
+        if (!(_cond_)) {                                                                                               \
+            printf("Test failed on line %u\r\n", (unsigned)__LINE__);                                                  \
+            retval = -1;                                                                                               \
+        }                                                                                                              \
+    } while (0)
+
+        /* Prepare buffer and write data */
+        lwrb_reset(&buff);
+        lwrb_write(&buff, "ABCDEFGH", 8);
+
+        peek_len = lwrb_peek(&buff, 0, peek_buff, 8);
+        PEEK_TEST(peek_len == 8);
+        PEEK_TEST(memcmp(peek_buff, "ABCDEFGH", 8) == 0);
+
+        /* Invalid data */
+        peek_len = lwrb_peek(&buff, 0, peek_buff, 0);
+        PEEK_TEST(peek_len == 0); /* Should return 0 */
+        peek_len = lwrb_peek(NULL, 0, peek_buff, 3);
+        PEEK_TEST(peek_len == 0); /* Should return 0 */
+        peek_len = lwrb_peek(&buff, 0, NULL, 3);
+        PEEK_TEST(peek_len == 0); /* Should return 0 */
+
+        peek_len = lwrb_peek(&buff, 3, peek_buff, 5);
+        PEEK_TEST(peek_len == 5);
+        PEEK_TEST(memcmp(peek_buff, "DEFGH", 5) == 0);
+
+        /* Peek with offset equal to buffer size */
+        peek_len = lwrb_peek(&buff, 8, peek_buff, 5);
+        PEEK_TEST(peek_len == 0);
+        /* Peek with offset lower than the buffer size but size to read reaching total above the size */
+        peek_len = lwrb_peek(&buff, 5, peek_buff, 5);
+        PEEK_TEST(peek_len == 3); /* 3 bytes were read */
+        PEEK_TEST(memcmp(peek_buff, "FGH", 3) == 0);
+
+        /* Move read pointer and peek again */
+        lwrb_read(&buff, tmp, 5); /* Read 5 bytes, 3 are left remaining */
+
+        /* Try to read 8, but 3 is left inside */
+        peek_len = lwrb_peek(&buff, 0, peek_buff, 8);
+        PEEK_TEST(peek_len == 3);
+        PEEK_TEST(memcmp(peek_buff, "FGH", 3) == 0);
+
+        /* Try with offset to read 6, but 1 can be read then only */
+        peek_len = lwrb_peek(&buff, 2, peek_buff, 6);
+        PEEK_TEST(peek_len == 1);
+        PEEK_TEST(memcmp(peek_buff, "H", 1) == 0);
+
+        /* Should return 0 */
+        peek_len = lwrb_peek(&buff, 3, peek_buff, 6);
+        PEEK_TEST(peek_len == 0);
+
+#undef PEEK_TEST
+    }
+
+    printf("Done!\r\n");
+    return retval;
 }

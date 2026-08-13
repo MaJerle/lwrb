@@ -23,7 +23,7 @@ subprocess.call('doxygen doxyfile.doxy', shell=True)
 # -- Project information -----------------------------------------------------
 
 project = 'LwRB'
-copyright = '2023, Tilen MAJERLE'
+copyright = '2025, Tilen MAJERLE'
 author = 'Tilen MAJERLE'
 
 # Try to get branch at which this is running

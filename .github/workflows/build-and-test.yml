@@ -1,0 +1,35 @@
+name: Windows CMake Build & Test
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install MinGW
+        run: |
+          choco install mingw --version=12.2.0 -y
+          echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
+          gcc --version
+
+      - name: Build
+        run: |
+          mkdir __build__
+          cd __build__
+          cmake -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=gcc -S.. -G Ninja
+          cmake --build .
+
+      - name: Run Tests
+        working-directory: __build__
+        run: |
+          ctest . --output-on-failure
