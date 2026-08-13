@@ -390,7 +390,7 @@ lwrb_get_free(const lwrb_t* buff) {
      *    always try again to write more data to remaining free memory that was read just during copy operation
      */
     w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
-    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_acquire);
 
     if (w_ptr >= r_ptr) {
         size = buff->size - (w_ptr - r_ptr);
@@ -433,7 +433,7 @@ lwrb_get_full(const lwrb_t* buff) {
      *    buffer will see "full size" less than it really is. This is not a problem, application can
      *    always try again to read more data from remaining full memory that was written just during copy operation
      */
-    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
+    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_acquire);
     r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
 
     if (w_ptr >= r_ptr) {
@@ -492,7 +492,7 @@ lwrb_get_linear_block_read_length(const lwrb_t* buff) {
      * Use temporary values in case they are changed during operations.
      * See lwrb_buff_free or lwrb_buff_full functions for more information why this is OK.
      */
-    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
+    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_acquire);
     r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
 
     if (w_ptr > r_ptr) {
@@ -568,7 +568,7 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
      * See lwrb_buff_free or lwrb_buff_full functions for more information why this is OK.
      */
     w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
-    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_acquire);
 
     if (w_ptr >= r_ptr) {
         len = buff->size - w_ptr;

@@ -6,6 +6,7 @@
 - Fix the platformio library package description
 - Remove the redundant checks for peek. Introduce the peek tests
 - Fix incorrect `LWPKT_CUSTOM_INC_DIR` reference in `library.cmake`
+- Fix the memory barrier usage
 
 ## v3.2.0
 
