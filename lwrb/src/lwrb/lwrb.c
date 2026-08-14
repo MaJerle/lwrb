@@ -47,7 +47,15 @@
         }                                                                                                              \
     } while (0)
 
-/* Optional atomic operations */
+/*
+ * Optional atomic operations.
+ *
+ * Disabling this does not just make individual reads/writes non-atomic,
+ * it removes any ordering/visibility guarantee between the write and read
+ * side entirely. Nothing in this file synchronizes threads or interrupts
+ * anymore at that point - it becomes fully the application's job to add
+ * whatever barriers, volatile access or locking the target platform needs.
+ */
 #ifdef LWRB_DISABLE_ATOMIC
 #define LWRB_INIT(var, val)        (var) = (val)
 #define LWRB_LOAD(var, type)       (var)
@@ -105,6 +113,9 @@ lwrb_free(lwrb_t* buff) {
 
 /**
  * \brief           Set event function callback for different buffer operations
+ * \note            Not thread safe, and not meant to be. Set it once during setup,
+ *                      right after \ref lwrb_init, before the buffer is touched from
+ *                      more than one thread/interrupt.
  * \param[in]       buff: Ring buffer instance
  * \param[in]       evt_fn: Callback function
  */
@@ -117,6 +128,9 @@ lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn evt_fn) {
 
 /**
  * \brief           Set custom buffer argument, that can be retrieved in the event function
+ * \note            Not thread safe, and not meant to be. Set it once during setup,
+ *                      right after \ref lwrb_init, before the buffer is touched from
+ *                      more than one thread/interrupt.
  * \param[in]       buff: Ring buffer instance
  * \param[in]       arg: Custom user argument
  */
@@ -311,6 +325,10 @@ lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* bread, uint16_t
 
 /**
  * \brief           Read from buffer without changing read pointer (peek only)
+ * \note            Not thread safe on its own - safe only if lwrb_peek and lwrb_read
+ *                      are always called one after the other from the same thread/interrupt.
+ *                      Calling either of them from a second context at the same time is the
+ *                      same as having two read exit points and is not supported.
  * \param[in]       buff: Ring buffer instance
  * \param[in]       skip_count: Number of bytes to skip before reading data
  * \param[out]      data: Pointer to output memory to copy buffer data to

@@ -63,6 +63,13 @@ typedef atomic_ulong lwrb_sz_atomic_t;
  */
 typedef unsigned long lwrb_sz_t;
 #else
+/*
+ * LWRB_DISABLE_ATOMIC is defined, so the atomic type is dropped in favor of a
+ * plain one. This is not "atomicity off, everything else still guaranteed" -
+ * there is no ordering or visibility guarantee between the write and read
+ * side left in the library at all. If you define this, it is entirely up to
+ * the application to make sure the target handles concurrent access safely.
+ */
 typedef unsigned long lwrb_sz_atomic_t;
 typedef unsigned long lwrb_sz_t;
 #endif
