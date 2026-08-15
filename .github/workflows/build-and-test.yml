@@ -1,4 +1,4 @@
-name: Windows CMake Build & Test
+name: CMake Build & Test
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - develop
 
 jobs:
-  build:
+  build-windows:
     runs-on: windows-latest
 
     steps:
@@ -22,14 +22,25 @@ jobs:
           echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
           gcc --version
 
-      - name: Build
+      - name: Run Tests
+        working-directory: tests
         run: |
-          mkdir __build__
-          cd __build__
-          cmake -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=gcc -S.. -G Ninja
-          cmake --build .
+          python3 test.py --github
+
+  build-gcc:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build build-essential
+          gcc --version
 
       - name: Run Tests
-        working-directory: __build__
+        working-directory: tests
         run: |
-          ctest . --output-on-failure
+          python3 test.py --github

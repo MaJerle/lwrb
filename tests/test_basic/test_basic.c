@@ -1,6 +1,3 @@
-// lwrb_dev.cpp : Defines the entry point for the console application.
-//
-
 #include <stdio.h>
 #include <string.h>
 #include "lwrb/lwrb.h"
@@ -24,7 +21,7 @@ my_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, lwrb_sz_t len) {
 }
 
 int
-main(void) {
+test_run(void) {
     int retval = 0;
     lwrb_sz_t len;
 
