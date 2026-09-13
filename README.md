@@ -7,15 +7,17 @@ Library provides generic FIFO ring buffer implementation.
 ## Features
 
 * Written in C (C11), compatible with `stdint.h` data types
-* Platform independent default code - with restrictions for smaller CPU architectures (`< sizeof(size_t)`)
-* FIFO (First In First Out) buffer implementation
+* Platform independent, no architecture specific code
+* FIFO (First In, First Out) buffer implementation
 * No dynamic memory allocation, data is static array
 * Uses optimized memory copy instead of loops to read/write data from/to memory
-* Thread safe when used as pipe with single write and single read entries - when CPU read/write operation for `size_t` are single instruction (ARM Cortex-M for instance)
-* Interrupt safe when used as pipe with single write and single read entries - when CPU read/write operation for `size_t` are single instruction (ARM Cortex-M for instance)
-* For CPU systems with smaller architecture than `sizeof(size_t)` (AVR for instance), atomic protection is required for read-write operation of buffer writes
+* Thread and interrupt safe when used as pipe with single write and single read entries
+* Uses C11 atomic operations by default to keep reads and writes race-free, even on architectures whose native word size is smaller than `size_t` (AVR for instance); can be disabled with `LWRB_DISABLE_ATOMIC`
 * Suitable for DMA transfers from and to memory with zero-copy overhead between buffer and application memory
 * Supports data peek, skip for read and advance for write
+* Byte-sequence search within buffered data
+* Optional all-or-nothing read and write operations to avoid partial transfers
+* Optional per-buffer custom user argument storage
 * Implements support for event notifications
 * User friendly MIT license
 
