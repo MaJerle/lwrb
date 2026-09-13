@@ -1,6 +1,6 @@
 # Lightweight ring buffer manager
 
-Library provides generic FIFO ring buffer implementation.
+LwRB is a generic *FIFO* (First In, First Out) buffer library optimized for embedded systems.
 
 [Open documentation](https://docs.majerle.eu/projects/lwrb/)
 
