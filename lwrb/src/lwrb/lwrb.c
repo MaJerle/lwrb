@@ -668,7 +668,7 @@ lwrb_find(const lwrb_t* buff, const void* bts, lwrb_sz_t len, lwrb_sz_t start_of
 
     full = lwrb_get_full(buff);
     /* Verify initial conditions */
-    if (full < (len + start_offset)) {
+    if (start_offset > full || len > (full - start_offset)) {
         return 0;
     }
 
