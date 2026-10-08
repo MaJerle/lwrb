@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <limits.h>
 #include <string.h>
 #include "lwrb/lwrb.h"
 
@@ -232,6 +233,24 @@ test_run(void) {
         FIND_TEST("1234", 3, 1, 0); /* Must not find it - start offset is later */
 
 #undef FIND_TEST
+    }
+
+    /* An overflowing length + offset must be rejected before reading either buffer. */
+    {
+        uint8_t storage[9];
+        lwrb_t search_buff;
+        lwrb_sz_t found_idx = 99;
+        lwrb_init(&search_buff, storage, sizeof(storage));
+        lwrb_write(&search_buff, "12345678", 8);
+        if (lwrb_find(&search_buff, "1", ULONG_MAX - 31, 32, &found_idx) != 0 || found_idx != 0) {
+            printf("Overflowing search range was accepted\r\n");
+            retval = -1;
+        }
+        found_idx = 99;
+        if (lwrb_find(&search_buff, "1", ULONG_MAX, 1, &found_idx) != 0 || found_idx != 0) {
+            printf("Overflowing search length was accepted\r\n");
+            retval = -1;
+        }
     }
 
     printf("Peek test\r\n");
