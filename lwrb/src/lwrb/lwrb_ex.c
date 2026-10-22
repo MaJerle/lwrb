@@ -52,6 +52,9 @@
  *                      writes the wrap region if there is more data to write. The r indicator is advanced if w
  * overtakes it. This operation is a read op as well as a write op. For thread-safety mutexes may be desired, see
  * documentation.
+ * \note            Thread safety: not thread safe. It is a write context function that also modifies
+ *                      the read pointer (via \ref lwrb_skip or \ref lwrb_reset). Safe only when read and write
+ *                      context are the same thread/interrupt, or when protected by a lock
  */
 lwrb_sz_t
 lwrb_overwrite(lwrb_t* buff, const void* data, lwrb_sz_t btw) {
@@ -103,6 +106,8 @@ lwrb_overwrite(lwrb_t* buff, const void* data, lwrb_sz_t btw) {
  * \note            This operation is a read op to the source, on success it will update the r index.
  *                  As well as a write op to the destination, and may update the w index.
  *                  For thread-safety mutexes may be desired, see documentation.
+ * \note            Thread safety: read context of `src` and write context of `dest`.
+ *                      Safe when the caller is the only reader of `src` and the only writer of `dest`
  */
 lwrb_sz_t
 lwrb_move(lwrb_t* dest, lwrb_t* src) {
@@ -128,6 +133,9 @@ lwrb_move(lwrb_t* dest, lwrb_t* src) {
         max_seq_write = lwrb_get_linear_block_write_length(dest);
         op_len = BUF_MIN(max_seq_read, max_seq_write);
         op_len = BUF_MIN(len_to_copy, op_len);
+        if (op_len == 0) {
+            break; /* Should not happen - return what was actually moved */
+        }
 
         /* Get addresses */
         d_src = lwrb_get_linear_block_read_address(src);
@@ -141,12 +149,8 @@ lwrb_move(lwrb_t* dest, lwrb_t* src) {
         lwrb_advance(dest, op_len);
         lwrb_skip(src, op_len);
         len_to_copy -= op_len;
-        if (op_len == 0) {
-            /* Hard error... */
-            return 0;
-        }
     }
-    return len_to_copy_orig;
+    return len_to_copy_orig - len_to_copy;
 }
 
 #endif /* defined(LWRB_DEV) */

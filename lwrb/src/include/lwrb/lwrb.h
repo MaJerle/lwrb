@@ -38,6 +38,11 @@
 #include <stdint.h>
 #include <string.h>
 
+/* Must be included outside of extern "C" block, C++23 implements it with templates */
+#if !defined(LWRB_DISABLE_ATOMIC) || __DOXYGEN__
+#include <stdatomic.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -49,8 +54,6 @@ extern "C" {
  */
 
 #if !defined(LWRB_DISABLE_ATOMIC) || __DOXYGEN__
-#include <stdatomic.h>
-
 /**
  * \brief           Atomic type for size variable.
  * Default value is set to be `unsigned 32-bits` type
@@ -69,6 +72,10 @@ typedef unsigned long lwrb_sz_t;
  * there is no ordering or visibility guarantee between the write and read
  * side left in the library at all. If you define this, it is entirely up to
  * the application to make sure the target handles concurrent access safely.
+ *
+ * WARNING: Pointers become plain (not even volatile) variables. The compiler may
+ * reorder the data copy after the pointer update, so the other context can
+ * observe a new pointer before the data behind it is written or read.
  */
 typedef unsigned long lwrb_sz_atomic_t;
 typedef unsigned long lwrb_sz_t;
@@ -114,39 +121,52 @@ typedef struct lwrb {
     void* arg;              /*!< Event custom user argument */
 } lwrb_t;
 
+/*
+ * Thread safety
+ *
+ * Library is lock-free for exactly one write context and one read context.
+ * A "context" is one thread or one interrupt - it may call functions many times,
+ * but never concurrently with itself.
+ *
+ * - WRITE CONTEXT: only modifies the write pointer. Safe while read context runs in parallel.
+ * - READ CONTEXT:  only modifies the read pointer. Safe while write context runs in parallel.
+ * - ANY CONTEXT:   modifies nothing, may be called from anywhere.
+ * - NOT SAFE:      application must guarantee exclusive access (no other context active).
+ *
+ * Two writers, two readers, or calling read context functions from the write context
+ * (and vice versa) concurrently requires application locking.
+ */
+
+/* Setup and control - NOT SAFE, call when no other context uses the buffer */
 uint8_t lwrb_init(lwrb_t* buff, void* buffdata, lwrb_sz_t size);
-uint8_t lwrb_is_ready(lwrb_t* buff);
 void lwrb_free(lwrb_t* buff);
 void lwrb_reset(lwrb_t* buff);
 void lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn fn);
 void lwrb_set_arg(lwrb_t* buff, void* arg);
+
+/* ANY CONTEXT */
+uint8_t lwrb_is_ready(lwrb_t* buff);
 void* lwrb_get_arg(lwrb_t* buff);
-
-/* Read/Write functions */
-lwrb_sz_t lwrb_write(lwrb_t* buff, const void* data, lwrb_sz_t btw);
-lwrb_sz_t lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr);
-lwrb_sz_t lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp);
-
-/* Extended read/write functions */
-uint8_t lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bwritten, uint16_t flags);
-uint8_t lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* bread, uint16_t flags);
-
-/* Buffer size information */
 lwrb_sz_t lwrb_get_free(const lwrb_t* buff);
 lwrb_sz_t lwrb_get_full(const lwrb_t* buff);
 
-/* Read data block management */
-void* lwrb_get_linear_block_read_address(const lwrb_t* buff);
-lwrb_sz_t lwrb_get_linear_block_read_length(const lwrb_t* buff);
-lwrb_sz_t lwrb_skip(lwrb_t* buff, lwrb_sz_t len);
-
-/* Write data block management */
+/* WRITE CONTEXT */
+lwrb_sz_t lwrb_write(lwrb_t* buff, const void* data, lwrb_sz_t btw);
+uint8_t lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bwritten, uint16_t flags);
 void* lwrb_get_linear_block_write_address(const lwrb_t* buff);
 lwrb_sz_t lwrb_get_linear_block_write_length(const lwrb_t* buff);
 lwrb_sz_t lwrb_advance(lwrb_t* buff, lwrb_sz_t len);
 
-/* Search in buffer */
+/* READ CONTEXT */
+lwrb_sz_t lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr);
+uint8_t lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* bread, uint16_t flags);
+lwrb_sz_t lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp);
 uint8_t lwrb_find(const lwrb_t* buff, const void* bts, lwrb_sz_t len, lwrb_sz_t start_offset, lwrb_sz_t* found_idx);
+void* lwrb_get_linear_block_read_address(const lwrb_t* buff);
+lwrb_sz_t lwrb_get_linear_block_read_length(const lwrb_t* buff);
+lwrb_sz_t lwrb_skip(lwrb_t* buff, lwrb_sz_t len);
+
+/* Extended functions (LWRB_DEV) */
 lwrb_sz_t lwrb_overwrite(lwrb_t* buff, const void* data, lwrb_sz_t btw);
 lwrb_sz_t lwrb_move(lwrb_t* dest, lwrb_t* src);
 
