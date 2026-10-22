@@ -11,7 +11,7 @@ This guide is describing how to start with the library quickly and effectively
 Download library
 ^^^^^^^^^^^^^^^^
 
-Library is primarly hosted on `Github <https://github.com/MaJerle/lwrb>`_.
+Library is primarily hosted on `Github <https://github.com/MaJerle/lwrb>`_.
 
 You can get it by:
 
@@ -40,7 +40,6 @@ This is used when you do not have yet local copy on your machine.
   * Run ``git clone --recurse-submodules --branch develop https://github.com/MaJerle/lwrb`` to clone `development` branch, including submodules
   * Run ``git clone --recurse-submodules --branch main https://github.com/MaJerle/lwrb`` to clone `latest stable` branch, including submodules
 
-* Navigate to ``examples`` directory and run favourite example
 
 Update cloned to latest version
 """""""""""""""""""""""""""""""
@@ -51,13 +50,14 @@ Update cloned to latest version
 * Run ``git submodule update --init --remote`` to update submodules to latest version
 
 .. note::
-	This is preferred option to use when you want to evaluate library and run prepared examples.
-	Repository consists of multiple submodules which can be automatically downloaded when cloning and pulling changes from root repository.
+	This is preferred option to use when you want to evaluate library and run tests.
+	Repository consists of submodules used for testing (``Unity``, sanitizers and CMake modules),
+	which are automatically downloaded when cloning and pulling changes from root repository.
 
 Add library to project
 ^^^^^^^^^^^^^^^^^^^^^^
 
-At this point it is assumed that you have successfully download library, either with ``git clone`` command or with manual download from the library releases page.
+At this point it is assumed that you have successfully downloaded library, either with ``git clone`` command or with manual download from the library releases page.
 Next step is to add the library to the project, by means of source files to compiler inputs and header files in search path.
 
 *CMake* is the main supported build system. Package comes with the ``CMakeLists.txt`` and ``library.cmake`` files, both located in the ``lwrb`` directory:
@@ -72,7 +72,7 @@ If you do not use the *CMake*, you can do the following:
 
 * Copy ``lwrb`` folder to your project, it contains library files
 * Add ``lwrb/src/include`` folder to `include path` of your toolchain. This is where `C/C++` compiler can find the files during compilation process. Usually using ``-I`` flag
-* Add source files from ``lwrb/src/`` folder to toolchain build. These files are built by `C/C++` compilery
+* Add source files from ``lwrb/src/lwrb/`` folder to toolchain build. These files are built by `C/C++` compiler
 * Build the project
 
 Minimal example code

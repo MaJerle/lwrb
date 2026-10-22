@@ -27,18 +27,18 @@ Thread (or interrupt) safety, with one entry and one exit points, is achieved by
 Therefore multiple *conditional* checks are guaranteed to be performed on the same local variables, even if actual buffer pointers get modified.
 
 * Read pointer could get changed by interrupt or another thread when application tries to write to buffer
-* Write pointer could get changed by interrupt or another thread when application ties to read from buffer
+* Write pointer could get changed by interrupt or another thread when application tries to read from buffer
 
 .. note::
     Even single entry and single exit points may introduce race condition, especially on smaller system, such as 8-bit or 16-bit system, or in general,
-    where arbitrary type (normaly `size_t`) is `sizeof(type) > architecture_size`.
+    where the pointer type (``lwrb_sz_t``, ``unsigned long`` by default) is ``sizeof(type) > architecture_size``.
     This is solved by C11 atomic library, that ensures atomic reads and writes to key structure members.
 
 Thread safety gets completely broken when application does one of the following:
 
 * Uses multiple write entry points to the single LwRB instance
 * Uses multiple read exit points to the single LwRB instance
-* Uses multiple read/write exit/entry points to the same LwRB instance
+* Calls read and write functions from the same multiple contexts at the same time
 
 .. figure:: ../static/images/buff_thread_safety_2_thread_write.svg
     :align: center
@@ -88,15 +88,44 @@ access is granted to *read* operation while *write* operation from one thread ta
     For *multi-entry-point-single-exit-point* use case, *read* mutex is not necessary.
     For *single-entry-point-multi-exit-point* use case, *write* mutex is not necessary.
 
-.. tip::
-   Functions considered as *read* operation are ``read``, ``skip``, ``peek`` and ``linear read``.
-   Functions considered as *write* operation are ``write``, ``advance`` and ``linear write``.
+.. _thread_safety_contexts:
 
-.. toctree::
-    :maxdepth: 2
+Function contexts
+^^^^^^^^^^^^^^^^^
+
+A *context* is one thread or one interrupt. It may call library functions many times,
+but never concurrently with itself. LwRB is lock-free for exactly one *write context* and one *read context*.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 45 35
+
+    * - Context
+      - Functions
+      - Notes
+    * - Write context
+      - ``lwrb_write``, ``lwrb_write_ex``, ``lwrb_get_linear_block_write_address``,
+        ``lwrb_get_linear_block_write_length``, ``lwrb_advance``
+      - Modify write pointer only. Safe while read context runs in parallel
+    * - Read context
+      - ``lwrb_read``, ``lwrb_read_ex``, ``lwrb_peek``, ``lwrb_find``,
+        ``lwrb_get_linear_block_read_address``, ``lwrb_get_linear_block_read_length``, ``lwrb_skip``
+      - Modify read pointer only (``peek`` and ``find`` modify nothing, but rely on read pointer not moving).
+        Safe while write context runs in parallel
+    * - Any context
+      - ``lwrb_is_ready``, ``lwrb_get_arg``, ``lwrb_get_free``, ``lwrb_get_full``
+      - Modify nothing. ``lwrb_get_free`` is a guaranteed minimum only from write context,
+        ``lwrb_get_full`` only from read context
+    * - Not thread safe
+      - ``lwrb_init``, ``lwrb_free``, ``lwrb_reset``, ``lwrb_set_evt_fn``, ``lwrb_set_arg``
+      - Application must guarantee no other context uses the buffer
+
+.. note::
+    Event callback is called from the context of the function that triggered the event,
+    see :ref:`events`.
 
 Atomicity
-=========
+^^^^^^^^^
 
 While thread-safety concepts are very important, depending on the system architecture and variable sizes (and hardware cache),
 application must also ensure that all the writes and reads to the internal variables are executed in atomic manner.
@@ -112,3 +141,10 @@ generate necessary calls to make sure, all reads and writes are atomic.
 .. tip::
     You can disable atomic operations in the library, by defining ``LWRB_DISABLE_ATOMIC`` global macro (typically with ``-D`` compiler option).
     It is then up to the developer to make sure architecture properly handles atomic operations.
+
+.. warning::
+    With ``LWRB_DISABLE_ATOMIC``, read and write pointers become plain (not even ``volatile``) variables,
+    and there is no ordering guarantee left in the library.
+    Compiler is free to reorder the data copy after the pointer update, so the other context
+    may observe a new pointer before the data behind it is written or read.
+    Application must add necessary barriers, ``volatile`` access or locking for the target platform.

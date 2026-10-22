@@ -1,3 +1,5 @@
+.. _hw_dma_usage:
+
 DMA for embedded systems
 ========================
 
@@ -9,7 +11,7 @@ One of the key features of LwRB library is that it can be seamlessly integrated 
     More about DMA is available on `Wikipedia <https://en.wikipedia.org/wiki/Direct_memory_access>`_.
 
 DMA controllers normally use source and destination memory addresses to transfer data in-between.
-This features, together with LwRB, allows seamless integration and zero-copy of application data at interrupts after DMA transfer has been completed.
+This feature, together with LwRB, allows seamless integration and zero-copy of application data at interrupts after DMA transfer has been completed.
 Some manual work is necessary to be handled, but this is very minor in comparison of writing byte-by-byte to buffer at (for example) each received character.
 
 Below are ``2`` common use cases:
@@ -57,12 +59,14 @@ After successful processing, buffer advance operation is necessary to manually i
 
 .. figure:: ../static/images/buff_lin_write_advance.svg
     :align: center
-    :alt: Data transfer from memory to hardware IP
+    :alt: Data transfer from hardware IP to memory
+
+    Data transfer from hardware IP to memory
 
 * Case **A**: Initial state, buffer is empty as ``R == W``
 
     * Based on ``W`` pointer position, application could write ``4`` bytes to contiguous block of memory
-* Case **B**: State after advancing `W` pointer for `4` bytes. Buffer now holds `4` bytes and has ``3`` remaining available
+* Case **B**: State after advancing ``W`` pointer for ``4`` bytes. Buffer now holds ``4`` bytes and has ``3`` remaining available
 * Case **C**: Buffer is full, no more free memory available for write operation
 
 Code example:
@@ -84,6 +88,15 @@ It is assumed that after DMA transfer completes, interrupt is generated (embedde
 
     Buffer skip operation is used to mark sent data as processed and to free memory for new writes to buffer
 
+.. note::
+
+    In this example, read context moves between main loop (first ``send_data`` call)
+    and DMA interrupt (``lwrb_skip`` and subsequent ``send_data`` calls).
+    This is safe only because DMA interrupt cannot fire while no transfer is active,
+    hence both never execute read operations at the same time.
+    If application calls read functions from main loop while DMA transfer may be active,
+    read protection is necessary. See :ref:`thread_safety`.
+
 .. literalinclude:: ../examples_src/example_dma_skip.c
     :language: c
     :linenos:
@@ -91,6 +104,3 @@ It is assumed that after DMA transfer completes, interrupt is generated (embedde
 
 .. tip::
     Check `STM32 UART DMA TX RX Github <https://github.com/MaJerle/stm32-usart-uart-dma-rx-tx>`_ repository for use cases.
-
-.. toctree::
-    :maxdepth: 2
