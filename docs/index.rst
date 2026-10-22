@@ -22,7 +22,7 @@ Features
 * No dynamic memory allocation, data is static array
 * Uses optimized memory copy instead of loops to read/write data from/to memory
 * Thread and interrupt safe when used as pipe with single write and single read entries
-* Uses C11 atomic operations by default to keep reads and writes race-free, even on architectures whose native word size is smaller than ``size_t`` (AVR for instance); can be disabled with ``LWRB_DISABLE_ATOMIC``
+* Uses C11 atomic operations by default to keep reads and writes race-free, even on architectures whose native word size is smaller than ``lwrb_sz_t`` (AVR for instance); can be disabled with ``LWRB_DISABLE_ATOMIC``
 * Suitable for DMA transfers from and to memory with zero-copy overhead between buffer and application memory
 * Supports data peek, skip for read and advance for write
 * Byte-sequence search within buffered data
@@ -34,7 +34,7 @@ Features
 Requirements
 ^^^^^^^^^^^^
 
-* C compiler
+* C11 compiler with ``stdatomic.h`` support (or ``LWRB_DISABLE_ATOMIC`` defined, see :ref:`thread_safety`)
 * Less than ``1kB`` of non-volatile memory
 
 Contribute

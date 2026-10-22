@@ -2,6 +2,15 @@
 
 ## Develop
 
+- Clear complete `lwrb_t` structure in `lwrb_init` (`arg` was left uninitialized)
+- `lwrb_write_ex` and `lwrb_read_ex` always set `bwritten`/`bread` output, also on failure
+- `lwrb_skip` and `lwrb_advance` no longer send event when `0` bytes are skipped/advanced
+- Fix header compilation with C++23 (`stdatomic.h` included outside of `extern "C"`)
+- Fix `lwrb_move` return value when operation stops early
+- Document thread-safety context (read, write, any, not safe) for every function
+- Rename `free` local variable to `free_len`
+- Documentation fixes and updates
+
 ## v3.3.0
 
 - Rework library CMake with removed INTERFACE type
