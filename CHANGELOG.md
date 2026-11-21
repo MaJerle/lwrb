@@ -2,8 +2,10 @@
 
 ## Develop
 
+## v3.4.0
+
 - Add `lwrb_write_byte` and `lwrb_read_byte` for single-byte access without parameter checks
-- Clear complete `lwrb_t` structure in `lwrb_init` (`arg` was left uninitialized)
+- Clear complete `lwrb_t` structure in `lwrb_init`
 - `lwrb_write_ex` and `lwrb_read_ex` always set `bwritten`/`bread` output, also on failure
 - `lwrb_skip` and `lwrb_advance` no longer send event when `0` bytes are skipped/advanced
 - Fix header compilation with C++23 (`stdatomic.h` included outside of `extern "C"`)
@@ -23,7 +25,7 @@
 ## v3.2.0
 
 - Add user argument option
-- Improve the variable names to better conform *LLVM* tidy config
+- Improve the variable names to better conform _LLVM_ tidy config
 
 ## v3.1.0
 
