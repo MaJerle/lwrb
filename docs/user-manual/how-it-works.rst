@@ -15,7 +15,7 @@ Let's start with reference of abbreviations in picture:
 
 * ``R`` represents `Read` pointer. Read on read/write operations. Modified on read operation only
 * ``W`` represents `Write` pointer. Read on read/write operations. Modified on write operation only
-* ``S`` represents `Size` of buffer. Used on all operations, never modified (atomic value)
+* ``S`` represents `Size` of buffer. Used on all operations, constant after ``lwrb_init``
 
     * Valid number of ``W`` and ``R`` pointers are between ``0`` and ``S - 1``
 
@@ -34,16 +34,9 @@ Let's start with reference of abbreviations in picture:
         
 .. note::
 
-    Example 1, add ``2`` numbers: ``2 + 3 = (3 + 2 + S) % S = (3 + 2 + 4) % 4 = (5 + 4) % 4 = 1``
+    Example 1, add ``2`` numbers: ``2 + 3 = (2 + 3) % S = 5 % 4 = 1``
 
     Example 2, subtract ``2`` numbers: ``2 - 3 = (2 - 3 + S) % S = (2 - 3 + 4) % 4 = (-1 + 4) % 4 = 3``
-
-
-.. figure:: ../static/images/buff_cases.svg
-    :align: center
-    :alt: Different buffer corner cases
-    
-    Different buffer corner cases
 
 Different image cases:
 
@@ -54,8 +47,5 @@ Different image cases:
     * ``R`` and ``W`` can hold ``S`` different values, from ``0`` to ``S - 1``, that is modulus of ``S``
     * Buffer holds ``W - R = 7 - 0 = 7`` bytes as ``W > R``
 * Case **D**: Buffer holds ``S - (R - W) = 8 - (5 - 3) = 6`` bytes as ``R > W``
-* Case **E**: Buffer is full as ``W == R - 1`` (``4 = 5 - 1``) and holds ``S - (R - W) = 8 - (5 - 4) ) = 7`` bytes
+* Case **E**: Buffer is full as ``W == R - 1`` (``4 = 5 - 1``) and holds ``S - (R - W) = 8 - (5 - 4) = 7`` bytes
 
-
-.. toctree::
-    :maxdepth: 2

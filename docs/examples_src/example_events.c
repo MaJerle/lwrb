@@ -2,7 +2,7 @@
  * \brief           Buffer event function
  */
 void
-my_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, size_t len) {
+my_buff_evt_fn(lwrb_t* buff, lwrb_evt_type_t type, lwrb_sz_t len) {
     switch (type) {
         case LWRB_EVT_RESET:
             printf("[EVT] Buffer reset event!\r\n");

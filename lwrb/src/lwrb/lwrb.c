@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (c) 2024 Tilen MAJERLE
+ * Copyright (c) 2026 Tilen MAJERLE
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,7 +29,7 @@
  * This file is part of LwRB - Lightweight ring buffer library.
  *
  * Author:          Tilen MAJERLE <tilen@majerle.eu>
- * Version:         v3.3.0
+ * Version:         v3.4.0
  */
 #include "lwrb/lwrb.h"
 
@@ -47,7 +47,20 @@
         }                                                                                                              \
     } while (0)
 
-/* Optional atomic operations */
+/*
+ * Optional atomic operations.
+ *
+ * Disabling this does not just make individual reads/writes non-atomic,
+ * it removes any ordering/visibility guarantee between the write and read
+ * side entirely. Nothing in this file synchronizes threads or interrupts
+ * anymore at that point - it becomes fully the application's job to add
+ * whatever barriers, volatile access or locking the target platform needs.
+ *
+ * WARNING: With atomics disabled, r_ptr and w_ptr are plain (not even volatile)
+ * variables. The compiler is free to reorder the data memcpy after the pointer
+ * store, or to cache pointer values in registers. The read context can then
+ * see the new w_ptr before the data is in memory (and vice versa for r_ptr).
+ */
 #ifdef LWRB_DISABLE_ATOMIC
 #define LWRB_INIT(var, val)        (var) = (val)
 #define LWRB_LOAD(var, type)       (var)
@@ -64,6 +77,8 @@
  * \param[in]       buffdata: Pointer to memory to use as buffer data
  * \param[in]       size: Size of `buffdata` in units of bytes
  *                      Maximum number of bytes buffer can hold is `size - 1`
+ * \note            Thread safety: not thread safe. Call once, before the buffer
+ *                      is used from any thread/interrupt
  * \return          `1` on success, `0` otherwise
  */
 uint8_t
@@ -72,7 +87,7 @@ lwrb_init(lwrb_t* buff, void* buffdata, lwrb_sz_t size) {
         return 0;
     }
 
-    buff->evt_fn = NULL;
+    BUF_MEMSET(buff, 0, sizeof(*buff));
     buff->size = size;
     buff->buff = buffdata;
     LWRB_INIT(buff->w_ptr, 0);
@@ -82,6 +97,7 @@ lwrb_init(lwrb_t* buff, void* buffdata, lwrb_sz_t size) {
 
 /**
  * \brief           Check if buff is initialized and ready to use
+ * \note            Thread safety: any context. Reads buffer configuration only
  * \param[in]       buff: Ring buffer instance
  * \return          `1` if ready, `0` otherwise
  */
@@ -94,6 +110,8 @@ lwrb_is_ready(lwrb_t* buff) {
  * \brief           Free buffer memory
  * \note            Since implementation does not use dynamic allocation,
  *                  it just sets buffer handle to `NULL`
+ * \note            Thread safety: not thread safe. Application must ensure
+ *                      the buffer is no longer used from any thread/interrupt
  * \param[in]       buff: Ring buffer instance
  */
 void
@@ -105,6 +123,12 @@ lwrb_free(lwrb_t* buff) {
 
 /**
  * \brief           Set event function callback for different buffer operations
+ * \note            Thread safety: not thread safe, and not meant to be. Set it once during setup,
+ *                      right after \ref lwrb_init, before the buffer is touched from
+ *                      more than one thread/interrupt.
+ * \note            Callback is called from the context of the function that triggered the event:
+ *                      \ref LWRB_EVT_WRITE from write context, \ref LWRB_EVT_READ from read context.
+ *                      Both can run at the same time, callback implementation must be safe for that
  * \param[in]       buff: Ring buffer instance
  * \param[in]       evt_fn: Callback function
  */
@@ -117,6 +141,9 @@ lwrb_set_evt_fn(lwrb_t* buff, lwrb_evt_fn evt_fn) {
 
 /**
  * \brief           Set custom buffer argument, that can be retrieved in the event function
+ * \note            Thread safety: not thread safe, and not meant to be. Set it once during setup,
+ *                      right after \ref lwrb_init, before the buffer is touched from
+ *                      more than one thread/interrupt.
  * \param[in]       buff: Ring buffer instance
  * \param[in]       arg: Custom user argument
  */
@@ -129,6 +156,7 @@ lwrb_set_arg(lwrb_t* buff, void* arg) {
 
 /**
  * \brief           Get custom buffer argument, previously set with \ref lwrb_set_arg
+ * \note            Thread safety: any context. Reads buffer configuration only
  * \param[in]       buff: Ring buffer instance
  * \return          User argument, previously set with \ref lwrb_set_arg
  */
@@ -139,13 +167,16 @@ lwrb_get_arg(lwrb_t* buff) {
 
 /**
  * \brief           Write data to buffer.
- *                  Copies data from `data` array to buffer and advances the write pointer for a maximum of `btw` number of bytes.
- * 
+ *                  Copies data from `data` array to buffer and advances the write pointer for a maximum of `btw` number
+ * of bytes.
+ *
  *                  It copies less if there is less memory available in the buffer.
  *                  User must check the return value of the function and compare it to
  *                  the requested write length, to determine if everything has been written
- * 
+ *
  * \note            Use \ref lwrb_write_ex for more advanced usage
+ * \note            Thread safety: write context. Safe to call concurrently with read context functions,
+ *                      as long as all write context calls come from one thread or one interrupt
  *
  * \param[in]       buff: Ring buffer instance
  * \param[in]       data: Pointer to data to write into buffer
@@ -166,11 +197,14 @@ lwrb_write(lwrb_t* buff, const void* data, lwrb_sz_t btw) {
 
 /**
  * \brief           Write extended functionality
- * 
+ * \note            Thread safety: write context. Safe to call concurrently with read context functions,
+ *                      as long as all write context calls come from one thread or one interrupt
+ *
  * \param           buff: Ring buffer instance
  * \param           data: Pointer to data to write into buffer
  * \param           btw: Number of bytes to write
- * \param           bwritten: Output pointer to write number of bytes written into the buffer
+ * \param           bwritten: Output pointer to write number of bytes written into the buffer.
+ *                      Set to `0` when function returns `0`. Can be set to `NULL`
  * \param           flags: Optional flags.
  *                      \ref LWRB_FLAG_WRITE_ALL: Request to write all data (up to btw).
  *                          Will early return if no memory available
@@ -178,20 +212,23 @@ lwrb_write(lwrb_t* buff, const void* data, lwrb_sz_t btw) {
  */
 uint8_t
 lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bwritten, uint16_t flags) {
-    lwrb_sz_t tocopy = 0, free = 0, w_ptr = 0;
+    lwrb_sz_t tocopy = 0, free_len = 0, w_ptr = 0;
     const uint8_t* d_ptr = data;
 
+    if (bwritten != NULL) {
+        *bwritten = 0;
+    }
     if (!BUF_IS_VALID(buff) || data == NULL || btw == 0) {
         return 0;
     }
 
     /* Calculate maximum number of bytes available to write */
-    free = lwrb_get_free(buff);
+    free_len = lwrb_get_free(buff);
     /* If no memory, or if user wants to write ALL data but no enough space, exit early */
-    if (free == 0 || (free < btw && (flags & LWRB_FLAG_WRITE_ALL))) {
+    if (free_len == 0 || (free_len < btw && (flags & LWRB_FLAG_WRITE_ALL))) {
         return 0;
     }
-    btw = BUF_MIN(free, btw);
+    btw = BUF_MIN(free_len, btw);
     w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_acquire);
 
     /* Step 1: Write data to linear part of buffer */
@@ -227,11 +264,14 @@ lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* bwritten
 
 /**
  * \brief           Read data from buffer.
- *                  Copies data from `data` array to buffer and advances the read pointer for a maximum of `btr` number of bytes.
- * 
+ *                  Copies data from buffer to `data` array and advances the read pointer for a maximum of `btr` number
+ * of bytes.
+ *
  *                  It copies less if there is less data available in the buffer.
- * 
+ *
  * \note            Use \ref lwrb_read_ex for more advanced usage
+ * \note            Thread safety: read context. Safe to call concurrently with write context functions,
+ *                      as long as all read context calls come from one thread or one interrupt
  *
  * \param[in]       buff: Ring buffer instance
  * \param[out]      data: Pointer to output memory to copy buffer data to
@@ -250,12 +290,14 @@ lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr) {
 
 /**
  * \brief           Read extended functionality
- * 
+ * \note            Thread safety: read context. Safe to call concurrently with write context functions,
+ *                      as long as all read context calls come from one thread or one interrupt
+ *
  * \param           buff: Ring buffer instance
- * \param           data: Pointer to memory to write read data from buffer 
+ * \param           data: Pointer to memory to write read data from buffer
  * \param           btr: Number of bytes to read
- * \param           bread: Output pointer to write number of bytes read from buffer and written to the 
- *                      output `data` variable
+ * \param           bread: Output pointer to write number of bytes read from buffer and written to the
+ *                      output `data` variable. Set to `0` when function returns `0`. Can be set to `NULL`
  * \param           flags: Optional flags
  *                      \ref LWRB_FLAG_READ_ALL: Request to read all data (up to btr).
  *                          Will early return if no enough bytes in the buffer
@@ -266,6 +308,9 @@ lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* bread, uint16_t
     lwrb_sz_t tocopy = 0, full = 0, r_ptr = 0;
     uint8_t* d_ptr = data;
 
+    if (bread != NULL) {
+        *bread = 0;
+    }
     if (!BUF_IS_VALID(buff) || data == NULL || btr == 0) {
         return 0;
     }
@@ -310,7 +355,90 @@ lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* bread, uint16_t
 }
 
 /**
+ * \brief           Write single byte to buffer, optimized for speed
+ *
+ *                  Lightweight alternative to `lwrb_write(buff, &val, 1)`, without memory copy,
+ *                  free length calculation or any parameter validation.
+ *
+ * \note            No parameter checks are performed. Caller must guarantee that
+ *                      `buff` is not `NULL` and buffer has been successfully initialized
+ *                      with \ref lwrb_init (and not freed with \ref lwrb_free)
+ * \note            Thread safety: write context. Safe to call concurrently with read context functions,
+ *                      as long as all write context calls come from one thread or one interrupt
+ *
+ * \param[in]       buff: Ring buffer instance. Must be valid and initialized
+ * \param[in]       val: Byte to write
+ * \return          `1` if byte has been written, `0` if buffer is full
+ */
+uint8_t
+lwrb_write_byte(lwrb_t* buff, uint8_t val) {
+    lwrb_sz_t w_ptr = 0, w_next = 0;
+
+    /* Write pointer is owned by the write context, relaxed load is enough */
+    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
+    w_next = w_ptr + 1;
+    if (w_next >= buff->size) {
+        w_next = 0;
+    }
+
+    /* Buffer is full when next write position reaches read pointer */
+    if (w_next == LWRB_LOAD(buff->r_ptr, memory_order_acquire)) {
+        return 0;
+    }
+    buff->buff[w_ptr] = val;
+
+    /* Publish data to the read context */
+    LWRB_STORE(buff->w_ptr, w_next, memory_order_release);
+
+    BUF_SEND_EVT(buff, LWRB_EVT_WRITE, 1);
+    return 1;
+}
+
+/**
+ * \brief           Read single byte from buffer, optimized for speed
+ *
+ *                  Lightweight alternative to `lwrb_read(buff, val, 1)`, without memory copy,
+ *                  full length calculation or any parameter validation.
+ *
+ * \note            No parameter checks are performed. Caller must guarantee that
+ *                      `buff` is not `NULL` and buffer has been successfully initialized
+ *                      with \ref lwrb_init (and not freed with \ref lwrb_free), and that `val` is not `NULL`
+ * \note            Thread safety: read context. Safe to call concurrently with write context functions,
+ *                      as long as all read context calls come from one thread or one interrupt
+ *
+ * \param[in]       buff: Ring buffer instance. Must be valid and initialized
+ * \param[out]      val: Pointer to output byte. Must not be `NULL`. Unchanged when function returns `0`
+ * \return          `1` if byte has been read, `0` if buffer is empty
+ */
+uint8_t
+lwrb_read_byte(lwrb_t* buff, uint8_t* val) {
+    lwrb_sz_t r_ptr = 0;
+
+    /* Read pointer is owned by the read context, relaxed load is enough */
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
+
+    /* Buffer is empty when both pointers are equal */
+    if (r_ptr == LWRB_LOAD(buff->w_ptr, memory_order_acquire)) {
+        return 0;
+    }
+    *val = buff->buff[r_ptr];
+    if (++r_ptr >= buff->size) {
+        r_ptr = 0;
+    }
+
+    /* Release memory to the write context */
+    LWRB_STORE(buff->r_ptr, r_ptr, memory_order_release);
+
+    BUF_SEND_EVT(buff, LWRB_EVT_READ, 1);
+    return 1;
+}
+
+/**
  * \brief           Read from buffer without changing read pointer (peek only)
+ * \note            Thread safety: read context. Safe to call concurrently with write context functions,
+ *                      as long as all read context calls come from one thread or one interrupt
+ *                      Data is not consumed, but the read pointer must not move during the call,
+ *                      hence it must be called from the same thread/interrupt as \ref lwrb_read
  * \param[in]       buff: Ring buffer instance
  * \param[in]       skip_count: Number of bytes to skip before reading data
  * \param[out]      data: Pointer to output memory to copy buffer data to
@@ -329,7 +457,7 @@ lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp) {
     /*
      * Calculate maximum number of bytes available to read
      * and check if we can even fit to it.
-     * 
+     *
      * The skip count at size of buffer or above is invalid input,
      * thus we can safely exit the function call
      */
@@ -360,6 +488,9 @@ lwrb_peek(const lwrb_t* buff, lwrb_sz_t skip_count, void* data, lwrb_sz_t btp) {
 
 /**
  * \brief           Get available size in buffer for write operation
+ * \note            Thread safety: any context, returns a snapshot.
+ *                      Value is a guaranteed minimum only when called from the write context.
+ *                      From read context the value may already be smaller when returned
  * \param[in]       buff: Ring buffer instance
  * \return          Number of free bytes in memory
  */
@@ -385,9 +516,9 @@ lwrb_get_free(const lwrb_t* buff) {
      *
      * lwrb_get_free is only called for write purpose, and when in FIFO mode, then:
      * - buff->w pointer will not change by another process/interrupt because we are in write mode just now
-     * - buff->r pointer may change by another process. If it gets changed after buff->r has been loaded to local variable,
-     *    buffer will see "free size" less than it actually is. This is not a problem, application can
-     *    always try again to write more data to remaining free memory that was read just during copy operation
+     * - buff->r pointer may change by another process. If it gets changed after buff->r has been loaded to local
+     * variable, buffer will see "free size" less than it actually is. This is not a problem, application can always try
+     * again to write more data to remaining free memory that was read just during copy operation
      */
     w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
     r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_acquire);
@@ -404,6 +535,9 @@ lwrb_get_free(const lwrb_t* buff) {
 
 /**
  * \brief           Get number of bytes currently available in buffer
+ * \note            Thread safety: any context, returns a snapshot.
+ *                      Value is a guaranteed minimum only when called from the read context.
+ *                      From write context the value may already be smaller when returned
  * \param[in]       buff: Ring buffer instance
  * \return          Number of bytes ready to be read
  */
@@ -429,9 +563,9 @@ lwrb_get_full(const lwrb_t* buff) {
      *
      * lwrb_get_full is only called for read purpose, and when in FIFO mode, then:
      * - buff->r pointer will not change by another process/interrupt because we are in read mode just now
-     * - buff->w pointer may change by another process. If it gets changed after buff->w has been loaded to local variable,
-     *    buffer will see "full size" less than it really is. This is not a problem, application can
-     *    always try again to read more data from remaining full memory that was written just during copy operation
+     * - buff->w pointer may change by another process. If it gets changed after buff->w has been loaded to local
+     * variable, buffer will see "full size" less than it really is. This is not a problem, application can always try
+     * again to read more data from remaining full memory that was written just during copy operation
      */
     w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_acquire);
     r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
@@ -446,7 +580,7 @@ lwrb_get_full(const lwrb_t* buff) {
 
 /**
  * \brief           Resets buffer to default values. Buffer size is not modified
- * \note            This function is not thread safe.
+ * \note            Thread safety: not thread safe. Modifies read and write pointers in two separate stores.
  *                      When used, application must ensure there is no active read/write operation
  * \param[in]       buff: Ring buffer instance
  */
@@ -461,6 +595,8 @@ lwrb_reset(lwrb_t* buff) {
 
 /**
  * \brief           Get linear address for buffer for fast read
+ * \note            Thread safety: read context. Safe to call concurrently with write context functions,
+ *                      as long as all read context calls come from one thread or one interrupt
  * \param[in]       buff: Ring buffer instance
  * \return          Linear buffer start address
  */
@@ -477,6 +613,8 @@ lwrb_get_linear_block_read_address(const lwrb_t* buff) {
 
 /**
  * \brief           Get length of linear block address before it overflows for read operation
+ * \note            Thread safety: read context. Safe to call concurrently with write context functions,
+ *                      as long as all read context calls come from one thread or one interrupt
  * \param[in]       buff: Ring buffer instance
  * \return          Linear buffer size in units of bytes for read operation
  */
@@ -490,7 +628,7 @@ lwrb_get_linear_block_read_length(const lwrb_t* buff) {
 
     /*
      * Use temporary values in case they are changed during operations.
-     * See lwrb_buff_free or lwrb_buff_full functions for more information why this is OK.
+     * See lwrb_get_free or lwrb_get_full functions for more information why this is OK.
      */
     w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_acquire);
     r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
@@ -510,6 +648,8 @@ lwrb_get_linear_block_read_length(const lwrb_t* buff) {
  * Marks data as read in the buffer and increases free memory for up to `len` bytes
  *
  * \note            Useful at the end of streaming transfer such as DMA
+ * \note            Thread safety: read context. Safe to call concurrently with write context functions,
+ *                      as long as all read context calls come from one thread or one interrupt
  * \param[in]       buff: Ring buffer instance
  * \param[in]       len: Number of bytes to skip and mark as read
  * \return          Number of bytes skipped
@@ -524,6 +664,9 @@ lwrb_skip(lwrb_t* buff, lwrb_sz_t len) {
 
     full = lwrb_get_full(buff);
     len = BUF_MIN(len, full);
+    if (len == 0) {
+        return 0;
+    }
     r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_acquire);
     r_ptr += len;
     if (r_ptr >= buff->size) {
@@ -536,6 +679,8 @@ lwrb_skip(lwrb_t* buff, lwrb_sz_t len) {
 
 /**
  * \brief           Get linear address for buffer for fast write
+ * \note            Thread safety: write context. Safe to call concurrently with read context functions,
+ *                      as long as all write context calls come from one thread or one interrupt
  * \param[in]       buff: Ring buffer instance
  * \return          Linear buffer start address
  */
@@ -552,6 +697,8 @@ lwrb_get_linear_block_write_address(const lwrb_t* buff) {
 
 /**
  * \brief           Get length of linear block address before it overflows for write operation
+ * \note            Thread safety: write context. Safe to call concurrently with read context functions,
+ *                      as long as all write context calls come from one thread or one interrupt
  * \param[in]       buff: Ring buffer instance
  * \return          Linear buffer size in units of bytes for write operation
  */
@@ -565,7 +712,7 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
 
     /*
      * Use temporary values in case they are changed during operations.
-     * See lwrb_buff_free or lwrb_buff_full functions for more information why this is OK.
+     * See lwrb_get_free or lwrb_get_full functions for more information why this is OK.
      */
     w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
     r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_acquire);
@@ -597,21 +744,26 @@ lwrb_get_linear_block_write_length(const lwrb_t* buff) {
  *
  * \note            Useful when hardware is writing to buffer and application needs to increase number
  *                      of bytes written to buffer by hardware
+ * \note            Thread safety: write context. Safe to call concurrently with read context functions,
+ *                      as long as all write context calls come from one thread or one interrupt
  * \param[in]       buff: Ring buffer instance
  * \param[in]       len: Number of bytes to advance
  * \return          Number of bytes advanced for write operation
  */
 lwrb_sz_t
 lwrb_advance(lwrb_t* buff, lwrb_sz_t len) {
-    lwrb_sz_t free = 0, w_ptr = 0;
+    lwrb_sz_t free_len = 0, w_ptr = 0;
 
     if (!BUF_IS_VALID(buff) || len == 0) {
         return 0;
     }
 
     /* Use local variables before writing back to main structure */
-    free = lwrb_get_free(buff);
-    len = BUF_MIN(len, free);
+    free_len = lwrb_get_free(buff);
+    len = BUF_MIN(len, free_len);
+    if (len == 0) {
+        return 0;
+    }
     w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_acquire);
     w_ptr += len;
     if (w_ptr >= buff->size) {
@@ -624,12 +776,15 @@ lwrb_advance(lwrb_t* buff, lwrb_sz_t len) {
 
 /**
  * \brief           Searches for a *needle* in an array, starting from given offset.
- * 
- * \note            This function is not thread-safe. 
- * 
+ *
+ * \note            Thread safety: read context. Safe to call concurrently with write context functions,
+ *                      as long as all read context calls come from one thread or one interrupt
+ *                      Data is not consumed, but the read pointer must not move during the call,
+ *                      hence it must be called from the same thread/interrupt as \ref lwrb_read
+ *
  * \param           buff: Ring buffer to search for needle in
  * \param           bts: Constant byte array sequence to search for in a buffer
- * \param           len: Length of the \arg bts array 
+ * \param           len: Length of the \arg bts array
  * \param           start_offset: Start offset in the buffer
  * \param           found_idx: Pointer to variable to write index in array where bts has been found
  *                      Must not be set to `NULL`
@@ -648,7 +803,7 @@ lwrb_find(const lwrb_t* buff, const void* bts, lwrb_sz_t len, lwrb_sz_t start_of
 
     full = lwrb_get_full(buff);
     /* Verify initial conditions */
-    if (full < (len + start_offset)) {
+    if (start_offset > full || len > (full - start_offset)) {
         return 0;
     }
 

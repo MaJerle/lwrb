@@ -27,7 +27,7 @@
             }
         },
         {
-            "name": "Gcc-Debug",
+            "name": "GCC-Debug",
             "inherits": "default",
             "toolchainFile": "${sourceDir}/cmake/gcc.cmake",
             "cacheVariables": {
@@ -45,8 +45,8 @@
             "configurePreset": "Win64-Debug"
         },
         {
-            "name": "Gcc-Debug",
-            "configurePreset": "Gcc-Debug"
+            "name": "GCC-Debug",
+            "configurePreset": "GCC-Debug"
         }
     ]
 }

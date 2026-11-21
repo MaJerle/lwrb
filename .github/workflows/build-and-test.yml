@@ -1,4 +1,4 @@
-name: Windows CMake Build & Test
+name: CMake Build & Test
 
 on:
   push:
@@ -7,29 +7,20 @@ on:
   pull_request:
     branches:
       - develop
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install MinGW
-        run: |
-          choco install mingw --version=12.2.0 -y
-          echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
-          gcc --version
-
-      - name: Build
-        run: |
-          mkdir __build__
-          cd __build__
-          cmake -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=gcc -S.. -G Ninja
-          cmake --build .
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
 
       - name: Run Tests
-        working-directory: __build__
+        working-directory: tests
         run: |
-          ctest . --output-on-failure
+          python3 test.py --github

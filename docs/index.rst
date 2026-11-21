@@ -3,7 +3,7 @@ LwRB |version| documentation
 
 Welcome to the documentation for version |version|.
 
-LwRB is a generic *FIFO* (First In; First Out) buffer library optimized for embedded systems.
+LwRB is a generic *FIFO* (First In, First Out) buffer library optimized for embedded systems.
 
 .. image:: static/images/logo.svg
     :align: center
@@ -16,22 +16,25 @@ LwRB is a generic *FIFO* (First In; First Out) buffer library optimized for embe
 Features
 ^^^^^^^^
 
-* Written in C (C11), compatible with ``size_t`` for size data types
+* Written in C (C11), compatible with ``stdint.h`` data types
 * Platform independent, no architecture specific code
-* FIFO (First In First Out) buffer implementation
+* FIFO (First In, First Out) buffer implementation
 * No dynamic memory allocation, data is static array
 * Uses optimized memory copy instead of loops to read/write data from/to memory
-* Thread safe when used as pipe with single write and single read entries
-* Interrupt safe when used as pipe with single write and single read entries
+* Thread and interrupt safe when used as pipe with single write and single read entries
+* Uses C11 atomic operations by default to keep reads and writes race-free, even on architectures whose native word size is smaller than ``lwrb_sz_t`` (AVR for instance); can be disabled with ``LWRB_DISABLE_ATOMIC``
 * Suitable for DMA transfers from and to memory with zero-copy overhead between buffer and application memory
 * Supports data peek, skip for read and advance for write
+* Byte-sequence search within buffered data
+* Optional all-or-nothing read and write operations to avoid partial transfers
+* Optional per-buffer custom user argument storage
 * Implements support for event notifications
 * User friendly MIT license
 
 Requirements
 ^^^^^^^^^^^^
 
-* C compiler
+* C11 compiler with ``stdatomic.h`` support (or ``LWRB_DISABLE_ATOMIC`` defined, see :ref:`thread_safety`)
 * Less than ``1kB`` of non-volatile memory
 
 Contribute
