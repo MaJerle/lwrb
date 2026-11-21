@@ -2,6 +2,7 @@
 
 ## Develop
 
+- Add `lwrb_write_byte` and `lwrb_read_byte` for single-byte access without parameter checks
 - Clear complete `lwrb_t` structure in `lwrb_init` (`arg` was left uninitialized)
 - `lwrb_write_ex` and `lwrb_read_ex` always set `bwritten`/`bread` output, also on failure
 - `lwrb_skip` and `lwrb_advance` no longer send event when `0` bytes are skipped/advanced

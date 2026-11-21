@@ -105,11 +105,12 @@ but never concurrently with itself. LwRB is lock-free for exactly one *write con
       - Notes
     * - Write context
       - ``lwrb_write``, ``lwrb_write_ex``, ``lwrb_get_linear_block_write_address``,
-        ``lwrb_get_linear_block_write_length``, ``lwrb_advance``
+        ``lwrb_get_linear_block_write_length``, ``lwrb_advance``, ``lwrb_write_byte``
       - Modify write pointer only. Safe while read context runs in parallel
     * - Read context
       - ``lwrb_read``, ``lwrb_read_ex``, ``lwrb_peek``, ``lwrb_find``,
-        ``lwrb_get_linear_block_read_address``, ``lwrb_get_linear_block_read_length``, ``lwrb_skip``
+        ``lwrb_get_linear_block_read_address``, ``lwrb_get_linear_block_read_length``, ``lwrb_skip``,
+        ``lwrb_read_byte``
       - Modify read pointer only (``peek`` and ``find`` modify nothing, but rely on read pointer not moving).
         Safe while write context runs in parallel
     * - Any context

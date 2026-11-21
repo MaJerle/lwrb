@@ -21,8 +21,8 @@ Some use cases:
 
 Events are sent by the following functions:
 
-* ``LWRB_EVT_WRITE``: ``lwrb_write``, ``lwrb_write_ex``, ``lwrb_advance``
-* ``LWRB_EVT_READ``: ``lwrb_read``, ``lwrb_read_ex``, ``lwrb_skip``
+* ``LWRB_EVT_WRITE``: ``lwrb_write``, ``lwrb_write_ex``, ``lwrb_write_byte``, ``lwrb_advance``
+* ``LWRB_EVT_READ``: ``lwrb_read``, ``lwrb_read_ex``, ``lwrb_read_byte``, ``lwrb_skip``
 * ``LWRB_EVT_RESET``: ``lwrb_reset``
 * ``lwrb_peek`` and ``lwrb_find`` do not send any event
 

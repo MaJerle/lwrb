@@ -355,6 +355,85 @@ lwrb_read_ex(lwrb_t* buff, void* data, lwrb_sz_t btr, lwrb_sz_t* bread, uint16_t
 }
 
 /**
+ * \brief           Write single byte to buffer, optimized for speed
+ *
+ *                  Lightweight alternative to `lwrb_write(buff, &val, 1)`, without memory copy,
+ *                  free length calculation or any parameter validation.
+ *
+ * \note            No parameter checks are performed. Caller must guarantee that
+ *                      `buff` is not `NULL` and buffer has been successfully initialized
+ *                      with \ref lwrb_init (and not freed with \ref lwrb_free)
+ * \note            Thread safety: write context. Safe to call concurrently with read context functions,
+ *                      as long as all write context calls come from one thread or one interrupt
+ *
+ * \param[in]       buff: Ring buffer instance. Must be valid and initialized
+ * \param[in]       val: Byte to write
+ * \return          `1` if byte has been written, `0` if buffer is full
+ */
+uint8_t
+lwrb_write_byte(lwrb_t* buff, uint8_t val) {
+    lwrb_sz_t w_ptr = 0, w_next = 0;
+
+    /* Write pointer is owned by the write context, relaxed load is enough */
+    w_ptr = LWRB_LOAD(buff->w_ptr, memory_order_relaxed);
+    w_next = w_ptr + 1;
+    if (w_next >= buff->size) {
+        w_next = 0;
+    }
+
+    /* Buffer is full when next write position reaches read pointer */
+    if (w_next == LWRB_LOAD(buff->r_ptr, memory_order_acquire)) {
+        return 0;
+    }
+    buff->buff[w_ptr] = val;
+
+    /* Publish data to the read context */
+    LWRB_STORE(buff->w_ptr, w_next, memory_order_release);
+
+    BUF_SEND_EVT(buff, LWRB_EVT_WRITE, 1);
+    return 1;
+}
+
+/**
+ * \brief           Read single byte from buffer, optimized for speed
+ *
+ *                  Lightweight alternative to `lwrb_read(buff, val, 1)`, without memory copy,
+ *                  full length calculation or any parameter validation.
+ *
+ * \note            No parameter checks are performed. Caller must guarantee that
+ *                      `buff` is not `NULL` and buffer has been successfully initialized
+ *                      with \ref lwrb_init (and not freed with \ref lwrb_free), and that `val` is not `NULL`
+ * \note            Thread safety: read context. Safe to call concurrently with write context functions,
+ *                      as long as all read context calls come from one thread or one interrupt
+ *
+ * \param[in]       buff: Ring buffer instance. Must be valid and initialized
+ * \param[out]      val: Pointer to output byte. Must not be `NULL`. Unchanged when function returns `0`
+ * \return          `1` if byte has been read, `0` if buffer is empty
+ */
+uint8_t
+lwrb_read_byte(lwrb_t* buff, uint8_t* val) {
+    lwrb_sz_t r_ptr = 0;
+
+    /* Read pointer is owned by the read context, relaxed load is enough */
+    r_ptr = LWRB_LOAD(buff->r_ptr, memory_order_relaxed);
+
+    /* Buffer is empty when both pointers are equal */
+    if (r_ptr == LWRB_LOAD(buff->w_ptr, memory_order_acquire)) {
+        return 0;
+    }
+    *val = buff->buff[r_ptr];
+    if (++r_ptr >= buff->size) {
+        r_ptr = 0;
+    }
+
+    /* Release memory to the write context */
+    LWRB_STORE(buff->r_ptr, r_ptr, memory_order_release);
+
+    BUF_SEND_EVT(buff, LWRB_EVT_READ, 1);
+    return 1;
+}
+
+/**
  * \brief           Read from buffer without changing read pointer (peek only)
  * \note            Thread safety: read context. Safe to call concurrently with write context functions,
  *                      as long as all read context calls come from one thread or one interrupt

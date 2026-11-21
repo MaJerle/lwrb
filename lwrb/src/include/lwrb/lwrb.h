@@ -156,6 +156,7 @@ uint8_t lwrb_write_ex(lwrb_t* buff, const void* data, lwrb_sz_t btw, lwrb_sz_t* 
 void* lwrb_get_linear_block_write_address(const lwrb_t* buff);
 lwrb_sz_t lwrb_get_linear_block_write_length(const lwrb_t* buff);
 lwrb_sz_t lwrb_advance(lwrb_t* buff, lwrb_sz_t len);
+uint8_t lwrb_write_byte(lwrb_t* buff, uint8_t val);
 
 /* READ CONTEXT */
 lwrb_sz_t lwrb_read(lwrb_t* buff, void* data, lwrb_sz_t btr);
@@ -165,6 +166,7 @@ uint8_t lwrb_find(const lwrb_t* buff, const void* bts, lwrb_sz_t len, lwrb_sz_t 
 void* lwrb_get_linear_block_read_address(const lwrb_t* buff);
 lwrb_sz_t lwrb_get_linear_block_read_length(const lwrb_t* buff);
 lwrb_sz_t lwrb_skip(lwrb_t* buff, lwrb_sz_t len);
+uint8_t lwrb_read_byte(lwrb_t* buff, uint8_t* val);
 
 /* Extended functions (LWRB_DEV) */
 lwrb_sz_t lwrb_overwrite(lwrb_t* buff, const void* data, lwrb_sz_t btw);

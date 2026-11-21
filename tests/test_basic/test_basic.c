@@ -313,6 +313,69 @@ test_run(void) {
 #undef PEEK_TEST
     }
 
+    printf("Fast byte read/write test\r\n");
+    {
+        uint8_t val, byte_buff_data[4];
+        lwrb_t byte_buff;
+        size_t i;
+
+#define BYTE_TEST(_exp_)                                                                                               \
+    do {                                                                                                               \
+        if (!(_exp_)) {                                                                                                \
+            printf("Test failed on line %u\r\n", (unsigned)__LINE__);                                                  \
+            retval = -1;                                                                                               \
+        }                                                                                                              \
+    } while (0)
+
+        /* Buffer can hold 3 bytes */
+        lwrb_init(&byte_buff, byte_buff_data, sizeof(byte_buff_data));
+
+        /* Empty buffer, read must fail and keep output untouched */
+        val = 0xA5;
+        BYTE_TEST(lwrb_read_byte(&byte_buff, &val) == 0);
+        BYTE_TEST(val == 0xA5);
+
+        /* Fill to the full, then next write must fail */
+        BYTE_TEST(lwrb_write_byte(&byte_buff, 'a') == 1);
+        BYTE_TEST(lwrb_write_byte(&byte_buff, 'b') == 1);
+        BYTE_TEST(lwrb_write_byte(&byte_buff, 'c') == 1);
+        BYTE_TEST(lwrb_write_byte(&byte_buff, 'd') == 0);
+        BYTE_TEST(lwrb_get_full(&byte_buff) == 3);
+        BYTE_TEST(lwrb_get_free(&byte_buff) == 0);
+
+        /* Read back in order */
+        BYTE_TEST(lwrb_read_byte(&byte_buff, &val) == 1 && val == 'a');
+        BYTE_TEST(lwrb_read_byte(&byte_buff, &val) == 1 && val == 'b');
+
+        /* Wrap write pointer over the end of buffer */
+        BYTE_TEST(lwrb_write_byte(&byte_buff, 'e') == 1);
+        BYTE_TEST(lwrb_write_byte(&byte_buff, 'f') == 1);
+        BYTE_TEST(byte_buff.w_ptr == 1);
+        BYTE_TEST(lwrb_write_byte(&byte_buff, 'g') == 0);
+
+        /* Wrap read pointer over the end of buffer */
+        BYTE_TEST(lwrb_read_byte(&byte_buff, &val) == 1 && val == 'c');
+        BYTE_TEST(lwrb_read_byte(&byte_buff, &val) == 1 && val == 'e');
+        BYTE_TEST(lwrb_read_byte(&byte_buff, &val) == 1 && val == 'f');
+        BYTE_TEST(byte_buff.r_ptr == 1);
+        BYTE_TEST(lwrb_read_byte(&byte_buff, &val) == 0);
+
+        /* Interoperability with regular API, over multiple wrap-arounds */
+        for (i = 0; i < 10; ++i) {
+            BYTE_TEST(lwrb_write(&byte_buff, "xy", 2) == 2);
+            BYTE_TEST(lwrb_read_byte(&byte_buff, &val) == 1 && val == 'x');
+            BYTE_TEST(lwrb_write_byte(&byte_buff, 'z') == 1);
+            BYTE_TEST(lwrb_read(&byte_buff, tmp, 3) == 2 && memcmp(tmp, "yz", 2) == 0);
+        }
+
+        /* Buffer of size 1 can never hold data */
+        lwrb_init(&byte_buff, byte_buff_data, 1);
+        BYTE_TEST(lwrb_write_byte(&byte_buff, 'a') == 0);
+        BYTE_TEST(lwrb_read_byte(&byte_buff, &val) == 0);
+
+#undef BYTE_TEST
+    }
+
     printf("Done!\r\n");
     return retval;
 }
